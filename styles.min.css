@@ -1,1 +1,1021 @@
-*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}html,body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#000000;color:#ffffff;min-height:100vh;font-weight:300;line-height:1.4;overflow-x:hidden;margin:0;padding:0;border:none;outline:none;position:relative}.mobile-container{width:100vw;height:100vh;max-width:100vw;max-height:100vh;overflow:hidden;position:relative;margin:0;padding:0;box-sizing:border-box;display:flex;flex-direction:column}.preview-area{flex:1;display:flex;align-items:center;justify-content:center;background:#000000;position:relative;overflow:hidden;z-index:1000;width:100%;background-image:linear-gradient(45deg,#2a2a2a 25%,transparent 25%),linear-gradient(-45deg,#2a2a2a 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#2a2a2a 75%),linear-gradient(-45deg,transparent 75%,#2a2a2a 75%);background-size:16px 16px;background-position:0 0,0 8px,8px -8px,-8px 0px;background-repeat:repeat}.preview-area.ratio-9-16{}.preview-area.ratio-4-5{}.connected-state{display:flex;align-items:center;justify-content:center;position:relative;background:#000000;width:100%;height:100%;max-width:100%;max-height:100%;margin:0 auto}.connected-state.ratio-9-16{aspect-ratio:9/16;width:100%;height:auto;max-width:100%;max-height:100%}.connected-state.ratio-4-5{aspect-ratio:4/5;width:100%;height:auto;max-width:100%;max-height:100%}#route-canvas{width:100%;height:100%;object-fit:contain;display:block}.stats-overlay{position:absolute;top:20px;left:20px;z-index:1001}.stat-item{display:flex;flex-direction:column;margin-bottom:16px}.stat-label{font-size:12px;font-weight:300;color:#ffffff;opacity:0.8;margin-bottom:4px}.stat-value{font-size:18px;font-weight:600;color:#ffffff}.bottom-stats-overlay{position:absolute;bottom:20px;right:20px;z-index:1001}.navbar{background:#000000;border-bottom:1px solid #333333;padding:16px 0;position:relative;z-index:1000}.nav-container{max-width:100%;margin:0 auto;padding:0 20px;display:flex;justify-content:space-between;align-items:center}.nav-brand h1{font-size:20px;font-weight:300;color:#ffffff;margin:0}.nav-actions{display:flex;gap:12px}.btn{padding:8px 16px;border:1px solid #ffffff;background:transparent;color:#ffffff;font-size:12px;font-weight:300;cursor:pointer;transition:all 0.2s ease;text-decoration:none;display:inline-block;text-align:center;border-radius:4px}.btn:hover{background:#ffffff;color:#000000}.btn-primary{background:#ffffff;color:#000000}.btn-primary:hover{background:#cccccc}.editing-panel{background:#000000;border-top:1px solid #333333;padding:20px;position:relative;z-index:1000}.tab-nav{display:flex;gap:0;margin-bottom:20px;border-bottom:1px solid #333333}.tab-btn{padding:12px 20px;background:transparent;border:none;color:#666666;font-size:12px;font-weight:300;cursor:pointer;transition:all 0.2s ease;border-bottom:2px solid transparent;flex:1;text-align:center}.tab-btn.active{color:#ffffff;border-bottom-color:#ffffff}.tab-btn:hover{color:#ffffff}.tab-content{min-height:120px}.tab-panel{display:none}.tab-panel.active{display:block}.action-btn{width:100%;padding:12px;background:transparent;border:1px solid #ffffff;color:#ffffff;font-size:12px;font-weight:300;cursor:pointer;transition:all 0.2s ease;margin-bottom:8px;border-radius:4px;display:flex;align-items:center;justify-content:center}.action-btn:hover{background:#ffffff;color:#000000}.data-buttons{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.data-btn{height:40px;padding:0 8px;background:transparent;border:1px solid #ffffff;color:#ffffff;font-size:12px;font-weight:300;cursor:pointer;transition:all 0.2s ease;text-align:center;display:flex;align-items:center;justify-content:center}.data-btn:hover{background:#ffffff;color:#000000}.data-btn.active{background:#ffffff;color:#000000}.ratio-controls{display:flex;gap:8px}.ratio-btn{padding:8px 16px;background:transparent;border:1px solid #ffffff;color:#ffffff;font-size:12px;font-weight:300;cursor:pointer;transition:all 0.2s ease;border-radius:4px}.ratio-btn:hover{background:#ffffff;color:#000000}.ratio-btn.active{background:#ffffff;color:#000000}.color-controls{display:flex;gap:8px}.color-btn{padding:8px 16px;background:transparent;border:1px solid #ffffff;color:#ffffff;font-size:12px;font-weight:300;cursor:pointer;transition:all 0.2s ease;border-radius:4px}.color-btn:hover{background:#ffffff;color:#000000}.color-btn.active{background:#ffffff;color:#000000}.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;color:#ffffff}.loading-spinner{width:40px;height:40px;border:3px solid #333333;border-top:3px solid #ffffff;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:16px}@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}.loading-text{font-size:14px;font-weight:300;color:#ffffff;opacity:0.8}.hidden{display:none!important}.workout-card{flex:1;display:flex;flex-direction:column;overflow:hidden}.workout-background{flex:1;display:flex;flex-direction:column;overflow:hidden}.workout-stats{display:flex;justify-content:space-between;padding:20px;background:rgba(0,0,0,0.8);color:#ffffff}.workout-stat{text-align:center}.workout-stat-label{font-size:12px;opacity:0.8;margin-bottom:4px}.workout-stat-value{font-size:18px;font-weight:600}@media (max-width:768px){.nav-container{padding:0 16px}.nav-brand h1{font-size:18px}.tab-btn{padding:10px 16px;font-size:11px}.action-btn{padding:10px;font-size:11px}.data-btn{height:36px;font-size:11px}.workout-card{margin:0}}@media (min-width:1024px){.mobile-container{width:375px!important;height:812px!important;max-width:375px!important;max-height:812px!important;overflow:hidden;display:flex!important;flex-direction:column!important;margin:20px auto!important;border:1px solid #333333!important;border-radius:8px!important}.main-content{position:fixed!important;top:60px!important;bottom:180px!important;left:0!important;right:0!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;width:100%!important;height:calc(100% - 60px - 180px)!important;z-index:1!important;margin:0!important;padding:0!important}.workout-card{flex:1!important;width:100%!important;height:100%!important;display:flex!important;flex-direction:column!important;overflow:hidden!important}.workout-background{flex:1!important;width:100%!important;height:100%!important;display:flex!important;flex-direction:column!important;overflow:hidden!important}.connected-state{flex:1!important;display:flex!important;flex-direction:column!important;height:100%!important;width:100%!important;overflow:hidden!important}.preview-area{flex:1!important;display:flex!important;align-items:center!important;justify-content:center!important;width:100%!important;height:100%!important;overflow:hidden!important}.editing-panel{height:180px!important;position:fixed!important;bottom:0!important;left:0!important;right:0!important;z-index:1000!important}.navbar{height:60px!important;position:fixed!important;top:0!important;left:0!important;right:0!important;z-index:1000!important}body{display:flex!important;justify-content:center!important;align-items:center!important;min-height:100vh!important;background:#000000!important}}@media (max-width:480px){.mobile-container{width:100vw!important;height:100vh!important;max-width:100vw!important;max-height:100vh!important;overflow:hidden;display:flex!important;flex-direction:column!important}.main-content{position:fixed!important;top:60px!important;bottom:180px!important;left:0!important;right:0!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;width:100%!important;height:calc(100vh - 60px - 180px)!important;z-index:1!important;margin:0!important;padding:0!important}.workout-card{flex:1!important;width:100%!important;height:100%!important;display:flex!important;flex-direction:column!important;overflow:hidden!important}.workout-background{flex:1!important;width:100%!important;height:100%!important;display:flex!important;flex-direction:column!important;overflow:hidden!important}.connected-state{flex:1!important;display:flex!important;flex-direction:column!important;height:100%!important;width:100%!important;overflow:hidden!important}.mobile-container.aspect-4-5{width:100vw!important;height:100vh!important;max-width:100vw!important;max-height:100vh!important}.main-content{display:flex!important;flex-direction:column!important;height:calc(100vh - 60px - 160px)!important;margin-top:0!important;margin-bottom:0!important;position:fixed!important;top:60px!important;bottom:160px!important;left:0!important;right:0!important}.connected-state{display:flex!important;flex-direction:column!important;height:100%!important}.workout-card{display:flex!important;flex-direction:column!important;height:100%!important}.navbar{padding:8px 0}.nav-container{padding:0 16px}.nav-brand h1{font-size:16px}.editing-panel{height:160px}.main-content{height:calc(100vh - 60px - 160px);margin-bottom:160px}.tab-btn{padding:10px 6px;font-size:10px}.tab-content{padding:16px}}@media (min-width:481px) and (max-width:768px){.mobile-container{max-width:90vw;margin:0 auto}.editing-panel{height:170px}.main-content{height:calc(100vh - 60px - 170px);margin-bottom:170px}}
+/* Mobile-First Minimalist Design */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+html, body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #000000;
+    color: #ffffff;
+    min-height: 100vh;
+    font-weight: 300;
+    line-height: 1.4;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+    border: none;
+    outline: none;
+    position: relative;
+}
+
+/* VSCO-style layout: preview on top, editing panel on bottom */
+.mobile-container {
+    width: 100vw;
+    height: 100vh;
+    max-width: 100vw;
+    max-height: 100vh;
+    overflow: hidden;
+    position: relative;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* Preview area - как в VSCO */
+.preview-area {
+    flex: 1; /* Растягивается по доступной высоте */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000000;
+    position: relative;
+    overflow: hidden;
+    z-index: 1000;
+    width: 100%;
+    /* Шашечки для пустого превью */
+    background-image: 
+        linear-gradient(45deg, #2a2a2a 25%, transparent 25%),
+        linear-gradient(-45deg, #2a2a2a 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #2a2a2a 75%),
+        linear-gradient(-45deg, transparent 75%, #2a2a2a 75%);
+    background-size: 16px 16px;
+    background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+    background-repeat: repeat;
+}
+
+/* Preview area с ratio 9:16 */
+.preview-area.ratio-9-16 {
+    /* Просто flex, JavaScript будет управлять размерами */
+}
+
+/* Preview area с ratio 4:5 */
+.preview-area.ratio-4-5 {
+    /* Просто flex, JavaScript будет управлять размерами */
+}
+
+/* 9:16 preview - фиксированные пропорции как в фоторедакторах */
+.preview-9-16 {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    aspect-ratio: 9/16;
+    max-height: calc(100vh - 60px - 180px);
+    object-fit: contain;
+    background: #111111;
+    border: 1px solid #333333;
+}
+
+/* 4:5 preview - фиксированные пропорции как в фоторедакторах */
+.preview-4-5 {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    aspect-ratio: 4/5;
+    max-height: calc(100vh - 60px - 180px);
+    object-fit: contain;
+    background: #111111;
+    border: 1px solid #333333;
+}
+
+
+/* Status Bar removed */
+
+/* Navigation */
+.navbar {
+    position: relative;
+    background: #000000;
+    border-bottom: 1px solid #333333;
+    z-index: 1000;
+    padding: 12px 0;
+    margin: 0;
+    height: 60px;
+    flex-shrink: 0;
+}
+
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+}
+
+.nav-brand h1 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 1px;
+}
+
+.nav-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+
+.nav-btn {
+    background: none;
+    border: none;
+    color: #ffffff;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+}
+
+.nav-btn:hover {
+    background: #333333;
+    color: #ffffff;
+}
+
+.nav-btn svg {
+    width: 24px;
+    height: 24px;
+    stroke: currentColor;
+    transition: stroke 0.2s ease;
+}
+
+.nav-btn:hover svg {
+    stroke: #ffffff;
+}
+
+/* Main Content - зафиксирован между навбаром и панелью */
+.main-content {
+    position: fixed;
+    top: 60px;
+    bottom: 180px;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    width: 100%;
+    height: calc(100vh - 60px - 180px);
+    z-index: 1;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* State Containers */
+.state-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 200px);
+    padding: 20px;
+}
+
+.state-card {
+    background: #000000;
+    border: 1px solid #333333;
+    padding: 40px 20px;
+    text-align: center;
+    max-width: 300px;
+    width: 100%;
+}
+
+.state-card h2 {
+    font-size: 24px;
+    font-weight: 300;
+    margin-bottom: 16px;
+    color: #ffffff;
+}
+
+.state-card p {
+    opacity: 0.7;
+    line-height: 1.6;
+    margin-bottom: 24px;
+    font-size: 14px;
+}
+
+/* Buttons */
+.btn {
+    padding: 12px 24px;
+    border: 1px solid #ffffff;
+    background: transparent;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 300;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+}
+
+.btn:hover {
+    background: #ffffff;
+    color: #000000;
+}
+
+.btn-primary {
+    background: #ffffff;
+    color: #000000;
+}
+
+.btn-primary:hover {
+    background: #cccccc;
+}
+
+/* Connected State - превью как в VSCO */
+.connected-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background: #000000;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    margin: 0 auto;
+}
+
+/* Connected State с ratio 9:16 */
+.connected-state.ratio-9-16 {
+    aspect-ratio: 9 / 16;
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+/* Connected State с ratio 4:5 */
+.connected-state.ratio-4-5 {
+    aspect-ratio: 4 / 5;
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+/* Canvas для превью - просто заполняет контейнер */
+#route-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    border: none;
+    outline: none;
+    /* Шашечки как в фоторедакторах - показываются только когда нет фона */
+    background: 
+        linear-gradient(45deg, #2a2a2a 25%, transparent 25%),
+        linear-gradient(-45deg, #2a2a2a 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #2a2a2a 75%),
+        linear-gradient(-45deg, transparent 75%, #2a2a2a 75%);
+    background-size: 16px 16px;
+    background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+    background-repeat: repeat;
+    background-attachment: local;
+}
+
+/* Скрыть шашечки когда есть фоновая картинка */
+#route-canvas.has-background {
+    background: transparent;
+}
+
+/* Stats Overlay - скрываем, так как статистики рисуются в canvas */
+.stats-overlay {
+    display: none;
+}
+
+/* Bottom Stats Overlay - скрываем, так как статистики рисуются в canvas */
+.bottom-stats-overlay {
+    display: none;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.stat-label {
+    font-size: 12px;
+    font-weight: 300;
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+}
+
+.stat-value {
+    font-size: 18px;
+    font-weight: 300;
+    color: #ffffff;
+}
+
+
+.workout-footer {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    display: flex;
+    justify-content: space-between;
+    z-index: 10;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    border-radius: 4px;
+}
+
+/* Editing Panel */
+.editing-panel {
+    position: relative;
+    height: 180px;
+    background: #000000;
+    border-top: 1px solid #333333;
+    padding: 0;
+    z-index: 100;
+    display: flex;
+    flex-shrink: 0;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+.tab-nav {
+    display: flex;
+    background: #000000;
+    border-bottom: 1px solid #333333;
+    flex-shrink: 0;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 12px 8px;
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 300;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tab-btn.active {
+    background: #ffffff;
+    color: #000000;
+}
+
+.tab-btn:hover:not(.active) {
+    background: #333333;
+}
+
+.tab-content {
+    padding: 20px;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.tab-panel {
+    display: none;
+}
+
+.tab-panel.active {
+    display: block;
+}
+
+/* Action Buttons */
+.action-btn {
+    width: 100%;
+    padding: 16px;
+    background: transparent;
+    border: 1px solid #ffffff;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 300;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.action-btn:hover {
+    background: #ffffff;
+    color: #000000;
+}
+
+/* Data Buttons */
+.data-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.data-btn {
+    height: 40px;
+    padding: 0 8px;
+    background: transparent;
+    border: 1px solid #ffffff;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 300;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.data-btn.active {
+    background: #ffffff;
+    color: #000000;
+}
+
+.data-btn:hover:not(.active) {
+    background: #333333;
+}
+
+/* Position Controls */
+.position-controls {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.position-btn {
+    padding: 12px;
+    background: transparent;
+    border: 1px solid #ffffff;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 300;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.position-btn:hover {
+    background: #ffffff;
+    color: #000000;
+}
+
+/* Color Controls */
+.color-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.color-btn {
+    padding: 12px;
+    background: transparent;
+    border: 1px solid #ffffff;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 300;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.color-btn:hover {
+    background: #ffffff;
+    color: #000000;
+}
+
+/* Ratio Controls */
+.ratio-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.ratio-btn {
+    flex: 1;
+    padding: 12px;
+    background: transparent;
+    border: 1px solid #ffffff;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 300;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.ratio-btn.active {
+    background: #ffffff;
+    color: #000000;
+}
+
+.ratio-btn:hover:not(.active) {
+    background: #333333;
+}
+
+/* Loading State */
+.loading-state {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #333333;
+    border-top: 2px solid #ffffff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 16px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Utility Classes */
+.hidden {
+    display: none !important;
+}
+
+.text-center {
+    text-align: center;
+}
+
+/* Responsive Design */
+@media (min-width: 768px) {
+    .mobile-container {
+        /* Убираем ограничения для мобильной версии */
+        max-width: 100vw;
+        margin: 0;
+        border: none;
+        box-shadow: none;
+    }
+    
+    .workout-card {
+        margin: 0;
+    }
+}
+
+/* Desktop version - фиксированные размеры как мобильная */
+@media (min-width: 1024px) {
+    .mobile-container {
+        width: 375px !important;
+        height: 812px !important;
+        max-width: 375px !important;
+        max-height: 812px !important;
+        overflow: hidden;
+        display: flex !important;
+        flex-direction: column !important;
+        margin: 20px auto !important;
+        border: 1px solid #333333 !important;
+        border-radius: 8px !important;
+    }
+    
+    .main-content {
+        position: fixed !important;
+        top: 60px !important;
+        bottom: 180px !important;
+        left: 0 !important;
+        right: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
+        width: 100% !important;
+        height: calc(100% - 60px - 180px) !important;
+        z-index: 1 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    .workout-card {
+        flex: 1 !important;
+        width: 100% !important;
+        height: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
+    }
+    
+    .workout-background {
+        flex: 1 !important;
+        width: 100% !important;
+        height: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
+    }
+    
+    .connected-state {
+        flex: 1 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        height: 100% !important;
+        width: 100% !important;
+        overflow: hidden !important;
+    }
+    
+    .preview-area {
+        flex: 1 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 100% !important;
+        height: 100% !important;
+        overflow: hidden !important;
+    }
+    
+    .editing-panel {
+        height: 180px !important;
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        z-index: 1000 !important;
+    }
+    
+    .navbar {
+        height: 60px !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        z-index: 1000 !important;
+    }
+    
+    /* Центрируем контейнер на экране */
+    body {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        min-height: 100vh !important;
+        background: #000000 !important;
+    }
+}
+
+/* Mobile-first responsive design */
+@media (max-width: 480px) {
+    .mobile-container {
+        width: 100vw !important;
+        height: 100vh !important;
+        max-width: 100vw !important;
+        max-height: 100vh !important;
+        overflow: hidden;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    
+    .main-content {
+        position: fixed !important;
+        top: 60px !important;
+        bottom: 180px !important;
+        left: 0 !important;
+        right: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
+        width: 100% !important;
+        height: calc(100vh - 60px - 180px) !important;
+        z-index: 1 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    .workout-card {
+        flex: 1 !important;
+        width: 100% !important;
+        height: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
+    }
+    
+    .workout-background {
+        flex: 1 !important;
+        width: 100% !important;
+        height: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
+    }
+    
+    .connected-state {
+        flex: 1 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        height: 100% !important;
+        width: 100% !important;
+        overflow: hidden !important;
+    }
+    
+    .mobile-container.aspect-4-5 {
+        width: 100vw !important;
+        height: 100vh !important;
+        max-width: 100vw !important;
+        max-height: 100vh !important;
+    }
+    
+    .main-content {
+        display: flex !important;
+        flex-direction: column !important;
+        height: calc(100vh - 60px - 160px) !important;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        position: fixed !important;
+        top: 60px !important;
+        bottom: 160px !important;
+        left: 0 !important;
+        right: 0 !important;
+    }
+    
+    .connected-state {
+        display: flex !important;
+        flex-direction: column !important;
+        height: 100% !important;
+    }
+    
+    .workout-card {
+        display: flex !important;
+        flex-direction: column !important;
+        height: 100% !important;
+    }
+    
+    .navbar {
+        padding: 8px 0;
+    }
+    
+    .nav-container {
+        padding: 0 16px;
+    }
+    
+    .nav-brand h1 {
+        font-size: 16px;
+    }
+    
+    .editing-panel {
+        height: 160px;
+    }
+    
+    .main-content {
+        height: calc(100vh - 60px - 160px);
+        margin-bottom: 160px;
+    }
+    
+    .tab-btn {
+        padding: 10px 6px;
+        font-size: 10px;
+    }
+    
+    .tab-content {
+        padding: 16px;
+    }
+}
+
+/* Tablet responsive */
+@media (min-width: 481px) and (max-width: 768px) {
+    .mobile-container {
+        max-width: 90vw;
+        margin: 0 auto;
+    }
+    
+    .editing-panel {
+        height: 170px;
+    }
+    
+    .main-content {
+        height: calc(100vh - 60px - 170px);
+        margin-bottom: 170px;
+    }
+}
+
+/* Mobile-first aspect ratios - адаптивно подстраивается под высоту экрана */
+@media (max-width: 768px) {
+    .mobile-container.aspect-9-16 {
+        height: calc(100vh - 60px - 180px) !important;
+        aspect-ratio: 9/16 !important;
+        max-height: calc(100vh - 60px - 180px) !important;
+        transform: none !important;
+        overflow: hidden !important;
+        margin: 0 auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    
+    .mobile-container.aspect-4-5 {
+        height: calc(100vh - 60px - 180px) !important;
+        aspect-ratio: 4/5 !important;
+        max-height: calc(100vh - 60px - 180px) !important;
+        transform: none !important;
+        overflow: hidden !important;
+        margin: 0 auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+}
+
+/* Desktop aspect ratios - адаптивно подстраивается под высоту экрана */
+@media (min-width: 769px) {
+    .mobile-container.aspect-9-16 {
+        height: calc(100vh - 60px - 180px);
+        aspect-ratio: 9/16;
+        max-height: calc(100vh - 60px - 180px);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .mobile-container.aspect-4-5 {
+        height: calc(100vh - 60px - 180px);
+        aspect-ratio: 4/5;
+        max-height: calc(100vh - 60px - 180px);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .mobile-container.aspect-1-1 {
+        aspect-ratio: 1/1;
+        width: 400px;
+        height: 400px;
+        max-width: 400px;
+        max-height: 400px;
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+/* Focus States */
+button:focus,
+.btn:focus {
+    outline: 1px solid #ffffff;
+    outline-offset: 2px;
+}
+
+/* Selection */
+::selection {
+    background: #ffffff;
+    color: #000000;
+}
+
+/* Modal Styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    position: relative;
+    background: #000000;
+    border: 1px solid #333333;
+    border-radius: 8px;
+    max-width: 400px;
+    width: 100%;
+    max-height: 80vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #333333;
+}
+
+.modal-header h3 {
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 300;
+    margin: 0;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: #ffffff;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background 0.2s ease;
+}
+
+.modal-close:hover {
+    background: #333333;
+}
+
+.modal-body {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.workout-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.workout-item {
+    background: #111111;
+    border: 1px solid #333333;
+    border-radius: 6px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.workout-item:hover {
+    background: #1a1a1a;
+    border-color: #555555;
+}
+
+.workout-item.active {
+    background: #ffffff;
+    color: #000000;
+    border-color: #ffffff;
+}
+
+.workout-name {
+    font-size: 16px;
+    font-weight: 300;
+    color: inherit;
+    margin: 0;
+}
+
+.workout-stats {
+    display: flex;
+    gap: 16px;
+    font-size: 14px;
+    opacity: 0.7;
+}
+
+.workout-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.workout-stat-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.workout-stat-value {
+    font-weight: 300;
+}
+
+/* Smooth Transitions */
+* {
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}

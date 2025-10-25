@@ -2,18 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>5zn Web</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="description" content="5zn-web - Web application for 5zn project">
+    <meta name="keywords" content="5zn, web, application, mobile, responsive">
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; script-src * 'unsafe-inline' 'unsafe-eval' 'unsafe-hashes'; style-src * 'unsafe-inline'; img-src * data: blob:; connect-src *; object-src *; media-src *; font-src *; worker-src *; manifest-src *; form-action *; base-uri *;">
+    <title>5zn.io</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <link rel="stylesheet" href="styles.min.css">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="mobile-container">
+    <div class="mobile-container" id="mobile-container">
         <!-- Top Navigation -->
         <nav class="navbar">
             <div class="nav-container">
                 <div class="nav-brand">
-                    <h1>5zn</h1>
+                    <h1>5zn.io</h1>
                 </div>
                 <div class="nav-actions">
                     <button id="connect-strava-btn" class="btn btn-primary">Connect Strava</button>
@@ -138,6 +141,6 @@
     <input type="file" id="photo-input" accept="image/*" style="display: none;">
     <input type="file" id="logo-input" accept="image/*" style="display: none;">
 
-    <script src="app.min.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>

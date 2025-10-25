@@ -40,13 +40,12 @@ class ProductionHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         if self.path == '/' or self.path == '/index.html':
             self.path = '/index.prod.html'
         
-        # Serve minified CSS
-        if self.path == '/styles.css':
-            self.path = '/styles.min.css'
+        # Use original files for now (same as development)
+        # if self.path == '/styles.css':
+        #     self.path = '/styles.min.css'
         
-        # Serve minified JS
-        if self.path == '/app.js':
-            self.path = '/app.min.js'
+        # if self.path == '/app.js':
+        #     self.path = '/app.min.js'
         
         return super().do_GET()
 
