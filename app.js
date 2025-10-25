@@ -313,18 +313,25 @@ class TrinkyApp {
 
     async loadWorkouts() {
         try {
+            console.log('🔄 Loading workouts...');
             const response = await this.fetchStravaData('/athlete/activities?per_page=10');
+            console.log('📊 Workouts response:', response);
+            
             this.workouts = response.data || [];
+            console.log('📋 Workouts loaded:', this.workouts.length);
             
             if (this.workouts.length > 0) {
                 this.currentWorkout = this.workouts[0];
+                console.log('🎯 Current workout:', this.currentWorkout);
                 this.updateWorkoutDisplay();
                 this.drawRoute();
+            } else {
+                console.log('⚠️ No workouts found');
             }
             
             this.showConnectedState();
         } catch (error) {
-            console.error('Error loading workouts:', error);
+            console.error('❌ Error loading workouts:', error);
             this.showError('Failed to load workouts. Please try again.');
         }
     }
@@ -453,7 +460,23 @@ class TrinkyApp {
         
         // Рисуем изображение, заполняющее весь канвас
         this.ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+        
+        // Добавляем полупрозрачную оранжевую подложку для контраста
+        this.drawOrangeOverlay();
+        
         console.log('🖼️ Background image drawn to canvas (height-adaptive)');
+    }
+
+    drawOrangeOverlay() {
+        // Получаем размеры canvas (без DPR)
+        const canvasWidth = this.canvas.width / (window.devicePixelRatio || 1);
+        const canvasHeight = this.canvas.height / (window.devicePixelRatio || 1);
+        
+        // Рисуем полупрозрачную оранжевую подложку
+        this.ctx.fillStyle = 'rgba(255, 107, 53, 0.3)'; // Оранжевый с прозрачностью 30%
+        this.ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+        
+        console.log('🟠 Orange overlay drawn for contrast');
     }
 
     drawBackground() {
@@ -515,11 +538,8 @@ class TrinkyApp {
         // Иконка велосипеда справа (в безопасной зоне) - ВРЕМЕННО СКРЫТА
         // this.drawBikeIcon(canvasWidth - 60, topPadding + 30);
         
-        // График в центральной части (с учетом отступов)
-        const graphY = topPadding + 120;
+        // График убран - используем только маршрут из drawDemoRoute()
         const availableHeight = canvasHeight - topPadding - bottomPadding;
-        const graphHeight = availableHeight * 0.5; // 50% от доступной высоты для графика
-        this.drawActivityGraph(20, graphY, canvasWidth - 40, graphHeight);
         
         // Статистики в самом низу канваса (3x2 сетка)
         const statsHeight = availableHeight * 0.3; // 30% от доступной высоты для статистик
@@ -662,8 +682,7 @@ class TrinkyApp {
     }
 
     drawActivityGraph(x, y, width, height) {
-        // Рисуем график активности (элевация или мощность)
-        this.ctx.strokeStyle = '#FF6B35';
+        // Рисуем график активности в цвета французского флага
         this.ctx.lineWidth = 4;
         this.ctx.lineCap = 'round';
         this.ctx.lineJoin = 'round';
@@ -678,6 +697,14 @@ class TrinkyApp {
             points.push({ x: pointX, y: pointY });
         }
         
+        // Создаем градиент для французского флага
+        const gradient = this.ctx.createLinearGradient(x, 0, x + width, 0);
+        gradient.addColorStop(0, '#002395');    // Синий
+        gradient.addColorStop(0.5, '#FFFFFF');  // Белый
+        gradient.addColorStop(1, '#ED2939');    // Красный
+        
+        this.ctx.strokeStyle = gradient;
+        
         // Рисуем линию графика
         this.ctx.beginPath();
         this.ctx.moveTo(points[0].x, points[0].y);
@@ -687,13 +714,6 @@ class TrinkyApp {
         }
         
         this.ctx.stroke();
-        
-        // Добавляем тень
-        this.ctx.strokeStyle = 'rgba(255, 107, 53, 0.3)';
-        this.ctx.lineWidth = 6;
-        this.ctx.globalCompositeOperation = 'multiply';
-        this.ctx.stroke();
-        this.ctx.globalCompositeOperation = 'source-over';
     }
 
     drawDemoRoute() {
@@ -733,12 +753,34 @@ class TrinkyApp {
     }
 
     drawSingleRoute(points) {
-        // Рисуем одну простую линию маршрута
-        this.ctx.strokeStyle = '#FF6B35';
+        // Рисуем линию маршрута в цвета флага Франции
         this.ctx.lineWidth = 4;
         this.ctx.lineCap = 'round';
         this.ctx.lineJoin = 'round';
-        this.drawPath(points);
+        
+        // Создаем градиент для французского флага
+        // Находим границы линии для правильного градиента
+        let minX = Math.min(...points.map(p => p.x));
+        let maxX = Math.max(...points.map(p => p.x));
+        
+        const gradient = this.ctx.createLinearGradient(minX, 0, maxX, 0);
+        gradient.addColorStop(0, '#002395');    // Синий (французский синий)
+        gradient.addColorStop(0.4, '#FFFFFF');  // Белый (плавный переход)
+        gradient.addColorStop(0.6, '#FFFFFF');  // Белый (плавный переход)
+        gradient.addColorStop(1, '#ED2939');     // Красный (французский красный)
+        
+        this.ctx.strokeStyle = gradient;
+        
+        // Рисуем путь правильно
+        this.ctx.beginPath();
+        for (let i = 0; i < points.length; i++) {
+            if (i === 0) {
+                this.ctx.moveTo(points[i].x, points[i].y);
+            } else {
+                this.ctx.lineTo(points[i].x, points[i].y);
+            }
+        }
+        this.ctx.stroke();
     }
 
     generateDemoRoute(width, height, padding, topPadding = 0) {
