@@ -183,7 +183,7 @@ class TrinkyApp {
             mainContent.style.display = 'flex';
             mainContent.style.flexDirection = 'column';
             mainContent.style.height = 'calc(100vh - 60px - 160px)';
-            mainContent.style.marginTop = '60px';
+            mainContent.style.marginTop = '0';
             mainContent.style.marginBottom = '160px';
         }
         
@@ -220,16 +220,51 @@ class TrinkyApp {
         // Get device pixel ratio for crisp rendering on mobile
         const dpr = window.devicePixelRatio || 1;
         
-        // Set display size
-        this.canvas.style.width = rect.width + 'px';
-        this.canvas.style.height = rect.height + 'px';
+        // Get actual container dimensions (between navbar and toolbar)
+        const containerWidth = rect.width;
+        const containerHeight = rect.height;
+        
+        console.log('📐 Container dimensions:', containerWidth, 'x', containerHeight);
+        
+        // Calculate scale to fit container while maintaining 9:16 aspect ratio
+        const contentAspectRatio = 9 / 16;
+        const containerAspectRatio = containerWidth / containerHeight;
+        
+        let canvasWidth, canvasHeight;
+        
+        if (containerAspectRatio > contentAspectRatio) {
+            // Container is wider than 9:16, scale by height
+            canvasHeight = containerHeight;
+            canvasWidth = containerHeight * contentAspectRatio;
+        } else {
+            // Container is taller than 9:16, scale by width
+            canvasWidth = containerWidth;
+            canvasHeight = containerWidth / contentAspectRatio;
+        }
+        
+        // Ensure canvas doesn't exceed container
+        if (canvasWidth > containerWidth) {
+            canvasWidth = containerWidth;
+            canvasHeight = containerWidth / contentAspectRatio;
+        }
+        if (canvasHeight > containerHeight) {
+            canvasHeight = containerHeight;
+            canvasWidth = containerHeight * contentAspectRatio;
+        }
+        
+        // Set display size to fit container
+        this.canvas.style.width = canvasWidth + 'px';
+        this.canvas.style.height = canvasHeight + 'px';
         
         // Set actual canvas size with DPR
-        this.canvas.width = rect.width * dpr;
-        this.canvas.height = rect.height * dpr;
+        this.canvas.width = canvasWidth * dpr;
+        this.canvas.height = canvasHeight * dpr;
         
         // Scale context for crisp rendering
         this.ctx.scale(dpr, dpr);
+        
+        console.log('📐 Canvas resized to fit container:', canvasWidth, 'x', canvasHeight);
+        console.log('📐 Container was:', containerWidth, 'x', containerHeight);
         
         if (this.currentWorkout) {
             this.drawRoute();
@@ -773,6 +808,103 @@ class TrinkyApp {
         } else {
             alert(text);
         }
+    }
+
+    // Export functionality with proper 1080x1920 resolution
+    exportData() {
+        if (!this.currentWorkout) {
+            this.showError('No workout data to export');
+            return;
+        }
+
+        // Create a new canvas with exact 1080x1920 resolution
+        const exportCanvas = document.createElement('canvas');
+        exportCanvas.width = 1080;
+        exportCanvas.height = 1920;
+        const exportCtx = exportCanvas.getContext('2d');
+
+        // Fill background
+        exportCtx.fillStyle = '#000000';
+        exportCtx.fillRect(0, 0, 1080, 1920);
+
+        // Draw route with proper scaling
+        const padding = 40;
+        const routeWidth = 1080 - (padding * 2);
+        const routeHeight = 1920 - (padding * 2) - 200; // Leave space for stats
+
+        // Generate route points for export resolution
+        const points = this.generateDemoRoute(routeWidth, routeHeight, 0);
+        
+        // Draw route with French flag colors
+        const segmentLength = points.length / 3;
+        
+        // Blue segment
+        exportCtx.strokeStyle = '#002395';
+        exportCtx.lineWidth = 8;
+        exportCtx.lineCap = 'round';
+        exportCtx.lineJoin = 'round';
+        this.drawExportPathSegment(exportCtx, points, 0, segmentLength, padding);
+        
+        // White segment
+        exportCtx.strokeStyle = '#FFFFFF';
+        this.drawExportPathSegment(exportCtx, points, segmentLength, segmentLength * 2, padding);
+        
+        // Red segment
+        exportCtx.strokeStyle = '#ED2939';
+        this.drawExportPathSegment(exportCtx, points, segmentLength * 2, points.length, padding);
+
+        // Draw stats overlay
+        exportCtx.fillStyle = '#FFFFFF';
+        exportCtx.font = 'bold 48px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        exportCtx.textAlign = 'left';
+        exportCtx.fillText('DISTANCE', 60, 1800);
+        exportCtx.fillText('3 000 m', 60, 1860);
+        
+        exportCtx.textAlign = 'right';
+        exportCtx.fillText('ELEVATION', 1020, 1800);
+        exportCtx.fillText('3 000 m', 1020, 1860);
+
+        // Download the image
+        const link = document.createElement('a');
+        link.download = `5zn-workout-${Date.now()}.png`;
+        link.href = exportCanvas.toDataURL('image/png');
+        link.click();
+
+        console.log('📸 Exported workout image: 1080x1920');
+    }
+
+    drawExportPathSegment(ctx, points, start, end, offsetX) {
+        if (!points || !Array.isArray(points) || points.length === 0) return;
+        
+        start = Math.max(0, Math.min(start, points.length - 1));
+        end = Math.max(0, Math.min(end, points.length));
+        
+        if (start >= end) return;
+        
+        ctx.beginPath();
+        
+        // Find first valid point
+        let firstValidPoint = null;
+        for (let i = start; i < end; i++) {
+            if (points[i] && typeof points[i].x === 'number' && typeof points[i].y === 'number' && 
+                !isNaN(points[i].x) && !isNaN(points[i].y)) {
+                firstValidPoint = points[i];
+                break;
+            }
+        }
+        
+        if (!firstValidPoint) return;
+        
+        ctx.moveTo(firstValidPoint.x + offsetX, firstValidPoint.y + 100); // Offset for header
+        
+        for (let i = start + 1; i < end; i++) {
+            if (points[i] && typeof points[i].x === 'number' && typeof points[i].y === 'number' &&
+                !isNaN(points[i].x) && !isNaN(points[i].y)) {
+                ctx.lineTo(points[i].x + offsetX, points[i].y + 100);
+            }
+        }
+        
+        ctx.stroke();
     }
 }
 

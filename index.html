@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=1080, initial-scale=1.0, user-scalable=no">
     <meta name="description" content="5zn-web - Web application for 5zn project">
     <meta name="keywords" content="5zn, web, application, mobile, responsive">
     <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; script-src * 'unsafe-inline' 'unsafe-eval' 'unsafe-hashes'; style-src * 'unsafe-inline'; img-src * data: blob:; connect-src *; object-src *; media-src *; font-src *; worker-src *; manifest-src *; form-action *; base-uri *;">
     <title>5zn.io</title>
-    <link rel="stylesheet" href="styles.css?v=8">
+    <link rel="stylesheet" href="styles.css?v=29">
 </head>
 <body>
     <div class="mobile-container aspect-9-16" id="mobile-container">
@@ -52,27 +52,22 @@
 
         <!-- Connected State -->
         <div id="connected" class="connected-state hidden">
-            <!-- Workout Card -->
-            <div class="workout-card">
-                <!-- Background Image Area -->
-                <div class="workout-background" id="workout-background">
-                    <!-- Overlay Stats -->
-                    <div class="workout-overlay">
-                        <div class="overlay-stats">
-                            <div class="overlay-stat">
-                                <span class="stat-label">DISTANCE</span>
-                                <span class="stat-value" id="distance-value">3 000 m</span>
-                            </div>
-                            <div class="overlay-stat">
-                                <span class="stat-label">ELEVATION</span>
-                                <span class="stat-value" id="elevation-value">3 000 m</span>
-                            </div>
-                        </div>
-                        
-                        <!-- Route Canvas -->
-                        <div class="route-container">
-                            <canvas id="route-canvas"></canvas>
-                        </div>
+            <!-- Viewport Container -->
+            <div class="viewport-container">
+                <!-- Preview Area -->
+                <div class="preview-area">
+                    <canvas id="route-canvas"></canvas>
+                </div>
+                
+                <!-- Stats Overlay -->
+                <div class="stats-overlay">
+                    <div class="stat-item">
+                        <span class="stat-label">DISTANCE</span>
+                        <span class="stat-value" id="distance-value">3 000 m</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">ELEVATION</span>
+                        <span class="stat-value" id="elevation-value">3 000 m</span>
                     </div>
                 </div>
             </div>
@@ -175,8 +170,8 @@
         </div> <!-- Close mobile-container -->
     </main>
 
-    <script src="config.js?v=10"></script>
-    <script src="app.js?v=10"></script>
+    <script src="config.js?v=29"></script>
+    <script src="app.js?v=29"></script>
     
     <!-- Debug script -->
     <script>
