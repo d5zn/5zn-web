@@ -242,12 +242,12 @@ class TrinkyApp {
         let canvasWidth, canvasHeight;
         
         // Для обоих соотношений используем размеры preview-area
-        const previewArea = document.querySelector('.preview-area');
-        const previewRect = previewArea.getBoundingClientRect();
-        
-        canvasWidth = previewRect.width;
-        canvasHeight = previewRect.height;
-        
+            const previewArea = document.querySelector('.preview-area');
+            const previewRect = previewArea.getBoundingClientRect();
+            
+            canvasWidth = previewRect.width;
+            canvasHeight = previewRect.height;
+            
         if (is4_5) {
             console.log('📐 4:5 Canvas - using preview area:', canvasWidth, 'x', canvasHeight);
         } else {
@@ -369,32 +369,32 @@ class TrinkyApp {
         } catch (error) {
             console.error('❌ Strava API error:', error);
             // Fallback to mock data for development
-            return new Promise((resolve) => {
-                setTimeout(() => {
-                    resolve({
-                        data: [
-                            {
-                                id: 1,
-                                name: 'Morning Ride',
-                                distance: 15000,
-                                moving_time: 3600,
-                                total_elevation_gain: 500,
-                                average_speed: 4.17,
-                                map: { polyline: 'mock_polyline_data' }
-                            },
-                            {
-                                id: 2,
-                                name: 'Evening Run',
-                                distance: 8000,
-                                moving_time: 2400,
-                                total_elevation_gain: 200,
-                                average_speed: 3.33,
-                                map: { polyline: 'mock_polyline_data_2' }
-                            }
-                        ]
-                    });
-                }, 1000);
-            });
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                resolve({
+                    data: [
+                        {
+                            id: 1,
+                            name: 'Morning Ride',
+                            distance: 15000,
+                            moving_time: 3600,
+                            total_elevation_gain: 500,
+                            average_speed: 4.17,
+                            map: { polyline: 'mock_polyline_data' }
+                        },
+                        {
+                            id: 2,
+                            name: 'Evening Run',
+                            distance: 8000,
+                            moving_time: 2400,
+                            total_elevation_gain: 200,
+                            average_speed: 3.33,
+                            map: { polyline: 'mock_polyline_data_2' }
+                        }
+                    ]
+                });
+            }, 1000);
+        });
         }
     }
 
@@ -435,6 +435,7 @@ class TrinkyApp {
     }
 
     formatDistance(meters) {
+        if (!meters || meters === 0) return '—';
         if (meters >= 1000) {
             return `${(meters / 1000).toFixed(1)} km`;
         }
@@ -442,10 +443,12 @@ class TrinkyApp {
     }
 
     formatElevation(meters) {
+        if (!meters || meters === 0) return '—';
         return `${meters} m`;
     }
 
     formatSpeed(mps) {
+        if (!mps || mps === 0) return '—';
         // Convert m/s to km/h
         const kmh = mps * 3.6;
         return `${kmh.toFixed(1)} km/h`;
@@ -865,11 +868,18 @@ class TrinkyApp {
         this.ctx.fillStyle = '#FFFFFF';
         this.ctx.font = '600 22px Inter, sans-serif';
         this.ctx.textAlign = 'left';
-        this.ctx.fillText('Morning Ride', 20, topPadding + 50);
+        // Используем реальные данные из currentWorkout
+        const workoutName = this.currentWorkout?.name || 'Workout';
+        this.ctx.fillText(workoutName, 20, topPadding + 50);
         
         this.ctx.font = '13px Inter, sans-serif';
         this.ctx.fillStyle = '#FFFFFF';
-        this.ctx.fillText('25 OCT, 15:30', 20, topPadding + 80);
+        
+        // Форматируем дату из start_date
+        const workoutDate = this.currentWorkout?.start_date ? 
+            this.formatWorkoutDate(this.currentWorkout.start_date) : 
+            'Date not available';
+        this.ctx.fillText(workoutDate, 20, topPadding + 80);
         
         // Контейнер для логотипа - разное позиционирование для разных соотношений
         if (is4_5) {
@@ -1638,6 +1648,7 @@ class TrinkyApp {
     }
 
     formatTime(seconds) {
+        if (!seconds || seconds === 0) return '—';
         const hours = Math.floor(seconds / 3600);
         const minutes = Math.floor((seconds % 3600) / 60);
         
@@ -1645,6 +1656,22 @@ class TrinkyApp {
             return `${hours}h ${minutes}m`;
         } else {
             return `${minutes}m`;
+        }
+    }
+    
+    formatWorkoutDate(dateString) {
+        try {
+            const date = new Date(dateString);
+            const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 
+                          'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+            const day = date.getDate();
+            const month = months[date.getMonth()];
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            return `${day} ${month}, ${hours}:${minutes}`;
+        } catch (error) {
+            console.error('Date formatting error:', error);
+            return 'Invalid date';
         }
     }
 
