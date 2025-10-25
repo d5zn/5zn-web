@@ -1,4 +1,9 @@
 // Trinky Web App - Mobile-First Version
+
+// Утилита для условного логирования (только в development)
+const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const log = isDev ? console.log : () => {};
+
 class TrinkyApp {
     constructor() {
         this.stravaToken = localStorage.getItem('strava_token');
@@ -239,18 +244,20 @@ class TrinkyApp {
         const connectedState = document.getElementById('connected');
         const is4_5 = connectedState && connectedState.classList.contains('ratio-4-5');
         
-        // Get device pixel ratio for crisp rendering on mobile
-        const dpr = window.devicePixelRatio || 1;
+        // Get device pixel ratio, но ограничиваем для производительности
+        const rawDpr = window.devicePixelRatio || 1;
+        // Ограничиваем DPR максимум до 2 для предотвращения проблем на слабых устройствах
+        const dpr = Math.min(rawDpr, 2);
         
         let canvasWidth, canvasHeight;
         
         // Для обоих соотношений используем размеры preview-area
-            const previewArea = document.querySelector('.preview-area');
-            const previewRect = previewArea.getBoundingClientRect();
-            
-            canvasWidth = previewRect.width;
-            canvasHeight = previewRect.height;
-            
+        const previewArea = document.querySelector('.preview-area');
+        const previewRect = previewArea.getBoundingClientRect();
+        
+        canvasWidth = previewRect.width;
+        canvasHeight = previewRect.height;
+        
         if (is4_5) {
             console.log('📐 4:5 Canvas - using preview area:', canvasWidth, 'x', canvasHeight);
         } else {
@@ -268,7 +275,7 @@ class TrinkyApp {
         // Scale context for crisp rendering
         this.ctx.scale(dpr, dpr);
         
-        console.log('📐 Canvas resized:', canvasWidth, 'x', canvasHeight, 'DPR:', dpr, 'Actual canvas size:', this.canvas.width, 'x', this.canvas.height);
+        console.log('📐 Canvas resized:', canvasWidth, 'x', canvasHeight, 'DPR:', rawDpr, '->', dpr, 'Actual canvas size:', this.canvas.width, 'x', this.canvas.height);
         
         if (this.currentWorkout) {
             this.drawRoute();
@@ -364,6 +371,15 @@ class TrinkyApp {
             });
             
             if (!response.ok) {
+                if (response.status === 401) {
+                    // Токен истек
+                    localStorage.removeItem('strava_token');
+                    this.showError('Сессия истекла. Пожалуйста, подключитесь снова');
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 2000);
+                    throw new Error('Unauthorized');
+                }
                 throw new Error(`Strava API error: ${response.status} ${response.statusText}`);
             }
             
@@ -371,33 +387,39 @@ class TrinkyApp {
             return { data };
         } catch (error) {
             console.error('❌ Strava API error:', error);
+            
+            // Показываем пользователю дружественное сообщение
+            if (error.message !== 'Unauthorized') {
+                this.showError('Не удалось загрузить данные из Strava. Проверьте подключение к интернету');
+            }
+            
             // Fallback to mock data for development
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                resolve({
-                    data: [
-                        {
-                            id: 1,
-                            name: 'Morning Ride',
-                            distance: 15000,
-                            moving_time: 3600,
-                            total_elevation_gain: 500,
-                            average_speed: 4.17,
-                            map: { polyline: 'mock_polyline_data' }
-                        },
-                        {
-                            id: 2,
-                            name: 'Evening Run',
-                            distance: 8000,
-                            moving_time: 2400,
-                            total_elevation_gain: 200,
-                            average_speed: 3.33,
-                            map: { polyline: 'mock_polyline_data_2' }
-                        }
-                    ]
-                });
-            }, 1000);
-        });
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve({
+                        data: [
+                            {
+                                id: 1,
+                                name: 'Morning Ride',
+                                distance: 15000,
+                                moving_time: 3600,
+                                total_elevation_gain: 500,
+                                average_speed: 4.17,
+                                map: { polyline: 'mock_polyline_data' }
+                            },
+                            {
+                                id: 2,
+                                name: 'Evening Run',
+                                distance: 8000,
+                                moving_time: 2400,
+                                total_elevation_gain: 200,
+                                average_speed: 3.33,
+                                map: { polyline: 'mock_polyline_data_2' }
+                            }
+                        ]
+                    });
+                }, 1000);
+            });
         }
     }
 
@@ -1514,6 +1536,26 @@ class TrinkyApp {
     handlePhotoUpload(file) {
         if (!file) return;
         
+        // Валидация типа файла
+        if (!file.type.startsWith('image/')) {
+            this.showError('Пожалуйста, загрузите изображение');
+            return;
+        }
+        
+        // Валидация размера (максимум 10MB)
+        const maxSize = 10 * 1024 * 1024; // 10MB
+        if (file.size > maxSize) {
+            this.showError('Файл слишком большой. Максимальный размер: 10MB');
+            return;
+        }
+        
+        // Проверка расширения файла
+        const validExtensions = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+        if (!validExtensions.includes(file.type)) {
+            this.showError('Неподдерживаемый формат изображения. Используйте JPG, PNG или WEBP');
+            return;
+        }
+        
         const reader = new FileReader();
         reader.onload = (e) => {
             this.backgroundImage = e.target.result;
@@ -1530,16 +1572,35 @@ class TrinkyApp {
                 monoBtn.style.justifyContent = 'center';
             }
         };
+        reader.onerror = () => {
+            this.showError('Ошибка при чтении файла');
+        };
         reader.readAsDataURL(file);
     }
 
     handleLogoUpload(file) {
         if (!file) return;
         
+        // Валидация типа файла
+        if (!file.type.startsWith('image/')) {
+            this.showError('Пожалуйста, загрузите изображение');
+            return;
+        }
+        
+        // Валидация размера (максимум 2MB для логотипа)
+        const maxSize = 2 * 1024 * 1024; // 2MB
+        if (file.size > maxSize) {
+            this.showError('Логотип слишком большой. Максимальный размер: 2MB');
+            return;
+        }
+        
         const reader = new FileReader();
         reader.onload = (e) => {
             this.logoImage = e.target.result;
             this.updateLogo();
+        };
+        reader.onerror = () => {
+            this.showError('Ошибка при чтении файла логотипа');
         };
         reader.readAsDataURL(file);
     }
@@ -1723,7 +1784,36 @@ class TrinkyApp {
     }
 
     showError(message) {
-        alert(message);
+        // В development показываем alert, в production можно использовать toast
+        if (isDev) {
+            alert(message);
+        } else {
+            // Создаем toast уведомление
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 80px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #f44336;
+                color: white;
+                padding: 16px 24px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                z-index: 10000;
+                max-width: 90%;
+                text-align: center;
+                animation: slideDown 0.3s ease-out;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            // Удаляем через 4 секунды
+            setTimeout(() => {
+                toast.style.animation = 'slideUp 0.3s ease-out';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
     }
 
     // Workout Selector Modal
