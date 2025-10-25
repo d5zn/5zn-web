@@ -87,8 +87,6 @@
                 <div class="tab-nav">
                     <button class="tab-btn active" data-tab="photo">PHOTO</button>
                     <button class="tab-btn" data-tab="data">DATA</button>
-                    <button class="tab-btn" data-tab="logo">LOGO</button>
-                    <button class="tab-btn" data-tab="position">POSITION</button>
                     <button class="tab-btn" data-tab="colors">COLORS</button>
                     <button class="tab-btn" data-tab="ratio">RATIO</button>
                 </div>
@@ -97,28 +95,29 @@
                 <div class="tab-content">
                     <!-- Photo Tab -->
                     <div id="photo-tab" class="tab-panel active">
-                        <button class="action-btn" id="upload-photo-btn">+ Upload Photo</button>
+                        <button class="action-btn" id="upload-photo-btn" style="height: 40px; display: flex; align-items: center; justify-content: center;">Upload Photo</button>
+                        <button class="action-btn" id="mono-toggle-btn" style="height: 40px; margin-top: 8px; display: none; align-items: center; justify-content: center;">Convert to Mono</button>
                     </div>
 
                     <!-- Data Tab -->
                     <div id="data-tab" class="tab-panel">
                         <div class="data-buttons">
-                            <button class="data-btn" data-metric="elevation">Elevation</button>
                             <button class="data-btn active" data-metric="distance">Distance</button>
-                            <button class="data-btn" data-metric="power">Power/Avg</button>
+                            <button class="data-btn" data-metric="elevation">Elevation</button>
                             <button class="data-btn" data-metric="time">Time</button>
                             <button class="data-btn" data-metric="speed">Speed/Avg</button>
                             <button class="data-btn" data-metric="calories">Calories</button>
+                            <button class="data-btn" data-metric="power">Power/Avg</button>
                         </div>
                     </div>
 
-                    <!-- Logo Tab -->
-                    <div id="logo-tab" class="tab-panel">
+                    <!-- Logo Tab - Hidden -->
+                    <div id="logo-tab" class="tab-panel" style="display: none;">
                         <button class="action-btn" id="upload-logo-btn">+ Upload Logo</button>
                     </div>
 
-                    <!-- Position Tab -->
-                    <div id="position-tab" class="tab-panel">
+                    <!-- Position Tab - Hidden -->
+                    <div id="position-tab" class="tab-panel" style="display: none;">
                         <div class="position-controls">
                             <button class="position-btn" data-position="top-left">Top Left</button>
                             <button class="position-btn" data-position="top-right">Top Right</button>

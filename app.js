@@ -9,7 +9,26 @@ class TrinkyApp {
         this.currentTab = 'photo';
         this.currentMetric = 'distance';
         this.backgroundImage = null;
+        this.originalBackgroundImage = null; // Для хранения оригинального изображения
+        this.isMonochrome = false; // Отслеживаем состояние изображения
         this.logoImage = null;
+        
+        // Переменные для управления фоновым изображением
+        this.imageTransform = {
+            x: 0,           // Смещение по X
+            y: 0,           // Смещение по Y
+            scale: 1,       // Масштаб
+            rotation: 0     // Поворот
+        };
+        
+        // Переменные для отслеживания жестов
+        this.touchState = {
+            isDragging: false,
+            isScaling: false,
+            lastTouchDistance: 0,
+            lastTouchCenter: { x: 0, y: 0 },
+            startTouches: []
+        };
         
         this.init();
     }
@@ -36,6 +55,8 @@ class TrinkyApp {
             e.preventDefault();
             this.connectStrava();
         });
+        
+        // Обработчики для управления фоновым изображением будут добавлены в setupCanvas()
         
         // Demo button
         document.getElementById('demo-btn')?.addEventListener('click', () => this.enableDemoMode());
@@ -201,6 +222,12 @@ class TrinkyApp {
             this.ctx = this.canvas.getContext('2d');
             this.resizeCanvas();
             window.addEventListener('resize', () => this.resizeCanvas());
+            
+            // Добавляем обработчики для управления фоновым изображением
+            this.setupImageManipulation();
+            
+            // Обработчики для кнопок фото
+            this.setupPhotoButtons();
         }
     }
 
@@ -458,10 +485,23 @@ class TrinkyApp {
             drawY = (canvasHeight - drawHeight) / 2;
         }
         
-        // Рисуем изображение, заполняющее весь канвас
-        this.ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+        // Применяем трансформации к изображению
+        this.ctx.save();
         
-        // Добавляем полупрозрачную оранжевую подложку для контраста
+        // Применяем смещение и масштаб
+        const centerX = drawX + drawWidth / 2;
+        const centerY = drawY + drawHeight / 2;
+        
+        this.ctx.translate(centerX + this.imageTransform.x, centerY + this.imageTransform.y);
+        this.ctx.scale(this.imageTransform.scale, this.imageTransform.scale);
+        this.ctx.rotate(this.imageTransform.rotation);
+        
+        // Рисуем изображение с учетом трансформаций
+        this.ctx.drawImage(img, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
+        
+        this.ctx.restore();
+        
+        // Добавляем полупрозрачную черную подложку для контраста
         this.drawOrangeOverlay();
         
         console.log('🖼️ Background image drawn to canvas (height-adaptive)');
@@ -472,11 +512,268 @@ class TrinkyApp {
         const canvasWidth = this.canvas.width / (window.devicePixelRatio || 1);
         const canvasHeight = this.canvas.height / (window.devicePixelRatio || 1);
         
-        // Рисуем полупрозрачную оранжевую подложку
-        this.ctx.fillStyle = 'rgba(255, 107, 53, 0.3)'; // Оранжевый с прозрачностью 30%
+        // Рисуем полупрозрачную черную подложку
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.4)'; // Черный с прозрачностью 40%
         this.ctx.fillRect(0, 0, canvasWidth, canvasHeight);
         
-        console.log('🟠 Orange overlay drawn for contrast');
+        console.log('⚫ Black overlay drawn for contrast');
+    }
+
+    setupImageManipulation() {
+        // Обработчики для мыши
+        this.canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e));
+        this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+        this.canvas.addEventListener('mouseup', (e) => this.handleMouseUp(e));
+        this.canvas.addEventListener('wheel', (e) => this.handleWheel(e));
+        
+        // Обработчики для touch
+        this.canvas.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: false });
+        this.canvas.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
+        this.canvas.addEventListener('touchend', (e) => this.handleTouchEnd(e), { passive: false });
+    }
+
+    handleMouseDown(e) {
+        if (!this.backgroundImage) return;
+        
+        this.touchState.isDragging = true;
+        this.touchState.lastTouchCenter = { x: e.clientX, y: e.clientY };
+        e.preventDefault();
+    }
+
+    handleMouseMove(e) {
+        if (!this.touchState.isDragging || !this.backgroundImage) return;
+        
+        const deltaX = e.clientX - this.touchState.lastTouchCenter.x;
+        const deltaY = e.clientY - this.touchState.lastTouchCenter.y;
+        
+        this.imageTransform.x += deltaX;
+        this.imageTransform.y += deltaY;
+        
+        this.touchState.lastTouchCenter = { x: e.clientX, y: e.clientY };
+        
+        this.drawRoute(); // Перерисовываем
+        e.preventDefault();
+    }
+
+    handleMouseUp(e) {
+        this.touchState.isDragging = false;
+        e.preventDefault();
+    }
+
+    handleWheel(e) {
+        if (!this.backgroundImage) return;
+        
+        const scaleFactor = e.deltaY > 0 ? 0.9 : 1.1;
+        this.imageTransform.scale *= scaleFactor;
+        this.imageTransform.scale = Math.max(0.1, Math.min(5, this.imageTransform.scale)); // Ограничиваем масштаб
+        
+        this.drawRoute(); // Перерисовываем
+        e.preventDefault();
+    }
+
+    handleTouchStart(e) {
+        if (!this.backgroundImage) return;
+        
+        this.touchState.startTouches = Array.from(e.touches);
+        
+        if (e.touches.length === 1) {
+            // Один палец - перетаскивание
+            this.touchState.isDragging = true;
+            this.touchState.lastTouchCenter = { 
+                x: e.touches[0].clientX, 
+                y: e.touches[0].clientY 
+            };
+        } else if (e.touches.length === 2) {
+            // Два пальца - масштабирование
+            this.touchState.isScaling = true;
+            this.touchState.isDragging = false;
+            this.touchState.lastTouchDistance = this.getTouchDistance(e.touches);
+            this.touchState.lastTouchCenter = this.getTouchCenter(e.touches);
+        }
+        
+        e.preventDefault();
+    }
+
+    handleTouchMove(e) {
+        if (!this.backgroundImage) return;
+        
+        if (this.touchState.isDragging && e.touches.length === 1) {
+            // Перетаскивание одним пальцем
+            const deltaX = e.touches[0].clientX - this.touchState.lastTouchCenter.x;
+            const deltaY = e.touches[0].clientY - this.touchState.lastTouchCenter.y;
+            
+            this.imageTransform.x += deltaX;
+            this.imageTransform.y += deltaY;
+            
+            this.touchState.lastTouchCenter = { 
+                x: e.touches[0].clientX, 
+                y: e.touches[0].clientY 
+            };
+            
+            this.drawRoute(); // Перерисовываем
+        } else if (this.touchState.isScaling && e.touches.length === 2) {
+            // Масштабирование двумя пальцами
+            const currentDistance = this.getTouchDistance(e.touches);
+            const scaleFactor = currentDistance / this.touchState.lastTouchDistance;
+            
+            this.imageTransform.scale *= scaleFactor;
+            this.imageTransform.scale = Math.max(0.1, Math.min(5, this.imageTransform.scale)); // Ограничиваем масштаб
+            
+            this.touchState.lastTouchDistance = currentDistance;
+            this.touchState.lastTouchCenter = this.getTouchCenter(e.touches);
+            
+            this.drawRoute(); // Перерисовываем
+        }
+        
+        e.preventDefault();
+    }
+
+    handleTouchEnd(e) {
+        this.touchState.isDragging = false;
+        this.touchState.isScaling = false;
+        e.preventDefault();
+    }
+
+    getTouchDistance(touches) {
+        if (touches.length < 2) return 0;
+        
+        const dx = touches[0].clientX - touches[1].clientX;
+        const dy = touches[0].clientY - touches[1].clientY;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    getTouchCenter(touches) {
+        if (touches.length === 0) return { x: 0, y: 0 };
+        
+        let x = 0, y = 0;
+        for (let touch of touches) {
+            x += touch.clientX;
+            y += touch.clientY;
+        }
+        
+        return {
+            x: x / touches.length,
+            y: y / touches.length
+        };
+    }
+
+    setupPhotoButtons() {
+        // Обработчик для переключаемой кнопки
+        document.getElementById('mono-toggle-btn')?.addEventListener('click', () => {
+            if (this.isMonochrome) {
+                this.returnToOriginal();
+            } else {
+                this.convertToMono();
+            }
+        });
+    }
+
+    convertToMono() {
+        if (!this.backgroundImage) {
+            console.log('⚠️ No background image to convert');
+            return;
+        }
+        
+        // Создаем canvas для обработки изображения
+        const tempCanvas = document.createElement('canvas');
+        const tempCtx = tempCanvas.getContext('2d');
+        
+        const img = new Image();
+        img.onload = () => {
+            tempCanvas.width = img.width;
+            tempCanvas.height = img.height;
+            
+            // Рисуем изображение
+            tempCtx.drawImage(img, 0, 0);
+            
+            // Получаем данные пикселей
+            const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+            const data = imageData.data;
+            
+            // Конвертируем в драматичный моно стиль с высоким контрастом
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i];
+                const g = data[i + 1];
+                const b = data[i + 2];
+                
+                // Используем формулу для получения яркости
+                let gray = Math.round(0.299 * r + 0.587 * g + 0.114 * b);
+                
+                // Драматичный моно эффект
+                gray = gray / 255; // Нормализуем к 0-1
+                
+                // Применяем S-образную кривую для драматичного контраста
+                if (gray < 0.5) {
+                    // Усиливаем тени - делаем их еще темнее
+                    gray = Math.pow(gray * 2, 1.5) / 2;
+                } else {
+                    // Усиливаем светлые области - делаем их еще ярче
+                    gray = 0.5 + Math.pow((gray - 0.5) * 2, 0.6) / 2;
+                }
+                
+                // Дополнительное усиление контраста
+                gray = Math.pow(gray, 0.8);
+                
+                // Применяем тональную кривую для драматичного эффекта
+                gray = gray * gray * (3 - 2 * gray); // S-образная кривая
+                
+                gray = Math.round(gray * 255); // Возвращаем к 0-255
+                
+                // Ограничиваем значения
+                gray = Math.max(0, Math.min(255, gray));
+                
+                data[i] = gray;     // Red
+                data[i + 1] = gray; // Green
+                data[i + 2] = gray; // Blue
+                // Alpha остается без изменений
+            }
+            
+            // Применяем изменения
+            tempCtx.putImageData(imageData, 0, 0);
+            
+            // Сохраняем как новое фоновое изображение
+            this.backgroundImage = tempCanvas.toDataURL('image/png');
+            
+            // Обновляем состояние
+            this.isMonochrome = true;
+            this.updateMonoButton();
+            
+            // Перерисовываем
+            this.drawRoute();
+            
+            console.log('🖤 Image converted to monochrome');
+        };
+        img.src = this.backgroundImage;
+    }
+
+    returnToOriginal() {
+        if (!this.originalBackgroundImage) {
+            console.log('⚠️ No original image to return to');
+            return;
+        }
+        
+        // Возвращаем оригинальное изображение
+        this.backgroundImage = this.originalBackgroundImage;
+        
+        // Обновляем состояние
+        this.isMonochrome = false;
+        this.updateMonoButton();
+        
+        // Перерисовываем
+        this.drawRoute();
+        
+        console.log('🔄 Returned to original image');
+    }
+
+    updateMonoButton() {
+        const monoBtn = document.getElementById('mono-toggle-btn');
+        if (!monoBtn) return;
+        
+        if (this.isMonochrome) {
+            monoBtn.textContent = 'Return to Original';
+        } else {
+            monoBtn.textContent = 'Convert to Mono';
+        }
     }
 
     drawBackground() {
@@ -1018,7 +1315,18 @@ class TrinkyApp {
         const reader = new FileReader();
         reader.onload = (e) => {
             this.backgroundImage = e.target.result;
+            this.originalBackgroundImage = e.target.result; // Сохраняем оригинал
+            this.isMonochrome = false; // Сбрасываем состояние
+            this.updateMonoButton(); // Обновляем кнопку
             this.updateBackground();
+            
+            // Показываем кнопку монохром
+            const monoBtn = document.getElementById('mono-toggle-btn');
+            if (monoBtn) {
+                monoBtn.style.display = 'flex';
+                monoBtn.style.alignItems = 'center';
+                monoBtn.style.justifyContent = 'center';
+            }
         };
         reader.readAsDataURL(file);
     }
