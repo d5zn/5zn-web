@@ -1648,6 +1648,19 @@ class TrinkyApp {
                     console.log(`Button ${index}:`, btn.id, btn.className, btn.textContent?.trim());
                 });
                 
+                // Проверим навигацию более детально
+                const navbar = document.querySelector('.navbar');
+                const navContainer = document.querySelector('.nav-container');
+                const navActions = document.querySelector('.nav-actions');
+                
+                console.log('🔍 Navigation structure:', {
+                    navbar: !!navbar,
+                    navContainer: !!navContainer,
+                    navActions: !!navActions,
+                    navbarHTML: navbar?.innerHTML?.substring(0, 200),
+                    navActionsHTML: navActions?.innerHTML?.substring(0, 200)
+                });
+                
                 if (navActions) {
                     navActions.style.display = 'flex';
                     navActions.style.visibility = 'visible';
