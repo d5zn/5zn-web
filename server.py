@@ -17,8 +17,8 @@ class TrinkyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
         self.send_header('Access-Control-Allow-Headers', 'Content-Type')
         
-        # Disable CSP for development (remove in production)
-        # self.send_header('Content-Security-Policy', "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline';")
+        # CSP for development - allow everything
+        self.send_header('Content-Security-Policy', "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline'; img-src * data: blob:; connect-src *;")
         
         # Prevent caching for development
         self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0')

@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <!-- CSP disabled for development -->
+    <meta name="description" content="5zn-web - Web application for 5zn project">
+    <meta name="keywords" content="5zn, web, application, mobile, responsive">
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; script-src * 'unsafe-inline' 'unsafe-eval' 'unsafe-hashes'; style-src * 'unsafe-inline'; img-src * data: blob:; connect-src *; object-src *; media-src *; font-src *; worker-src *; manifest-src *; form-action *; base-uri *;">
     <title>5zn.io</title>
-    <!-- Google Fonts removed for development -->
-    <link rel="stylesheet" href="styles.css?v=3">
+    <link rel="stylesheet" href="styles.css?v=8">
 </head>
 <body>
     <div class="mobile-container aspect-9-16" id="mobile-container">
@@ -17,9 +18,22 @@
                     <h1>5zn.io</h1>
                 </div>
                 <div class="nav-actions">
-                    <span class="aspect-indicator" id="aspect-indicator">9:16</span>
-                    <button class="nav-btn">📤</button>
-                    <button class="nav-btn">📤</button>
+                    <button class="nav-btn" title="Select Workout" id="workout-selector-btn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 6h18"/>
+                            <path d="M3 12h18"/>
+                            <path d="M3 18h18"/>
+                        </svg>
+                    </button>
+                    <button class="nav-btn" title="Share" id="share-btn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="18" cy="5" r="3"/>
+                            <circle cx="6" cy="12" r="3"/>
+                            <circle cx="18" cy="19" r="3"/>
+                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                        </svg>
+                    </button>
                 </div>
             </div>
         </nav>
@@ -138,6 +152,22 @@
         </div>
     </main>
 
+    <!-- Workout Selector Modal -->
+    <div id="workout-selector-modal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Select Workout</h3>
+                <button class="modal-close" id="close-workout-selector">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="workout-list" class="workout-list">
+                    <!-- Workouts will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Hidden File Inputs -->
     <input type="file" id="photo-input" accept="image/*" style="display: none;">
     <input type="file" id="logo-input" accept="image/*" style="display: none;">
@@ -145,8 +175,8 @@
         </div> <!-- Close mobile-container -->
     </main>
 
-    <script src="config.js?v=3"></script>
-    <script src="app.js?v=3"></script>
+    <script src="config.js?v=10"></script>
+    <script src="app.js?v=10"></script>
     
     <!-- Debug script -->
     <script>
@@ -160,6 +190,23 @@
                 notConnected.classList.remove('hidden');
             }
         }, 2000);
+        
+        // Mobile debug
+        console.log('📱 Mobile debug started');
+        console.log('Viewport:', window.innerWidth, 'x', window.innerHeight);
+        console.log('User agent:', navigator.userAgent);
+        
+        // Force mobile display on load
+        window.addEventListener('load', () => {
+            console.log('📱 Page loaded, forcing mobile display');
+            const container = document.getElementById('mobile-container');
+            if (container) {
+                container.style.width = '100vw';
+                container.style.height = '100vh';
+                container.style.display = 'flex';
+                container.style.flexDirection = 'column';
+            }
+        });
     </script>
 </body>
 </html>

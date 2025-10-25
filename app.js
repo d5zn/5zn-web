@@ -20,15 +20,29 @@ class TrinkyApp {
         this.setupCanvas();
         this.setupTabs();
         this.initializeRatio();
+        this.setupMobileOptimizations();
         this.checkAuthStatus();
+        
+        // Force display after initialization
+        setTimeout(() => {
+            this.forceMobileDisplay();
+        }, 100);
     }
 
     setupEventListeners() {
         // Connect Strava button
         document.getElementById('connect-strava-btn')?.addEventListener('click', () => this.connectStrava());
+        document.getElementById('connect-strava-btn')?.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            this.connectStrava();
+        });
         
         // Demo button
         document.getElementById('demo-btn')?.addEventListener('click', () => this.enableDemoMode());
+        document.getElementById('demo-btn')?.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            this.enableDemoMode();
+        });
         
         // File uploads
         document.getElementById('upload-photo-btn')?.addEventListener('click', () => {
@@ -45,6 +59,27 @@ class TrinkyApp {
         
         document.getElementById('logo-input')?.addEventListener('change', (e) => {
             this.handleLogoUpload(e.target.files[0]);
+        });
+        
+        // Nav buttons
+        document.getElementById('workout-selector-btn')?.addEventListener('click', () => {
+            this.openWorkoutSelector();
+        });
+        
+        document.getElementById('share-btn')?.addEventListener('click', () => {
+            this.shareData();
+        });
+        
+        // Modal close
+        document.getElementById('close-workout-selector')?.addEventListener('click', () => {
+            this.closeWorkoutSelector();
+        });
+        
+        // Close modal on backdrop click
+        document.getElementById('workout-selector-modal')?.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal-backdrop')) {
+                this.closeWorkoutSelector();
+            }
         });
     }
 
@@ -95,6 +130,78 @@ class TrinkyApp {
         this.setRatio('9:16');
     }
 
+    setupMobileOptimizations() {
+        // Force mobile display
+        this.forceMobileDisplay();
+        
+        // Handle orientation changes
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                this.resizeCanvas();
+                this.forceMobileDisplay();
+            }, 100);
+        });
+        
+        // Handle viewport changes
+        window.addEventListener('resize', () => {
+            this.resizeCanvas();
+            this.forceMobileDisplay();
+        });
+        
+        // Prevent zoom on double tap for mobile
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', (e) => {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+        
+        // Prevent context menu on long press
+        document.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+        });
+    }
+
+    forceMobileDisplay() {
+        const container = document.getElementById('mobile-container');
+        const mainContent = document.querySelector('.main-content');
+        const connectedState = document.getElementById('connected');
+        const notConnected = document.getElementById('not-connected');
+        
+        if (container) {
+            container.style.width = '100vw';
+            container.style.height = '100vh';
+            container.style.maxWidth = '100vw';
+            container.style.maxHeight = '100vh';
+            container.style.display = 'flex';
+            container.style.flexDirection = 'column';
+        }
+        
+        if (mainContent) {
+            mainContent.style.display = 'flex';
+            mainContent.style.flexDirection = 'column';
+            mainContent.style.height = 'calc(100vh - 60px - 160px)';
+            mainContent.style.marginTop = '60px';
+            mainContent.style.marginBottom = '160px';
+        }
+        
+        if (connectedState) {
+            connectedState.style.display = 'flex';
+            connectedState.style.flexDirection = 'column';
+            connectedState.style.height = '100%';
+        }
+        
+        if (notConnected) {
+            notConnected.style.display = 'flex';
+            notConnected.style.flexDirection = 'column';
+            notConnected.style.height = '100%';
+        }
+        
+        console.log('🔧 Mobile display forced');
+    }
+
     setupCanvas() {
         this.canvas = document.getElementById('route-canvas');
         if (this.canvas) {
@@ -110,8 +217,19 @@ class TrinkyApp {
         const container = this.canvas.parentElement;
         const rect = container.getBoundingClientRect();
         
-        this.canvas.width = rect.width;
-        this.canvas.height = rect.height;
+        // Get device pixel ratio for crisp rendering on mobile
+        const dpr = window.devicePixelRatio || 1;
+        
+        // Set display size
+        this.canvas.style.width = rect.width + 'px';
+        this.canvas.style.height = rect.height + 'px';
+        
+        // Set actual canvas size with DPR
+        this.canvas.width = rect.width * dpr;
+        this.canvas.height = rect.height * dpr;
+        
+        // Scale context for crisp rendering
+        this.ctx.scale(dpr, dpr);
         
         if (this.currentWorkout) {
             this.drawRoute();
@@ -278,9 +396,14 @@ class TrinkyApp {
             const t = i / numPoints;
             const x = padding + (width - 2 * padding) * t;
             const y = padding + (height - 2 * padding) * (0.5 + 0.3 * Math.sin(t * Math.PI * 3) + 0.2 * Math.sin(t * Math.PI * 7));
-            points.push({ x, y });
+            
+            // Ensure valid coordinates
+            if (!isNaN(x) && !isNaN(y) && isFinite(x) && isFinite(y)) {
+                points.push({ x: Math.round(x), y: Math.round(y) });
+            }
         }
         
+        console.log('Generated', points.length, 'valid points');
         return points;
     }
 
@@ -334,7 +457,8 @@ class TrinkyApp {
         // Find first valid point
         let firstValidPoint = null;
         for (let i = start; i < end; i++) {
-            if (points[i] && typeof points[i].x === 'number' && typeof points[i].y === 'number') {
+            if (points[i] && typeof points[i].x === 'number' && typeof points[i].y === 'number' && 
+                !isNaN(points[i].x) && !isNaN(points[i].y)) {
                 firstValidPoint = points[i];
                 break;
             }
@@ -342,13 +466,18 @@ class TrinkyApp {
         
         if (!firstValidPoint) {
             console.log('No valid points found in segment');
+            // Draw a simple fallback line
+            this.ctx.moveTo(50, 50);
+            this.ctx.lineTo(100, 100);
+            this.ctx.stroke();
             return;
         }
         
         this.ctx.moveTo(firstValidPoint.x, firstValidPoint.y);
         
         for (let i = start + 1; i < end; i++) {
-            if (points[i] && typeof points[i].x === 'number' && typeof points[i].y === 'number') {
+            if (points[i] && typeof points[i].x === 'number' && typeof points[i].y === 'number' &&
+                !isNaN(points[i].x) && !isNaN(points[i].y)) {
                 this.ctx.lineTo(points[i].x, points[i].y);
             }
         }
@@ -422,62 +551,52 @@ class TrinkyApp {
         });
         document.querySelector(`[data-ratio="${ratio}"]`).classList.add('active');
         
-        // Update aspect indicator
-        const indicator = document.getElementById('aspect-indicator');
-        if (indicator) {
-            indicator.textContent = ratio;
-        }
         
-        // Log container dimensions for debugging
-        setTimeout(() => {
-            const rect = container.getBoundingClientRect();
-            console.log('Container dimensions:', rect.width, 'x', rect.height);
-            console.log('Container classes:', container.className);
+        // For mobile, use viewport-based sizing instead of fixed dimensions
+        if (window.innerWidth <= 768) {
+            // Mobile: use viewport dimensions
+            container.style.width = '100vw';
+            container.style.height = '100vh';
+            container.style.maxWidth = '100vw';
+            container.style.maxHeight = '100vh';
+            container.style.transform = 'none';
+            container.style.marginLeft = '0';
+            container.style.marginRight = '0';
             
-            // Force container to respect aspect ratio
-            container.style.width = '';
-            container.style.height = '';
-            container.style.maxWidth = '';
-            container.style.maxHeight = '';
-            
-            // Apply fixed dimensions based on ratio
-            let width, height;
-            
-            switch(ratio) {
-                case '9:16':
-                    width = 1920;
-                    height = 1080;
-                    break;
-                case '4:5':
-                    width = 1080;
-                    height = 1350;
-                    break;
-            }
-            
-            container.style.width = `${width}px`;
-            container.style.height = `${height}px`;
-            container.style.maxWidth = `${width}px`;
-            container.style.maxHeight = `${height}px`;
-            
-            // Calculate scale to fit screen
-            const availableWidth = window.innerWidth;
-            const availableHeight = window.innerHeight - 60 - 180; // navbar + panel
-            const scaleX = availableWidth / width;
-            const scaleY = availableHeight / height;
-            const scale = Math.min(scaleX, scaleY, 1); // Don't scale up
-            
-            // Apply scale and center
-            container.style.transform = `scale(${scale})`;
-            container.style.transformOrigin = 'center top';
-            container.style.marginLeft = 'auto';
-            container.style.marginRight = 'auto';
-            
-            console.log('Available space:', availableWidth, 'x', availableHeight);
-            console.log('Applied dimensions:', width, 'x', height, 'scale:', scale);
-            console.log('Final size:', width * scale, 'x', height * scale);
-            
-            this.resizeCanvas();
-        }, 100);
+            console.log('Mobile mode: using viewport dimensions');
+        } else {
+            // Desktop: use aspect ratio with scaling
+            setTimeout(() => {
+                const rect = container.getBoundingClientRect();
+                console.log('Container dimensions:', rect.width, 'x', rect.height);
+                
+                // Apply fixed dimensions based on ratio
+                let width, height;
+                
+                switch(ratio) {
+                    case '9:16':
+                        width = 400;
+                        height = 711;
+                        break;
+                    case '4:5':
+                        width = 400;
+                        height = 500;
+                        break;
+                }
+                
+                container.style.width = `${width}px`;
+                container.style.height = `${height}px`;
+                container.style.maxWidth = `${width}px`;
+                container.style.maxHeight = `${height}px`;
+                container.style.transform = 'none';
+                container.style.marginLeft = 'auto';
+                container.style.marginRight = 'auto';
+                
+                console.log('Desktop mode: applied dimensions', width, 'x', height);
+                
+                this.resizeCanvas();
+            }, 100);
+        }
     }
 
     // File Upload Handlers
@@ -542,6 +661,118 @@ class TrinkyApp {
 
     showError(message) {
         alert(message);
+    }
+
+    // Workout Selector Modal
+    openWorkoutSelector() {
+        const modal = document.getElementById('workout-selector-modal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            this.populateWorkoutList();
+        }
+    }
+
+    closeWorkoutSelector() {
+        const modal = document.getElementById('workout-selector-modal');
+        if (modal) {
+            modal.classList.add('hidden');
+        }
+    }
+
+    populateWorkoutList() {
+        const workoutList = document.getElementById('workout-list');
+        if (!workoutList || !this.workouts.length) {
+            workoutList.innerHTML = '<p style="text-align: center; opacity: 0.7;">No workouts available</p>';
+            return;
+        }
+
+        workoutList.innerHTML = this.workouts.map((workout, index) => `
+            <div class="workout-item ${workout.id === this.currentWorkout?.id ? 'active' : ''}" 
+                 data-workout-id="${workout.id}">
+                <h4 class="workout-name">${workout.name || 'Unnamed Workout'}</h4>
+                <div class="workout-stats">
+                    <div class="workout-stat">
+                        <span class="workout-stat-label">Distance</span>
+                        <span class="workout-stat-value">${this.formatDistance(workout.distance)}</span>
+                    </div>
+                    <div class="workout-stat">
+                        <span class="workout-stat-label">Elevation</span>
+                        <span class="workout-stat-value">${this.formatElevation(workout.total_elevation_gain)}</span>
+                    </div>
+                    <div class="workout-stat">
+                        <span class="workout-stat-label">Time</span>
+                        <span class="workout-stat-value">${this.formatTime(workout.moving_time)}</span>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        // Add click handlers
+        workoutList.querySelectorAll('.workout-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const workoutId = parseInt(item.dataset.workoutId);
+                this.selectWorkout(workoutId);
+            });
+        });
+    }
+
+    selectWorkout(workoutId) {
+        const workout = this.workouts.find(w => w.id === workoutId);
+        if (workout) {
+            this.currentWorkout = workout;
+            this.updateWorkoutDisplay();
+            this.drawRoute();
+            this.closeWorkoutSelector();
+            console.log('🏃 Selected workout:', workout.name);
+        }
+    }
+
+    formatTime(seconds) {
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        
+        if (hours > 0) {
+            return `${hours}h ${minutes}m`;
+        } else {
+            return `${minutes}m`;
+        }
+    }
+
+    // Share functionality
+    shareData() {
+        if (!this.currentWorkout) {
+            this.showError('No workout data to share');
+            return;
+        }
+
+        const shareText = `Check out my workout: ${this.currentWorkout.name || 'Workout'} - ${this.formatDistance(this.currentWorkout.distance)}`;
+        
+        if (navigator.share) {
+            navigator.share({
+                title: '5zn Workout',
+                text: shareText,
+                url: window.location.href
+            }).then(() => {
+                console.log('📤 Shared successfully');
+            }).catch((error) => {
+                console.log('Error sharing:', error);
+                this.fallbackShare(shareText);
+            });
+        } else {
+            this.fallbackShare(shareText);
+        }
+    }
+
+    fallbackShare(text) {
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Workout info copied to clipboard!');
+            }).catch(() => {
+                alert(text);
+            });
+        } else {
+            alert(text);
+        }
     }
 }
 
