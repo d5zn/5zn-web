@@ -1212,10 +1212,11 @@ class TrinkyApp {
         console.log('🗺️ Workout map data:', this.currentWorkout?.map);
         
         // Пытаемся использовать реальные данные маршрута из Strava
-        if (this.currentWorkout?.map?.polyline) {
-            console.log('🗺️ Found polyline data, length:', this.currentWorkout.map.polyline.length);
+        const polylineData = this.currentWorkout?.map?.polyline || this.currentWorkout?.map?.summary_polyline;
+        if (polylineData) {
+            console.log('🗺️ Found polyline data, length:', polylineData.length);
             try {
-                const points = this.decodePolyline(this.currentWorkout.map.polyline, width, height, padding, topPadding);
+                const points = this.decodePolyline(polylineData, width, height, padding, topPadding);
                 console.log('🗺️ Successfully decoded Strava route with', points.length, 'points');
                 return points;
             } catch (error) {
@@ -1615,9 +1616,20 @@ class TrinkyApp {
             
             // Показываем навигационные кнопки
             const navActions = document.querySelector('.nav-actions');
+            const workoutBtn = document.getElementById('workout-selector-btn');
+            const shareBtn = document.getElementById('share-btn');
+            
             if (navActions) {
                 navActions.style.display = 'flex';
-                console.log('✅ Navigation buttons shown');
+                console.log('✅ Navigation container shown');
+            }
+            if (workoutBtn) {
+                workoutBtn.style.display = 'block';
+                console.log('✅ Workout selector button shown');
+            }
+            if (shareBtn) {
+                shareBtn.style.display = 'block';
+                console.log('✅ Share button shown');
             }
             // Принудительно устанавливаем правильные пропорции 9:16
             connected.style.setProperty('aspect-ratio', '9 / 16', 'important');
