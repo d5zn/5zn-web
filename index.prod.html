@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="description" content="5zn-web - Web application for 5zn project">
     <meta name="keywords" content="5zn, web, application, mobile, responsive">
-    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; script-src * 'unsafe-inline' 'unsafe-eval' 'unsafe-hashes'; style-src * 'unsafe-inline'; img-src * data: blob:; connect-src *; object-src *; media-src *; font-src *; worker-src *; manifest-src *; form-action *; base-uri *;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://www.strava.com; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';">
     <title>5zn.io</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.min.css?v=2">
 </head>
 <body>
     <div class="mobile-container" id="mobile-container">
@@ -19,7 +19,29 @@
                     <h1>5zn.io</h1>
                 </div>
                 <div class="nav-actions">
-                             <button id="connect-strava-btn" class="btn btn-primary" style="height: 40px; display: flex; align-items: center; justify-content: center;">Connect Strava</button>
+                    <button class="nav-btn" title="Select Workout" id="workout-selector-btn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 6h18"/>
+                            <path d="M3 12h18"/>
+                            <path d="M3 18h18"/>
+                        </svg>
+                    </button>
+                    <button class="nav-btn" title="Share" id="share-btn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="18" cy="5" r="3"/>
+                            <circle cx="6" cy="12" r="3"/>
+                            <circle cx="18" cy="19" r="3"/>
+                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                        </svg>
+                    </button>
+                    <button class="nav-btn" title="Logout" id="logout-btn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                            <polyline points="16,17 21,12 16,7"/>
+                            <line x1="21" y1="12" x2="9" y2="12"/>
+                        </svg>
+                    </button>
                 </div>
             </div>
         </nav>
@@ -140,6 +162,6 @@
     <input type="file" id="logo-input" accept="image/*" style="display: none;">
 
     <script src="config.prod.js"></script>
-    <script src="app.js"></script>
+    <script src="app.min.js?v=2"></script>
 </body>
 </html>

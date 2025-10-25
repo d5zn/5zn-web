@@ -94,6 +94,11 @@ class TrinkyApp {
             this.shareData();
         });
         
+        // Logout button
+        document.getElementById('logout-btn')?.addEventListener('click', () => {
+            this.logout();
+        });
+        
         // Modal close
         document.getElementById('close-workout-selector')?.addEventListener('click', () => {
             this.closeWorkoutSelector();
@@ -1642,6 +1647,17 @@ class TrinkyApp {
         if (loading) loading.classList.add('hidden');
         if (notConnected) notConnected.classList.remove('hidden');
         if (connected) connected.classList.add('hidden');
+        
+        // Show connect button in nav and hide navigation icons
+        const navActions = document.querySelector('.nav-actions');
+        if (navActions) {
+            navActions.innerHTML = `
+                <button id="connect-strava-btn" class="btn btn-primary" style="height: 40px; display: flex; align-items: center; justify-content: center;">Connect Strava</button>
+            `;
+            
+            // Re-add event listener for connect button
+            document.getElementById('connect-strava-btn')?.addEventListener('click', () => this.connectStrava());
+        }
     }
 
     showConnectedState() {
@@ -1695,12 +1711,48 @@ class TrinkyApp {
                 const navActions = document.querySelector('.nav-actions');
                 const workoutBtn = document.getElementById('workout-selector-btn');
                 const shareBtn = document.getElementById('share-btn');
+                const logoutBtn = document.getElementById('logout-btn');
                 
                 console.log('🔍 Navigation elements found (with delay):', {
                     navActions: !!navActions,
                     workoutBtn: !!workoutBtn,
-                    shareBtn: !!shareBtn
+                    shareBtn: !!shareBtn,
+                    logoutBtn: !!logoutBtn
                 });
+                
+                // Show all navigation icons when connected
+                if (navActions) {
+                    navActions.innerHTML = `
+                        <button class="nav-btn" title="Select Workout" id="workout-selector-btn">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 6h18"/>
+                                <path d="M3 12h18"/>
+                                <path d="M3 18h18"/>
+                            </svg>
+                        </button>
+                        <button class="nav-btn" title="Share" id="share-btn">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="18" cy="5" r="3"/>
+                                <circle cx="6" cy="12" r="3"/>
+                                <circle cx="18" cy="19" r="3"/>
+                                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                            </svg>
+                        </button>
+                        <button class="nav-btn" title="Logout" id="logout-btn">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                                <polyline points="16,17 21,12 16,7"/>
+                                <line x1="21" y1="12" x2="9" y2="12"/>
+                            </svg>
+                        </button>
+                    `;
+                    
+                    // Re-add event listeners
+                    document.getElementById('workout-selector-btn')?.addEventListener('click', () => this.openWorkoutSelector());
+                    document.getElementById('share-btn')?.addEventListener('click', () => this.shareData());
+                    document.getElementById('logout-btn')?.addEventListener('click', () => this.logout());
+                }
                 
                 // Попробуем альтернативные селекторы
                 const allButtons = document.querySelectorAll('button');
@@ -1712,7 +1764,7 @@ class TrinkyApp {
                 // Проверим навигацию более детально
                 const navbar = document.querySelector('.navbar');
                 const navContainer = document.querySelector('.nav-container');
-                const navActions = document.querySelector('.nav-actions');
+                // navActions уже объявлена выше в этом блоке
                 
                 console.log('🔍 Navigation structure:', {
                     navbar: !!navbar,
@@ -1943,6 +1995,43 @@ class TrinkyApp {
         } else {
             alert(text);
         }
+    }
+
+    logout() {
+        // Clear Strava token
+        localStorage.removeItem('strava_token');
+        
+        // Reset app state
+        this.stravaToken = null;
+        this.currentWorkout = null;
+        this.workouts = [];
+        
+        // Hide connected state and show not connected state
+        document.getElementById('connected')?.classList.add('hidden');
+        document.getElementById('not-connected')?.classList.remove('hidden');
+        
+        // Show connect button in nav
+        const navActions = document.querySelector('.nav-actions');
+        if (navActions) {
+            navActions.innerHTML = `
+                <button id="connect-strava-btn" class="btn btn-primary" style="height: 40px; display: flex; align-items: center; justify-content: center;">Connect Strava</button>
+            `;
+            
+            // Re-add event listener for connect button
+            document.getElementById('connect-strava-btn')?.addEventListener('click', () => this.connectStrava());
+        }
+        
+        // Clear canvas
+        if (this.canvas && this.ctx) {
+            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        }
+        
+        // Reset background image
+        this.backgroundImage = null;
+        this.originalBackgroundImage = null;
+        this.isMonochrome = false;
+        
+        console.log('Logged out successfully');
     }
 
     // Export functionality with proper 1080x1920 resolution

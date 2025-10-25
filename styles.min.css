@@ -252,6 +252,7 @@ html, body {
     max-width: 100%;
     max-height: 100%;
     margin: 0 auto;
+    text-align: center;
 }
 
 /* Connected State с ratio 9:16 */
@@ -277,10 +278,12 @@ html, body {
     display: block;
     width: 100%;
     height: 100%;
-    margin: 0;
+    margin: 0 auto;
     padding: 0;
     border: none;
     outline: none;
+    object-fit: contain;
+    object-position: center;
     /* Шашечки как в фоторедакторах - показываются только когда нет фона */
     background: 
         linear-gradient(45deg, #2a2a2a 25%, transparent 25%),
@@ -1018,4 +1021,27 @@ button:focus,
 /* Smooth Transitions */
 * {
     transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Toast Animation */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px);
+    }
 }
