@@ -1208,13 +1208,21 @@ class TrinkyApp {
     }
 
     generateStravaRoute(width, height, padding, topPadding = 0) {
+        console.log('🗺️ Generating route for workout:', this.currentWorkout?.name);
+        console.log('🗺️ Workout map data:', this.currentWorkout?.map);
+        
         // Пытаемся использовать реальные данные маршрута из Strava
         if (this.currentWorkout?.map?.polyline) {
+            console.log('🗺️ Found polyline data, length:', this.currentWorkout.map.polyline.length);
             try {
-                return this.decodePolyline(this.currentWorkout.map.polyline, width, height, padding, topPadding);
+                const points = this.decodePolyline(this.currentWorkout.map.polyline, width, height, padding, topPadding);
+                console.log('🗺️ Successfully decoded Strava route with', points.length, 'points');
+                return points;
             } catch (error) {
                 console.warn('Failed to decode Strava polyline, using fallback:', error);
             }
+        } else {
+            console.log('🗺️ No polyline data found, using demo route');
         }
         
         // Fallback к демо маршруту если нет данных Strava
@@ -1592,11 +1600,25 @@ class TrinkyApp {
             notConnected.classList.add('hidden');
             notConnected.style.display = 'none';
             console.log('✅ Not connected hidden');
+            
+            // Принудительно скрываем кнопку Connect Strava
+            const connectBtn = document.getElementById('connect-strava-btn');
+            if (connectBtn) {
+                connectBtn.style.display = 'none';
+                console.log('✅ Connect button hidden');
+            }
         }
         if (connected) {
             connected.classList.remove('hidden');
             connected.style.display = 'block';
             console.log('✅ Connected shown');
+            
+            // Показываем навигационные кнопки
+            const navActions = document.querySelector('.nav-actions');
+            if (navActions) {
+                navActions.style.display = 'flex';
+                console.log('✅ Navigation buttons shown');
+            }
             // Принудительно устанавливаем правильные пропорции 9:16
             connected.style.setProperty('aspect-ratio', '9 / 16', 'important');
             connected.style.setProperty('max-height', '100%', 'important');
