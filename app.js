@@ -1525,14 +1525,17 @@ class TrinkyApp {
         
         if (loading) {
             loading.classList.add('hidden');
+            loading.style.display = 'none';
             console.log('✅ Loading hidden');
         }
         if (notConnected) {
             notConnected.classList.add('hidden');
+            notConnected.style.display = 'none';
             console.log('✅ Not connected hidden');
         }
         if (connected) {
             connected.classList.remove('hidden');
+            connected.style.display = 'block';
             console.log('✅ Connected shown');
             // Принудительно устанавливаем правильные пропорции 9:16
             connected.style.setProperty('aspect-ratio', '9 / 16', 'important');
@@ -1558,6 +1561,10 @@ class TrinkyApp {
                 console.log('🔄 Force refresh after connected state');
                 this.updateWorkoutDisplay();
                 this.drawRoute();
+                
+                // Принудительно обновляем DOM
+                document.body.offsetHeight; // Force reflow
+                console.log('🔄 DOM forced reflow');
             }, 200);
         }
     }
