@@ -2,15 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=1080, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="description" content="5zn-web - Web application for 5zn project">
     <meta name="keywords" content="5zn, web, application, mobile, responsive">
     <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; script-src * 'unsafe-inline' 'unsafe-eval' 'unsafe-hashes'; style-src * 'unsafe-inline'; img-src * data: blob:; connect-src *; object-src *; media-src *; font-src *; worker-src *; manifest-src *; form-action *; base-uri *;">
     <title>5zn.io</title>
-    <link rel="stylesheet" href="styles.css?v=29">
+    <link rel="stylesheet" href="styles.css?v=53">
 </head>
 <body>
-    <div class="mobile-container aspect-9-16" id="mobile-container">
+    <div class="mobile-container" id="mobile-container">
         <!-- Navigation Bar -->
         <nav class="navbar">
             <div class="nav-container">
@@ -38,26 +38,22 @@
             </div>
         </nav>
 
-        <!-- Main Content -->
-        <main class="main-content">
-        <!-- Not Connected State -->
-        <div id="not-connected" class="state-container">
-            <div class="state-card">
-                <h2>Connect to Strava</h2>
-                <p>Visualize your cycling routes and workout data.</p>
-                <button id="connect-strava-btn" class="btn btn-primary">Connect with Strava</button>
-                <button id="demo-btn" class="btn" style="margin-top: 1rem;">Try Demo Mode</button>
-            </div>
-        </div>
-
-        <!-- Connected State -->
-        <div id="connected" class="connected-state hidden">
-            <!-- Viewport Container -->
-            <div class="viewport-container">
-                <!-- Preview Area -->
-                <div class="preview-area">
-                    <canvas id="route-canvas"></canvas>
+        <!-- Preview Area - как в VSCO -->
+        <div class="preview-area ratio-9-16">
+            <!-- Not Connected State -->
+            <div id="not-connected" class="state-container">
+                <div class="state-card">
+                    <h2>Connect to Strava</h2>
+                    <p>Visualize your cycling routes and workout data.</p>
+                    <button id="connect-strava-btn" class="btn btn-primary">Connect with Strava</button>
+                    <button id="demo-btn" class="btn" style="margin-top: 1rem;">Try Demo Mode</button>
                 </div>
+            </div>
+
+            <!-- Connected State - превью как в VSCO -->
+            <div id="connected" class="connected-state ratio-9-16 hidden">
+                <!-- Preview Canvas -->
+                <canvas id="route-canvas"></canvas>
                 
                 <!-- Stats Overlay -->
                 <div class="stats-overlay">
@@ -70,10 +66,23 @@
                         <span class="stat-value" id="elevation-value">3 000 m</span>
                     </div>
                 </div>
+                
+                <!-- Bottom Stats Overlay -->
+                <div class="bottom-stats-overlay">
+                    <div class="stat-item">
+                        <span class="stat-label">AVG SPEED</span>
+                        <span class="stat-value" id="speed-value">15.2 km/h</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">TIME</span>
+                        <span class="stat-value" id="time-value">1h 23m</span>
+                    </div>
+                </div>
             </div>
+        </div>
 
-            <!-- Bottom Editing Panel -->
-            <div class="editing-panel">
+        <!-- Bottom Editing Panel -->
+        <div class="editing-panel">
                 <!-- Tab Navigation -->
                 <div class="tab-nav">
                     <button class="tab-btn active" data-tab="photo">PHOTO</button>
@@ -167,11 +176,10 @@
     <input type="file" id="photo-input" accept="image/*" style="display: none;">
     <input type="file" id="logo-input" accept="image/*" style="display: none;">
 
-        </div> <!-- Close mobile-container -->
-    </main>
+    </div> <!-- Close mobile-container -->
 
-    <script src="config.js?v=29"></script>
-    <script src="app.js?v=29"></script>
+    <script src="config.js?v=53"></script>
+    <script src="app.js?v=53"></script>
     
     <!-- Debug script -->
     <script>
@@ -191,15 +199,50 @@
         console.log('Viewport:', window.innerWidth, 'x', window.innerHeight);
         console.log('User agent:', navigator.userAgent);
         
-        // Force mobile display on load
+        // Force VSCO-style display on load с правильной формулой
         window.addEventListener('load', () => {
-            console.log('📱 Page loaded, forcing mobile display');
+            console.log('📱 Page loaded, applying VSCO-style layout with correct formula');
             const container = document.getElementById('mobile-container');
-            if (container) {
-                container.style.width = '100vw';
-                container.style.height = '100vh';
-                container.style.display = 'flex';
-                container.style.flexDirection = 'column';
+            const previewArea = document.querySelector('.preview-area');
+            const connectedState = document.getElementById('connected');
+            
+            if (container && previewArea) {
+                // Правильная формула расчета viewport
+                const screenHeight = window.innerHeight;
+                const navBarHeight = 60;
+                const tabBarHeight = 180;
+                const safeAreaInsets = 0; // для веб-версии
+                
+                const viewportHeight = screenHeight - navBarHeight - tabBarHeight - safeAreaInsets;
+                const viewportWidth = viewportHeight * 9 / 16;
+                
+                // Простая структура как в VSCO
+                container.style.setProperty('width', '100vw', 'important');
+                container.style.setProperty('height', '100vh', 'important');
+                container.style.setProperty('display', 'flex', 'important');
+                container.style.setProperty('flex-direction', 'column', 'important');
+                container.style.setProperty('margin', '0', 'important');
+                container.style.setProperty('padding', '0', 'important');
+                container.style.setProperty('overflow', 'hidden', 'important');
+                
+                // Preview area с правильными размерами
+                previewArea.style.setProperty('width', `${viewportWidth}px`, 'important');
+                previewArea.style.setProperty('height', `${viewportHeight}px`, 'important');
+                previewArea.style.setProperty('max-width', `${viewportWidth}px`, 'important');
+                previewArea.style.setProperty('max-height', `${viewportHeight}px`, 'important');
+                previewArea.style.setProperty('display', 'flex', 'important');
+                previewArea.style.setProperty('align-items', 'center', 'important');
+                previewArea.style.setProperty('justify-content', 'center', 'important');
+                previewArea.style.setProperty('margin', '0 auto', 'important');
+                
+                // Connected state заполняет preview area
+                if (connectedState) {
+                    connectedState.style.setProperty('width', '100%', 'important');
+                    connectedState.style.setProperty('height', '100%', 'important');
+                    connectedState.style.setProperty('aspect-ratio', '9 / 16', 'important');
+                }
+                
+                console.log('📱 Viewport calculated:', viewportWidth, 'x', viewportHeight, 'from screen height:', screenHeight);
             }
         });
     </script>

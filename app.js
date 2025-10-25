@@ -166,40 +166,33 @@ class TrinkyApp {
 
     forceMobileDisplay() {
         const container = document.getElementById('mobile-container');
-        const mainContent = document.querySelector('.main-content');
+        const previewArea = document.querySelector('.preview-area');
         const connectedState = document.getElementById('connected');
-        const notConnected = document.getElementById('not-connected');
         
-        if (container) {
-            container.style.width = '100vw';
-            container.style.height = '100vh';
-            container.style.maxWidth = '100vw';
-            container.style.maxHeight = '100vh';
-            container.style.display = 'flex';
-            container.style.flexDirection = 'column';
+        if (container && previewArea) {
+            // Простая структура: navbar фикс, панель фикс, preview-area растягивается
+            container.style.setProperty('width', '100vw', 'important');
+            container.style.setProperty('height', '100vh', 'important');
+            container.style.setProperty('display', 'flex', 'important');
+            container.style.setProperty('flex-direction', 'column', 'important');
+            container.style.setProperty('margin', '0', 'important');
+            container.style.setProperty('padding', '0', 'important');
+            container.style.setProperty('overflow', 'hidden', 'important');
+            
+            // Preview area просто растягивается
+            previewArea.style.setProperty('flex', '1', 'important');
+            previewArea.style.setProperty('display', 'flex', 'important');
+            previewArea.style.setProperty('align-items', 'center', 'important');
+            previewArea.style.setProperty('justify-content', 'center', 'important');
+            
+            // Connected state заполняет preview area
+            if (connectedState) {
+                connectedState.style.setProperty('width', '100%', 'important');
+                connectedState.style.setProperty('height', '100%', 'important');
+            }
+            
+            console.log('🔧 Простая flex структура установлена');
         }
-        
-        if (mainContent) {
-            mainContent.style.display = 'flex';
-            mainContent.style.flexDirection = 'column';
-            mainContent.style.height = 'calc(100vh - 60px - 160px)';
-            mainContent.style.marginTop = '0';
-            mainContent.style.marginBottom = '160px';
-        }
-        
-        if (connectedState) {
-            connectedState.style.display = 'flex';
-            connectedState.style.flexDirection = 'column';
-            connectedState.style.height = '100%';
-        }
-        
-        if (notConnected) {
-            notConnected.style.display = 'flex';
-            notConnected.style.flexDirection = 'column';
-            notConnected.style.height = '100%';
-        }
-        
-        console.log('🔧 Mobile display forced');
     }
 
     setupCanvas() {
@@ -226,37 +219,15 @@ class TrinkyApp {
         
         console.log('📐 Container dimensions:', containerWidth, 'x', containerHeight);
         
-        // Calculate scale to fit container while maintaining 9:16 aspect ratio
-        const contentAspectRatio = 9 / 16;
-        const containerAspectRatio = containerWidth / containerHeight;
-        
-        let canvasWidth, canvasHeight;
-        
-        if (containerAspectRatio > contentAspectRatio) {
-            // Container is wider than 9:16, scale by height
-            canvasHeight = containerHeight;
-            canvasWidth = containerHeight * contentAspectRatio;
-        } else {
-            // Container is taller than 9:16, scale by width
-            canvasWidth = containerWidth;
-            canvasHeight = containerWidth / contentAspectRatio;
-        }
-        
-        // Ensure canvas doesn't exceed container
-        if (canvasWidth > containerWidth) {
-            canvasWidth = containerWidth;
-            canvasHeight = containerWidth / contentAspectRatio;
-        }
-        if (canvasHeight > containerHeight) {
-            canvasHeight = containerHeight;
-            canvasWidth = containerHeight * contentAspectRatio;
-        }
+        // Use container dimensions directly - container is already scaled properly
+        const canvasWidth = containerWidth;
+        const canvasHeight = containerHeight;
         
         // Set display size to fit container
         this.canvas.style.width = canvasWidth + 'px';
         this.canvas.style.height = canvasHeight + 'px';
         
-        // Set actual canvas size with DPR
+        // Set actual canvas size with DPR for crisp rendering
         this.canvas.width = canvasWidth * dpr;
         this.canvas.height = canvasHeight * dpr;
         
@@ -382,9 +353,13 @@ class TrinkyApp {
 
         const distance = this.formatDistance(this.currentWorkout.distance);
         const elevation = this.formatElevation(this.currentWorkout.total_elevation_gain);
+        const speed = this.formatSpeed(this.currentWorkout.average_speed);
+        const time = this.formatTime(this.currentWorkout.moving_time);
 
         document.getElementById('distance-value').textContent = distance;
         document.getElementById('elevation-value').textContent = elevation;
+        document.getElementById('speed-value').textContent = speed;
+        document.getElementById('time-value').textContent = time;
     }
 
     formatDistance(meters) {
@@ -396,6 +371,12 @@ class TrinkyApp {
 
     formatElevation(meters) {
         return `${meters} m`;
+    }
+
+    formatSpeed(mps) {
+        // Convert m/s to km/h
+        const kmh = mps * 3.6;
+        return `${kmh.toFixed(1)} km/h`;
     }
 
     drawRoute() {
@@ -565,20 +546,6 @@ class TrinkyApp {
     // Ratio Setting
     setRatio(ratio) {
         console.log('Setting ratio:', ratio);
-        const container = document.getElementById('mobile-container');
-        
-        // Remove all aspect ratio classes
-        container.classList.remove('aspect-9-16', 'aspect-4-5');
-        
-        // Add the new aspect ratio class
-        switch(ratio) {
-            case '9:16':
-                container.classList.add('aspect-9-16');
-                break;
-            case '4:5':
-                container.classList.add('aspect-4-5');
-                break;
-        }
         
         // Update active button
         document.querySelectorAll('.ratio-btn').forEach(btn => {
@@ -586,52 +553,37 @@ class TrinkyApp {
         });
         document.querySelector(`[data-ratio="${ratio}"]`).classList.add('active');
         
+        // Update preview-area ratio с правильной формулой
+        const previewArea = document.querySelector('.preview-area');
+        const connectedState = document.getElementById('connected');
         
-        // For mobile, use viewport-based sizing instead of fixed dimensions
-        if (window.innerWidth <= 768) {
-            // Mobile: use viewport dimensions
-            container.style.width = '100vw';
-            container.style.height = '100vh';
-            container.style.maxWidth = '100vw';
-            container.style.maxHeight = '100vh';
-            container.style.transform = 'none';
-            container.style.marginLeft = '0';
-            container.style.marginRight = '0';
+        if (previewArea && connectedState) {
+            // Просто переключаем ratio классы
+            previewArea.classList.remove('ratio-9-16', 'ratio-4-5');
+            connectedState.classList.remove('ratio-9-16', 'ratio-4-5');
             
-            console.log('Mobile mode: using viewport dimensions');
-        } else {
-            // Desktop: use aspect ratio with scaling
-            setTimeout(() => {
-                const rect = container.getBoundingClientRect();
-                console.log('Container dimensions:', rect.width, 'x', rect.height);
-                
-                // Apply fixed dimensions based on ratio
-                let width, height;
-                
-                switch(ratio) {
-                    case '9:16':
-                        width = 400;
-                        height = 711;
-                        break;
-                    case '4:5':
-                        width = 400;
-                        height = 500;
-                        break;
-                }
-                
-                container.style.width = `${width}px`;
-                container.style.height = `${height}px`;
-                container.style.maxWidth = `${width}px`;
-                container.style.maxHeight = `${height}px`;
-                container.style.transform = 'none';
-                container.style.marginLeft = 'auto';
-                container.style.marginRight = 'auto';
-                
-                console.log('Desktop mode: applied dimensions', width, 'x', height);
-                
-                this.resizeCanvas();
-            }, 100);
+            switch(ratio) {
+                case '9:16':
+                    previewArea.classList.add('ratio-9-16');
+                    connectedState.classList.add('ratio-9-16');
+                    connectedState.style.setProperty('aspect-ratio', '9 / 16', 'important');
+                    console.log('🔧 Установлено соотношение 9:16');
+                    break;
+                case '4:5':
+                    previewArea.classList.add('ratio-4-5');
+                    connectedState.classList.add('ratio-4-5');
+                    connectedState.style.setProperty('aspect-ratio', '4 / 5', 'important');
+                    console.log('🔧 Установлено соотношение 4:5');
+                    break;
+            }
         }
+        
+        console.log('🔧 Ratio изменен на:', ratio, '- превью обновлен');
+        
+        // Перерисовываем canvas после изменения соотношения
+        setTimeout(() => {
+            this.resizeCanvas();
+        }, 100);
     }
 
     // File Upload Handlers
@@ -691,7 +643,21 @@ class TrinkyApp {
         
         if (loading) loading.classList.add('hidden');
         if (notConnected) notConnected.classList.add('hidden');
-        if (connected) connected.classList.remove('hidden');
+        if (connected) {
+            connected.classList.remove('hidden');
+            // Принудительно устанавливаем правильные пропорции 9:16
+            connected.style.setProperty('aspect-ratio', '9 / 16', 'important');
+            connected.style.setProperty('max-height', '100%', 'important');
+            connected.style.setProperty('overflow', 'hidden', 'important');
+            connected.style.setProperty('box-sizing', 'border-box', 'important');
+            connected.style.setProperty('width', '100%', 'important');
+            connected.style.setProperty('height', 'auto', 'important');
+            
+            // Просто показываем connected state
+            console.log('🔧 Connected state показан');
+            
+            console.log('🔧 Connected state с правильными пропорциями 9:16');
+        }
     }
 
     showError(message) {
@@ -817,7 +783,7 @@ class TrinkyApp {
             return;
         }
 
-        // Create a new canvas with exact 1080x1920 resolution
+        // Create a new canvas with exact 1080x1920 resolution (оригинальный размер)
         const exportCanvas = document.createElement('canvas');
         exportCanvas.width = 1080;
         exportCanvas.height = 1920;
@@ -827,12 +793,12 @@ class TrinkyApp {
         exportCtx.fillStyle = '#000000';
         exportCtx.fillRect(0, 0, 1080, 1920);
 
-        // Draw route with proper scaling
+        // Draw route with proper scaling for 1080x1920
         const padding = 40;
         const routeWidth = 1080 - (padding * 2);
         const routeHeight = 1920 - (padding * 2) - 200; // Leave space for stats
 
-        // Generate route points for export resolution
+        // Generate route points for export resolution (1080x1920)
         const points = this.generateDemoRoute(routeWidth, routeHeight, 0);
         
         // Draw route with French flag colors
@@ -870,7 +836,7 @@ class TrinkyApp {
         link.href = exportCanvas.toDataURL('image/png');
         link.click();
 
-        console.log('📸 Exported workout image: 1080x1920');
+        console.log('📸 Exported workout image: 1080x1920 (оригинальный размер)');
     }
 
     drawExportPathSegment(ctx, points, start, end, offsetX) {
