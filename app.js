@@ -363,32 +363,51 @@ class TrinkyApp {
     }
 
     async fetchStravaData(endpoint) {
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                resolve({
-                    data: [
-                        {
-                            id: 1,
-                            name: 'Morning Ride',
-                            distance: 15000,
-                            moving_time: 3600,
-                            total_elevation_gain: 500,
-                            average_speed: 4.17,
-                            map: { polyline: 'mock_polyline_data' }
-                        },
-                        {
-                            id: 2,
-                            name: 'Evening Run',
-                            distance: 8000,
-                            moving_time: 2400,
-                            total_elevation_gain: 200,
-                            average_speed: 3.33,
-                            map: { polyline: 'mock_polyline_data_2' }
-                        }
-                    ]
-                });
-            }, 1000);
-        });
+        try {
+            const apiUrl = `https://www.strava.com/api/v3${endpoint}`;
+            const response = await fetch(apiUrl, {
+                headers: {
+                    'Authorization': `Bearer ${this.stravaToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Strava API error: ${response.status} ${response.statusText}`);
+            }
+            
+            const data = await response.json();
+            return { data };
+        } catch (error) {
+            console.error('❌ Strava API error:', error);
+            // Fallback to mock data for development
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve({
+                        data: [
+                            {
+                                id: 1,
+                                name: 'Morning Ride',
+                                distance: 15000,
+                                moving_time: 3600,
+                                total_elevation_gain: 500,
+                                average_speed: 4.17,
+                                map: { polyline: 'mock_polyline_data' }
+                            },
+                            {
+                                id: 2,
+                                name: 'Evening Run',
+                                distance: 8000,
+                                moving_time: 2400,
+                                total_elevation_gain: 200,
+                                average_speed: 3.33,
+                                map: { polyline: 'mock_polyline_data_2' }
+                            }
+                        ]
+                    });
+                }, 1000);
+            });
+        }
     }
 
     updateWorkoutDisplay() {
