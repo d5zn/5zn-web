@@ -1517,10 +1517,23 @@ class TrinkyApp {
         const notConnected = document.getElementById('not-connected');
         const connected = document.getElementById('connected');
         
-        if (loading) loading.classList.add('hidden');
-        if (notConnected) notConnected.classList.add('hidden');
+        console.log('🔍 Elements found:', {
+            loading: !!loading,
+            notConnected: !!notConnected,
+            connected: !!connected
+        });
+        
+        if (loading) {
+            loading.classList.add('hidden');
+            console.log('✅ Loading hidden');
+        }
+        if (notConnected) {
+            notConnected.classList.add('hidden');
+            console.log('✅ Not connected hidden');
+        }
         if (connected) {
             connected.classList.remove('hidden');
+            console.log('✅ Connected shown');
             // Принудительно устанавливаем правильные пропорции 9:16
             connected.style.setProperty('aspect-ratio', '9 / 16', 'important');
             connected.style.setProperty('max-height', '100%', 'important');
@@ -1539,6 +1552,13 @@ class TrinkyApp {
             }, 100);
             
             console.log('🔧 Connected state с правильными пропорциями 9:16');
+            
+            // Принудительно обновляем отображение
+            setTimeout(() => {
+                console.log('🔄 Force refresh after connected state');
+                this.updateWorkoutDisplay();
+                this.drawRoute();
+            }, 200);
         }
     }
 
