@@ -207,23 +207,34 @@ class TrinkyApp {
     resizeCanvas() {
         if (!this.canvas) return;
         
-        const container = this.canvas.parentElement;
-        const rect = container.getBoundingClientRect();
+        // Проверяем текущее соотношение
+        const connectedState = document.getElementById('connected');
+        const is4_5 = connectedState && connectedState.classList.contains('ratio-4-5');
         
         // Get device pixel ratio for crisp rendering on mobile
         const dpr = window.devicePixelRatio || 1;
         
-        // Get actual container dimensions (between navbar and toolbar)
-        const containerWidth = rect.width;
-        const containerHeight = rect.height;
+        let canvasWidth, canvasHeight;
         
-        console.log('📐 Container dimensions:', containerWidth, 'x', containerHeight);
+        if (is4_5) {
+            // Для 4:5 canvas рассчитывается по ширине экрана
+            const screenWidth = window.innerWidth;
+            canvasWidth = screenWidth;
+            canvasHeight = screenWidth * 5 / 4;
+            
+            console.log('📐 4:5 Canvas - calculated from screen width:', canvasWidth, 'x', canvasHeight);
+        } else {
+            // Для 9:16 используем размеры preview-area
+            const previewArea = document.querySelector('.preview-area');
+            const previewRect = previewArea.getBoundingClientRect();
+            
+            canvasWidth = previewRect.width;
+            canvasHeight = previewRect.height;
+            
+            console.log('📐 9:16 Canvas - using preview area:', canvasWidth, 'x', canvasHeight);
+        }
         
-        // Use container dimensions directly - container is already scaled properly
-        const canvasWidth = containerWidth;
-        const canvasHeight = containerHeight;
-        
-        // Set display size to fit container
+        // Set display size
         this.canvas.style.width = canvasWidth + 'px';
         this.canvas.style.height = canvasHeight + 'px';
         
@@ -234,8 +245,7 @@ class TrinkyApp {
         // Scale context for crisp rendering
         this.ctx.scale(dpr, dpr);
         
-        console.log('📐 Canvas resized to fit container:', canvasWidth, 'x', canvasHeight);
-        console.log('📐 Container was:', containerWidth, 'x', containerHeight);
+        console.log('📐 Canvas resized:', canvasWidth, 'x', canvasHeight);
         
         if (this.currentWorkout) {
             this.drawRoute();
@@ -383,7 +393,221 @@ class TrinkyApp {
         if (!this.ctx || !this.currentWorkout) return;
 
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // Рисуем фоновую картинку если есть
+        this.drawBackground();
+        
+        // Рисуем маршрут
         this.drawDemoRoute();
+        
+        // Рисуем данные Strava
+        this.drawStravaData();
+    }
+
+    drawBackground() {
+        if (this.backgroundImage) {
+            const img = new Image();
+            img.onload = () => {
+                // Получаем размеры canvas (уже с учетом DPR)
+                const canvasWidth = this.canvas.width / (window.devicePixelRatio || 1);
+                const canvasHeight = this.canvas.height / (window.devicePixelRatio || 1);
+                
+                const imgAspect = img.width / img.height;
+                const canvasAspect = canvasWidth / canvasHeight;
+                
+                let drawWidth, drawHeight, drawX, drawY;
+                
+                // Адаптируем изображение под высоту канваса (cover по высоте)
+                if (imgAspect > canvasAspect) {
+                    // Изображение шире - масштабируем по высоте и обрезаем по бокам
+                    drawHeight = canvasHeight;
+                    drawWidth = drawHeight * imgAspect;
+                    drawX = (canvasWidth - drawWidth) / 2;
+                    drawY = 0;
+                } else {
+                    // Изображение уже - масштабируем по ширине и обрезаем сверху/снизу
+                    drawWidth = canvasWidth;
+                    drawHeight = drawWidth / imgAspect;
+                    drawX = 0;
+                    drawY = (canvasHeight - drawHeight) / 2;
+                }
+                
+                // Рисуем изображение, заполняющее весь канвас
+                this.ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+                console.log('🖼️ Background image drawn to canvas (height-adaptive)');
+            };
+            img.src = this.backgroundImage;
+        }
+    }
+
+    drawStravaData() {
+        if (!this.currentWorkout) return;
+        
+        const canvasWidth = this.canvas.width;
+        const canvasHeight = this.canvas.height;
+        
+        // Проверяем соотношение для выбора layout
+        const connectedState = document.getElementById('connected');
+        const is4_5 = connectedState && connectedState.classList.contains('ratio-4-5');
+        
+        if (is4_5) {
+            // Для 4:5 используем старый layout
+            this.drawStravaDataOld();
+        } else {
+            // Для 9:16 используем новый layout в стиле карточки
+            this.drawStravaDataCard();
+        }
+    }
+
+    drawStravaDataCard() {
+        const canvasWidth = this.canvas.width;
+        const canvasHeight = this.canvas.height;
+        
+        // Заголовок и дата в верхней части
+        this.ctx.fillStyle = '#FFFFFF';
+        this.ctx.font = 'bold 32px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        this.ctx.textAlign = 'left';
+        this.ctx.fillText('Morning Ride', 20, 50);
+        
+        this.ctx.font = '18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        this.ctx.fillStyle = '#CCCCCC';
+        this.ctx.fillText('25 OCT, 15:30', 20, 80);
+        
+        // Иконка велосипеда справа
+        this.drawBikeIcon(canvasWidth - 60, 30);
+        
+        // График в центральной части
+        this.drawActivityGraph(20, 120, canvasWidth - 40, 200);
+        
+        // Статистики внизу (3x2 сетка)
+        const statsY = 350;
+        const statsHeight = canvasHeight - statsY - 20;
+        const statsWidth = canvasWidth - 40;
+        const colWidth = statsWidth / 3;
+        const rowHeight = statsHeight / 2;
+        
+        const stats = [
+            { label: 'DISTANCE', value: this.formatDistance(this.currentWorkout.distance) },
+            { label: 'ELEVATION', value: this.formatElevation(this.currentWorkout.total_elevation_gain) },
+            { label: 'TIME', value: this.formatTime(this.currentWorkout.moving_time) },
+            { label: 'SPEED/AVG', value: this.formatSpeed(this.currentWorkout.average_speed) },
+            { label: 'CALORIES', value: '1,200' },
+            { label: 'POWER/AVG', value: '180W' }
+        ];
+        
+        for (let i = 0; i < stats.length; i++) {
+            const col = i % 3;
+            const row = Math.floor(i / 3);
+            const x = 20 + col * colWidth;
+            const y = statsY + row * rowHeight;
+            
+            // Label
+            this.ctx.fillStyle = '#AAAAAA';
+            this.ctx.font = '14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+            this.ctx.textAlign = 'left';
+            this.ctx.fillText(stats[i].label, x, y + 20);
+            
+            // Value
+            this.ctx.fillStyle = '#FFFFFF';
+            this.ctx.font = 'bold 20px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+            this.ctx.fillText(stats[i].value, x, y + 45);
+        }
+        
+        console.log('📊 Strava data card drawn to canvas');
+    }
+
+    drawStravaDataOld() {
+        const canvasWidth = this.canvas.width;
+        const canvasHeight = this.canvas.height;
+        
+        // Настройки текста
+        this.ctx.fillStyle = '#FFFFFF';
+        this.ctx.font = 'bold 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        this.ctx.textAlign = 'left';
+        
+        // Верхние данные
+        const distance = this.formatDistance(this.currentWorkout.distance);
+        const elevation = this.formatElevation(this.currentWorkout.total_elevation_gain);
+        
+        this.ctx.fillText('DISTANCE', 20, 40);
+        this.ctx.fillText(distance, 20, 70);
+        
+        this.ctx.textAlign = 'right';
+        this.ctx.fillText('ELEVATION', canvasWidth - 20, 40);
+        this.ctx.fillText(elevation, canvasWidth - 20, 70);
+        
+        // Нижние данные
+        const speed = this.formatSpeed(this.currentWorkout.average_speed);
+        const time = this.formatTime(this.currentWorkout.moving_time);
+        
+        this.ctx.textAlign = 'left';
+        this.ctx.fillText('AVG SPEED', 20, canvasHeight - 50);
+        this.ctx.fillText(speed, 20, canvasHeight - 20);
+        
+        this.ctx.textAlign = 'right';
+        this.ctx.fillText('TIME', canvasWidth - 20, canvasHeight - 50);
+        this.ctx.fillText(time, canvasWidth - 20, canvasHeight - 20);
+        
+        console.log('📊 Strava data old layout drawn to canvas');
+    }
+
+    drawBikeIcon(x, y) {
+        // Простая иконка велосипеда
+        this.ctx.strokeStyle = '#FFFFFF';
+        this.ctx.lineWidth = 3;
+        this.ctx.lineCap = 'round';
+        
+        // Рама велосипеда
+        this.ctx.beginPath();
+        this.ctx.moveTo(x, y + 20);
+        this.ctx.lineTo(x + 15, y + 10);
+        this.ctx.lineTo(x + 25, y + 15);
+        this.ctx.lineTo(x + 30, y + 5);
+        this.ctx.stroke();
+        
+        // Колеса
+        this.ctx.beginPath();
+        this.ctx.arc(x + 5, y + 20, 8, 0, Math.PI * 2);
+        this.ctx.stroke();
+        
+        this.ctx.beginPath();
+        this.ctx.arc(x + 25, y + 15, 8, 0, Math.PI * 2);
+        this.ctx.stroke();
+    }
+
+    drawActivityGraph(x, y, width, height) {
+        // Рисуем график активности (элевация или мощность)
+        this.ctx.strokeStyle = '#FF6B35';
+        this.ctx.lineWidth = 4;
+        this.ctx.lineCap = 'round';
+        this.ctx.lineJoin = 'round';
+        
+        // Создаем точки для графика
+        const points = [];
+        const numPoints = 20;
+        
+        for (let i = 0; i <= numPoints; i++) {
+            const pointX = x + (i / numPoints) * width;
+            const pointY = y + height - (Math.sin(i * 0.3) * 0.5 + 0.5) * height * 0.8;
+            points.push({ x: pointX, y: pointY });
+        }
+        
+        // Рисуем линию графика
+        this.ctx.beginPath();
+        this.ctx.moveTo(points[0].x, points[0].y);
+        
+        for (let i = 1; i < points.length; i++) {
+            this.ctx.lineTo(points[i].x, points[i].y);
+        }
+        
+        this.ctx.stroke();
+        
+        // Добавляем тень
+        this.ctx.strokeStyle = 'rgba(255, 107, 53, 0.3)';
+        this.ctx.lineWidth = 6;
+        this.ctx.globalCompositeOperation = 'multiply';
+        this.ctx.stroke();
+        this.ctx.globalCompositeOperation = 'source-over';
     }
 
     drawDemoRoute() {
@@ -564,16 +788,61 @@ class TrinkyApp {
             
             switch(ratio) {
                 case '9:16':
+                    // Для 9:16 рассчитываем от доступной высоты экрана
+                    const screenHeight = window.innerHeight;
+                    const navBarHeight = 60;
+                    const tabBarHeight = 180;
+                    const safeAreaInsets = 0;
+                    
+                    const viewportHeight9_16 = screenHeight - navBarHeight - tabBarHeight - safeAreaInsets;
+                    const viewportWidth9_16 = viewportHeight9_16 * 9 / 16;
+                    
                     previewArea.classList.add('ratio-9-16');
                     connectedState.classList.add('ratio-9-16');
+                    
+                    // Устанавливаем правильные размеры для preview-area
+                    previewArea.style.setProperty('width', `${viewportWidth9_16}px`, 'important');
+                    previewArea.style.setProperty('height', `${viewportHeight9_16}px`, 'important');
+                    previewArea.style.setProperty('max-width', `${viewportWidth9_16}px`, 'important');
+                    previewArea.style.setProperty('max-height', `${viewportHeight9_16}px`, 'important');
+                    
                     connectedState.style.setProperty('aspect-ratio', '9 / 16', 'important');
-                    console.log('🔧 Установлено соотношение 9:16');
+                    connectedState.style.setProperty('width', '100%', 'important');
+                    connectedState.style.setProperty('height', '100%', 'important');
+                    
+                    console.log('🔧 Установлено соотношение 9:16:', viewportWidth9_16, 'x', viewportHeight9_16);
                     break;
                 case '4:5':
+                    // Для 4:5 контейнер превью остается на своем месте (по высоте)
+                    // А canvas внутри рассчитывается по ширине экрана
+                    const screenHeight4_5 = window.innerHeight;
+                    const screenWidth4_5 = window.innerWidth;
+                    const navBarHeight4_5 = 60;
+                    const tabBarHeight4_5 = 180;
+                    const safeAreaInsets4_5 = 0;
+                    
+                    // Контейнер превью - фиксированная высота (как для 9:16)
+                    const containerHeight4_5 = screenHeight4_5 - navBarHeight4_5 - tabBarHeight4_5 - safeAreaInsets4_5;
+                    
+                    // Canvas для 4:5 - рассчитывается по ширине экрана
+                    const canvasWidth4_5 = screenWidth4_5;
+                    const canvasHeight4_5 = screenWidth4_5 * 5 / 4;
+                    
                     previewArea.classList.add('ratio-4-5');
                     connectedState.classList.add('ratio-4-5');
+                    
+                    // Контейнер превью - остается на своем месте
+                    previewArea.style.setProperty('width', '100%', 'important');
+                    previewArea.style.setProperty('height', `${containerHeight4_5}px`, 'important');
+                    previewArea.style.setProperty('max-width', '100%', 'important');
+                    previewArea.style.setProperty('max-height', `${containerHeight4_5}px`, 'important');
+                    
+                    // Connected state - заполняет контейнер
                     connectedState.style.setProperty('aspect-ratio', '4 / 5', 'important');
-                    console.log('🔧 Установлено соотношение 4:5');
+                    connectedState.style.setProperty('width', '100%', 'important');
+                    connectedState.style.setProperty('height', '100%', 'important');
+                    
+                    console.log('🔧 Установлено соотношение 4:5 - контейнер:', '100% x', containerHeight4_5, 'canvas:', canvasWidth4_5, 'x', canvasHeight4_5);
                     break;
             }
         }
@@ -583,6 +852,7 @@ class TrinkyApp {
         // Перерисовываем canvas после изменения соотношения
         setTimeout(() => {
             this.resizeCanvas();
+            console.log('🔧 Canvas перерисован после изменения соотношения');
         }, 100);
     }
 
@@ -610,13 +880,26 @@ class TrinkyApp {
     }
 
     updateBackground() {
-        const background = document.getElementById('workout-background');
+        // Убираем CSS фон, теперь фон рисуется в canvas
+        const background = document.getElementById('connected');
+        background.style.backgroundImage = 'none';
+        
+        // Управляем шашечками в зависимости от наличия фона
         if (this.backgroundImage) {
-            background.style.backgroundImage = `url(${this.backgroundImage})`;
-            background.style.backgroundSize = 'cover';
-            background.style.backgroundPosition = 'center';
-            background.style.backgroundRepeat = 'no-repeat';
+            this.canvas.classList.add('has-background');
+        } else {
+            this.canvas.classList.remove('has-background');
         }
+        
+        // Обновляем размер canvas
+        this.resizeCanvas();
+        
+        // Перерисовываем canvas с новым фоном
+        if (this.currentWorkout) {
+            this.drawRoute();
+        }
+        
+        console.log('🖼️ Background updated in canvas');
     }
 
     updateLogo() {
@@ -655,6 +938,12 @@ class TrinkyApp {
             
             // Просто показываем connected state
             console.log('🔧 Connected state показан');
+            
+            // Перерисовываем canvas для правильного размера
+            setTimeout(() => {
+                this.resizeCanvas();
+                console.log('🔧 Canvas перерисован при показе connected state');
+            }, 100);
             
             console.log('🔧 Connected state с правильными пропорциями 9:16');
         }
