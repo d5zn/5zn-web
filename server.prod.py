@@ -8,6 +8,7 @@ import http.server
 import socketserver
 import os
 import sys
+import json
 from pathlib import Path
 
 # Configuration
@@ -40,6 +41,11 @@ class ProductionHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         if self.path == '/' or self.path == '/index.html':
             self.path = '/index.prod.html'
         
+        # Serve config with environment variables
+        if self.path == '/config.prod.js':
+            self.serve_config()
+            return
+        
         # Use original files for now (same as development)
         # if self.path == '/styles.css':
         #     self.path = '/styles.min.css'
@@ -48,6 +54,25 @@ class ProductionHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         #     self.path = '/app.min.js'
         
         return super().do_GET()
+    
+    def serve_config(self):
+        """Serve configuration with environment variables"""
+        config = {
+            'STRAVA': {
+                'CLIENT_ID': os.environ.get('STRAVA_CLIENT_ID', 'your_strava_client_id_here'),
+                'CLIENT_SECRET': os.environ.get('STRAVA_CLIENT_SECRET', 'your_strava_client_secret_here'),
+                'REDIRECT_URI': os.environ.get('STRAVA_REDIRECT_URI', 'https://app.5zn.io/oauth/index.html'),
+                'SCOPE': 'read,activity:read_all'
+            }
+        }
+        
+        js_config = f"window.CONFIG = {json.dumps(config)};"
+        
+        self.send_response(200)
+        self.send_header('Content-Type', 'application/javascript')
+        self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
+        self.end_headers()
+        self.wfile.write(js_config.encode('utf-8'))
 
 def main():
     """Start production server"""
