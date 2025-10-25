@@ -43,6 +43,9 @@ class TrinkyApp {
         this.setupMobileOptimizations();
         this.checkAuthStatus();
         
+        // Принудительно показываем навигацию при инициализации
+        this.forceShowNavigation();
+        
         // Force display after initialization
         setTimeout(() => {
             this.forceMobileDisplay();
@@ -1620,7 +1623,10 @@ class TrinkyApp {
                 navbar.style.display = 'flex';
                 navbar.style.visibility = 'visible';
                 navbar.style.opacity = '1';
+                navbar.classList.remove('hidden');
                 console.log('✅ Navbar shown');
+            } else {
+                console.log('❌ Navbar not found!');
             }
             
             // Показываем навигационные кнопки
@@ -1644,13 +1650,23 @@ class TrinkyApp {
                 workoutBtn.style.display = 'block';
                 workoutBtn.style.visibility = 'visible';
                 workoutBtn.style.opacity = '1';
+                workoutBtn.classList.remove('hidden');
+                workoutBtn.style.position = 'relative';
+                workoutBtn.style.zIndex = '9999';
                 console.log('✅ Workout selector button shown');
+            } else {
+                console.log('❌ Workout selector button not found!');
             }
             if (shareBtn) {
                 shareBtn.style.display = 'block';
                 shareBtn.style.visibility = 'visible';
                 shareBtn.style.opacity = '1';
+                shareBtn.classList.remove('hidden');
+                shareBtn.style.position = 'relative';
+                shareBtn.style.zIndex = '9999';
                 console.log('✅ Share button shown');
+            } else {
+                console.log('❌ Share button not found!');
             }
             // Принудительно устанавливаем правильные пропорции 9:16
             connected.style.setProperty('aspect-ratio', '9 / 16', 'important');
