@@ -1629,45 +1629,54 @@ class TrinkyApp {
                 console.log('❌ Navbar not found!');
             }
             
-            // Показываем навигационные кнопки
-            const navActions = document.querySelector('.nav-actions');
-            const workoutBtn = document.getElementById('workout-selector-btn');
-            const shareBtn = document.getElementById('share-btn');
-            
-            console.log('🔍 Navigation elements found:', {
-                navActions: !!navActions,
-                workoutBtn: !!workoutBtn,
-                shareBtn: !!shareBtn
-            });
-            
-            if (navActions) {
-                navActions.style.display = 'flex';
-                navActions.style.visibility = 'visible';
-                navActions.style.opacity = '1';
-                console.log('✅ Navigation container shown');
-            }
-            if (workoutBtn) {
-                workoutBtn.style.display = 'block';
-                workoutBtn.style.visibility = 'visible';
-                workoutBtn.style.opacity = '1';
-                workoutBtn.classList.remove('hidden');
-                workoutBtn.style.position = 'relative';
-                workoutBtn.style.zIndex = '9999';
-                console.log('✅ Workout selector button shown');
-            } else {
-                console.log('❌ Workout selector button not found!');
-            }
-            if (shareBtn) {
-                shareBtn.style.display = 'block';
-                shareBtn.style.visibility = 'visible';
-                shareBtn.style.opacity = '1';
-                shareBtn.classList.remove('hidden');
-                shareBtn.style.position = 'relative';
-                shareBtn.style.zIndex = '9999';
-                console.log('✅ Share button shown');
-            } else {
-                console.log('❌ Share button not found!');
-            }
+            // Показываем навигационные кнопки с задержкой
+            setTimeout(() => {
+                const navActions = document.querySelector('.nav-actions');
+                const workoutBtn = document.getElementById('workout-selector-btn');
+                const shareBtn = document.getElementById('share-btn');
+                
+                console.log('🔍 Navigation elements found (with delay):', {
+                    navActions: !!navActions,
+                    workoutBtn: !!workoutBtn,
+                    shareBtn: !!shareBtn
+                });
+                
+                // Попробуем альтернативные селекторы
+                const allButtons = document.querySelectorAll('button');
+                console.log('🔍 All buttons found:', allButtons.length);
+                allButtons.forEach((btn, index) => {
+                    console.log(`Button ${index}:`, btn.id, btn.className, btn.textContent?.trim());
+                });
+                
+                if (navActions) {
+                    navActions.style.display = 'flex';
+                    navActions.style.visibility = 'visible';
+                    navActions.style.opacity = '1';
+                    console.log('✅ Navigation container shown');
+                }
+                if (workoutBtn) {
+                    workoutBtn.style.display = 'block';
+                    workoutBtn.style.visibility = 'visible';
+                    workoutBtn.style.opacity = '1';
+                    workoutBtn.classList.remove('hidden');
+                    workoutBtn.style.position = 'relative';
+                    workoutBtn.style.zIndex = '9999';
+                    console.log('✅ Workout selector button shown');
+                } else {
+                    console.log('❌ Workout selector button not found!');
+                }
+                if (shareBtn) {
+                    shareBtn.style.display = 'block';
+                    shareBtn.style.visibility = 'visible';
+                    shareBtn.style.opacity = '1';
+                    shareBtn.classList.remove('hidden');
+                    shareBtn.style.position = 'relative';
+                    shareBtn.style.zIndex = '9999';
+                    console.log('✅ Share button shown');
+                } else {
+                    console.log('❌ Share button not found!');
+                }
+            }, 500); // Задержка 500ms
             // Принудительно устанавливаем правильные пропорции 9:16
             connected.style.setProperty('aspect-ratio', '9 / 16', 'important');
             connected.style.setProperty('max-height', '100%', 'important');
