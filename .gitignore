@@ -62,6 +62,16 @@ coverage/
 .env.test.local
 .env.production.local
 
+# Configuration files with secrets
+server_config.py
+config.local.js
+*.local
+
+# User data (privacy sensitive)
+data/
+athletes_data/
+*.json.bak
+
 # Temporary files
 *.tmp
 *.temp
