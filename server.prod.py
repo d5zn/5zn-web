@@ -46,6 +46,11 @@ class ProductionHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.serve_config()
             return
         
+        # Handle Strava token exchange
+        if self.path == '/api/strava/token':
+            self.handle_strava_token()
+            return
+        
         # Use original files for now (same as development)
         # if self.path == '/styles.css':
         #     self.path = '/styles.min.css'
@@ -54,6 +59,13 @@ class ProductionHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         #     self.path = '/app.min.js'
         
         return super().do_GET()
+    
+    def do_POST(self):
+        """Handle POST requests"""
+        if self.path == '/api/strava/token':
+            self.handle_strava_token()
+        else:
+            self.send_error(404, "Not Found")
     
     def serve_config(self):
         """Serve configuration with environment variables"""
@@ -73,6 +85,58 @@ class ProductionHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
         self.end_headers()
         self.wfile.write(js_config.encode('utf-8'))
+    
+    def handle_strava_token(self):
+        """Handle Strava token exchange"""
+        try:
+            # Read request body
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length)
+            data = json.loads(post_data.decode('utf-8'))
+            code = data.get('code')
+            
+            if not code:
+                self.send_error(400, "Missing authorization code")
+                return
+            
+            # Exchange code for token with Strava API
+            client_id = os.environ.get('STRAVA_CLIENT_ID')
+            client_secret = os.environ.get('STRAVA_CLIENT_SECRET')
+            
+            if not client_id or not client_secret:
+                self.send_error(500, "Strava credentials not configured")
+                return
+            
+            import urllib.request
+            import urllib.parse
+            
+            token_data = {
+                'client_id': client_id,
+                'client_secret': client_secret,
+                'code': code,
+                'grant_type': 'authorization_code'
+            }
+            
+            token_url = 'https://www.strava.com/oauth/token'
+            token_request = urllib.request.Request(
+                token_url,
+                data=urllib.parse.urlencode(token_data).encode('utf-8'),
+                headers={'Content-Type': 'application/x-www-form-urlencoded'}
+            )
+            
+            with urllib.request.urlopen(token_request) as response:
+                token_response = json.loads(response.read().decode('utf-8'))
+                
+                # Send token response to client
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps(token_response).encode('utf-8'))
+                
+        except Exception as e:
+            print(f"Token exchange error: {e}")
+            self.send_error(500, f"Token exchange failed: {str(e)}")
 
 def main():
     """Start production server"""

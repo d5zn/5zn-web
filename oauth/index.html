@@ -82,6 +82,43 @@
     </div>
 
     <script>
+        // Exchange authorization code for access token
+        async function exchangeCodeForToken(code) {
+            try {
+                const response = await fetch('/api/strava/token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ code: code })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem('strava_token', data.access_token);
+                    localStorage.setItem('strava_refresh_token', data.refresh_token);
+                    localStorage.setItem('strava_athlete', JSON.stringify(data.athlete));
+                    
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('success').style.display = 'block';
+                    
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 2000);
+                } else {
+                    throw new Error('Token exchange failed');
+                }
+            } catch (error) {
+                console.error('Token exchange error:', error);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+                
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 3000);
+            }
+        }
+        
         // Handle OAuth callback
         const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get('code');
@@ -95,18 +132,8 @@
                 window.location.href = '/';
             }, 3000);
         } else if (code) {
-            // Simulate token exchange
-            setTimeout(() => {
-                localStorage.setItem('strava_token', 'mock_token_' + Date.now());
-                localStorage.setItem('strava_code', code);
-                
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('success').style.display = 'block';
-                
-                setTimeout(() => {
-                    window.location.href = '/';
-                }, 2000);
-            }, 1500);
+            // Exchange code for token
+            exchangeCodeForToken(code);
         } else {
             // No code or error, redirect to main page
             setTimeout(() => {
