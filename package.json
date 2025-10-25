@@ -1,0 +1,33 @@
+{
+  "name": "5zn-web",
+  "version": "1.0.0",
+  "description": "5zn-web - Web application for 5zn project",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 server.py",
+    "serve": "npx serve . -p 8000",
+    "dev": "npx live-server --port=8000 --open=/index.html"
+  },
+  "keywords": [
+    "5zn",
+    "web",
+    "application",
+    "javascript",
+    "html",
+    "css"
+  ],
+  "author": "5zn Team",
+  "license": "MIT",
+  "devDependencies": {
+    "live-server": "^1.2.2",
+    "serve": "^14.2.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/d5zn/5zn-web"
+  },
+  "bugs": {
+    "url": "https://github.com/d5zn/5zn-web/issues"
+  },
+  "homepage": "https://github.com/d5zn/5zn-web"
+}

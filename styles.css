@@ -1,0 +1,604 @@
+/* Mobile-First Minimalist Design */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+body {
+       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #000000;
+    color: #ffffff;
+    min-height: 100vh;
+    font-weight: 300;
+    line-height: 1.4;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+    position: relative;
+}
+
+/* Mobile-first container with proper aspect ratios */
+.mobile-container {
+    width: 100vw;
+    height: 100vh;
+    max-width: 100vw;
+    max-height: 100vh;
+    overflow: hidden;
+    position: relative;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    transform-origin: center top;
+}
+
+/* 9:16 aspect ratio option (default) */
+.aspect-9-16 {
+    width: 1920px;
+    height: 1080px;
+    aspect-ratio: 9/16;
+    max-width: 1920px;
+    max-height: 1080px;
+    margin: 0 auto;
+}
+
+/* 4:5 aspect ratio option */
+.aspect-4-5 {
+    width: 1080px;
+    height: 1350px;
+    aspect-ratio: 4/5;
+    max-width: 1080px;
+    max-height: 1350px;
+    margin: 0 auto;
+}
+
+
+/* Status Bar removed */
+
+/* Navigation */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: #000000;
+    border-bottom: 1px solid #333333;
+    z-index: 1000;
+    padding: 12px 0;
+    margin: 0;
+}
+
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+}
+
+.nav-brand h1 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 1px;
+}
+
+.nav-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.aspect-indicator {
+    font-size: 12px;
+    font-weight: 300;
+    color: #ffffff;
+    opacity: 0.7;
+    padding: 4px 8px;
+    background: #333333;
+    border-radius: 4px;
+}
+
+.nav-btn {
+    background: none;
+    border: none;
+    color: #ffffff;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+    transition: background 0.2s ease;
+}
+
+.nav-btn:hover {
+    background: #333333;
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    height: calc(100vh - 60px - 180px);
+    max-height: calc(100vh - 60px - 180px);
+    margin-top: 60px;
+    margin-bottom: 180px;
+    min-height: calc(100vh - 60px - 180px);
+}
+
+/* State Containers */
+.state-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 200px);
+    padding: 20px;
+}
+
+.state-card {
+    background: #000000;
+    border: 1px solid #333333;
+    padding: 40px 20px;
+    text-align: center;
+    max-width: 300px;
+    width: 100%;
+}
+
+.state-card h2 {
+    font-size: 24px;
+    font-weight: 300;
+    margin-bottom: 16px;
+    color: #ffffff;
+}
+
+.state-card p {
+    opacity: 0.7;
+    line-height: 1.6;
+    margin-bottom: 24px;
+    font-size: 14px;
+}
+
+/* Buttons */
+.btn {
+    padding: 12px 24px;
+    border: 1px solid #ffffff;
+    background: transparent;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 300;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+}
+
+.btn:hover {
+    background: #ffffff;
+    color: #000000;
+}
+
+.btn-primary {
+    background: #ffffff;
+    color: #000000;
+}
+
+.btn-primary:hover {
+    background: #cccccc;
+}
+
+/* Connected State */
+.connected-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.workout-card {
+    flex: 1;
+    background: #111111;
+    border: 1px solid #333333;
+    margin: 0;
+    border-radius: 0;
+    overflow: hidden;
+    position: relative;
+    height: 100%;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.workout-background {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    background: 
+        linear-gradient(45deg, #333333 25%, transparent 25%),
+        linear-gradient(-45deg, #333333 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #333333 75%),
+        linear-gradient(-45deg, transparent 75%, #333333 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    position: relative;
+    background-repeat: no-repeat;
+    background-attachment: local;
+    object-fit: cover;
+    display: flex;
+    flex-direction: column;
+}
+
+.workout-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.overlay-stats {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    display: flex;
+    justify-content: space-between;
+    z-index: 10;
+}
+
+.overlay-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.stat-label {
+    font-size: 12px;
+    font-weight: 300;
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+}
+
+.stat-value {
+    font-size: 18px;
+    font-weight: 300;
+    color: #ffffff;
+}
+
+.route-container {
+    flex: 1;
+    position: relative;
+    margin: 60px 20px 80px;
+    min-height: 0;
+}
+
+#route-canvas {
+    width: 100%;
+    height: 100%;
+    border-radius: 4px;
+}
+
+.workout-footer {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    display: flex;
+    justify-content: space-between;
+    z-index: 10;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    border-radius: 4px;
+}
+
+/* Editing Panel */
+.editing-panel {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 180px;
+    background: #000000;
+    border-top: 1px solid #333333;
+    padding: 0;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+}
+
+.tab-nav {
+    display: flex;
+    background: #000000;
+    border-bottom: 1px solid #333333;
+    flex-shrink: 0;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 12px 8px;
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 300;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tab-btn.active {
+    background: #ffffff;
+    color: #000000;
+}
+
+.tab-btn:hover:not(.active) {
+    background: #333333;
+}
+
+.tab-content {
+    padding: 20px;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.tab-panel {
+    display: none;
+}
+
+.tab-panel.active {
+    display: block;
+}
+
+/* Action Buttons */
+.action-btn {
+    width: 100%;
+    padding: 16px;
+    background: transparent;
+    border: 1px solid #ffffff;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 300;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.action-btn:hover {
+    background: #ffffff;
+    color: #000000;
+}
+
+/* Data Buttons */
+.data-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.data-btn {
+    padding: 12px 8px;
+    background: transparent;
+    border: 1px solid #ffffff;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 300;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.data-btn.active {
+    background: #ffffff;
+    color: #000000;
+}
+
+.data-btn:hover:not(.active) {
+    background: #333333;
+}
+
+/* Position Controls */
+.position-controls {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.position-btn {
+    padding: 12px;
+    background: transparent;
+    border: 1px solid #ffffff;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 300;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.position-btn:hover {
+    background: #ffffff;
+    color: #000000;
+}
+
+/* Color Controls */
+.color-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.color-btn {
+    padding: 12px;
+    background: transparent;
+    border: 1px solid #ffffff;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 300;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.color-btn:hover {
+    background: #ffffff;
+    color: #000000;
+}
+
+/* Ratio Controls */
+.ratio-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.ratio-btn {
+    flex: 1;
+    padding: 12px;
+    background: transparent;
+    border: 1px solid #ffffff;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 300;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.ratio-btn.active {
+    background: #ffffff;
+    color: #000000;
+}
+
+.ratio-btn:hover:not(.active) {
+    background: #333333;
+}
+
+/* Loading State */
+.loading-state {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #333333;
+    border-top: 2px solid #ffffff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 16px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Utility Classes */
+.hidden {
+    display: none !important;
+}
+
+.text-center {
+    text-align: center;
+}
+
+/* Responsive Design */
+@media (min-width: 768px) {
+    .mobile-container {
+        max-width: 400px;
+        margin: 0 auto;
+        border: 1px solid #333333;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    }
+    
+    .workout-card {
+        margin: 0;
+    }
+}
+
+@media (min-width: 1024px) {
+    .mobile-container {
+        max-width: 500px;
+    }
+}
+
+/* Ensure proper mobile viewport */
+@media (max-width: 480px) {
+    .mobile-container {
+        width: 100vw;
+        height: 100vh;
+        max-width: 100vw;
+        max-height: 100vh;
+    }
+    
+    .mobile-container.aspect-9-16 {
+        width: 100vw;
+        height: 177.78vw;
+        max-height: 100vh;
+    }
+    
+    .mobile-container.aspect-4-5 {
+        width: 100vw;
+        height: 125vw;
+        max-height: 100vh;
+    }
+    
+    .mobile-container.aspect-1-1 {
+        width: 100vw;
+        height: 100vw;
+        max-height: 100vh;
+    }
+}
+
+/* Fix for aspect ratio changes */
+.mobile-container.aspect-9-16 {
+    aspect-ratio: 9/16;
+    width: min(100vw, 56.25vh);
+    height: min(177.78vw, 100vh);
+    max-width: 56.25vh;
+    max-height: 100vh;
+}
+
+.mobile-container.aspect-4-5 {
+    aspect-ratio: 4/5;
+    width: min(100vw, 80vh);
+    height: min(125vw, 100vh);
+    max-width: 80vh;
+    max-height: 100vh;
+}
+
+.mobile-container.aspect-1-1 {
+    aspect-ratio: 1/1;
+    width: min(100vw, 100vh);
+    height: min(100vw, 100vh);
+    max-width: 100vh;
+    max-height: 100vh;
+}
+
+/* Focus States */
+button:focus,
+.btn:focus {
+    outline: 1px solid #ffffff;
+    outline-offset: 2px;
+}
+
+/* Selection */
+::selection {
+    background: #ffffff;
+    color: #000000;
+}
+
+/* Smooth Transitions */
+* {
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}

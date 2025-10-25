@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <!-- CSP disabled for development -->
+    <title>5zn.io</title>
+    <!-- Google Fonts removed for development -->
+    <link rel="stylesheet" href="styles.css?v=3">
+</head>
+<body>
+    <div class="mobile-container aspect-9-16" id="mobile-container">
+        <!-- Navigation Bar -->
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="nav-brand">
+                    <h1>5zn.io</h1>
+                </div>
+                <div class="nav-actions">
+                    <span class="aspect-indicator" id="aspect-indicator">9:16</span>
+                    <button class="nav-btn">📤</button>
+                    <button class="nav-btn">📤</button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+        <!-- Not Connected State -->
+        <div id="not-connected" class="state-container">
+            <div class="state-card">
+                <h2>Connect to Strava</h2>
+                <p>Visualize your cycling routes and workout data.</p>
+                <button id="connect-strava-btn" class="btn btn-primary">Connect with Strava</button>
+                <button id="demo-btn" class="btn" style="margin-top: 1rem;">Try Demo Mode</button>
+            </div>
+        </div>
+
+        <!-- Connected State -->
+        <div id="connected" class="connected-state hidden">
+            <!-- Workout Card -->
+            <div class="workout-card">
+                <!-- Background Image Area -->
+                <div class="workout-background" id="workout-background">
+                    <!-- Overlay Stats -->
+                    <div class="workout-overlay">
+                        <div class="overlay-stats">
+                            <div class="overlay-stat">
+                                <span class="stat-label">DISTANCE</span>
+                                <span class="stat-value" id="distance-value">3 000 m</span>
+                            </div>
+                            <div class="overlay-stat">
+                                <span class="stat-label">ELEVATION</span>
+                                <span class="stat-value" id="elevation-value">3 000 m</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Route Canvas -->
+                        <div class="route-container">
+                            <canvas id="route-canvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Editing Panel -->
+            <div class="editing-panel">
+                <!-- Tab Navigation -->
+                <div class="tab-nav">
+                    <button class="tab-btn active" data-tab="photo">PHOTO</button>
+                    <button class="tab-btn" data-tab="data">DATA</button>
+                    <button class="tab-btn" data-tab="logo">LOGO</button>
+                    <button class="tab-btn" data-tab="position">POSITION</button>
+                    <button class="tab-btn" data-tab="colors">COLORS</button>
+                    <button class="tab-btn" data-tab="ratio">RATIO</button>
+                </div>
+
+                <!-- Tab Content -->
+                <div class="tab-content">
+                    <!-- Photo Tab -->
+                    <div id="photo-tab" class="tab-panel active">
+                        <button class="action-btn" id="upload-photo-btn">+ Upload Photo</button>
+                    </div>
+
+                    <!-- Data Tab -->
+                    <div id="data-tab" class="tab-panel">
+                        <div class="data-buttons">
+                            <button class="data-btn" data-metric="elevation">Elevation</button>
+                            <button class="data-btn active" data-metric="distance">Distance</button>
+                            <button class="data-btn" data-metric="power">Power/Avg</button>
+                            <button class="data-btn" data-metric="time">Time</button>
+                            <button class="data-btn" data-metric="speed">Speed/Avg</button>
+                            <button class="data-btn" data-metric="calories">Calories</button>
+                        </div>
+                    </div>
+
+                    <!-- Logo Tab -->
+                    <div id="logo-tab" class="tab-panel">
+                        <button class="action-btn" id="upload-logo-btn">+ Upload Logo</button>
+                    </div>
+
+                    <!-- Position Tab -->
+                    <div id="position-tab" class="tab-panel">
+                        <div class="position-controls">
+                            <button class="position-btn" data-position="top-left">Top Left</button>
+                            <button class="position-btn" data-position="top-right">Top Right</button>
+                            <button class="position-btn" data-position="bottom-left">Bottom Left</button>
+                            <button class="position-btn" data-position="bottom-right">Bottom Right</button>
+                        </div>
+                    </div>
+
+                    <!-- Colors Tab -->
+                    <div id="colors-tab" class="tab-panel">
+                        <div class="color-controls">
+                            <button class="color-btn" data-color="french">French Flag</button>
+                            <button class="color-btn" data-color="gradient">Gradient</button>
+                            <button class="color-btn" data-color="solid">Solid</button>
+                        </div>
+                    </div>
+
+                           <!-- Ratio Tab -->
+                           <div id="ratio-tab" class="tab-panel">
+                               <div class="ratio-controls">
+                                   <button class="ratio-btn active" data-ratio="9:16">9:16</button>
+                                   <button class="ratio-btn" data-ratio="4:5">4:5</button>
+                               </div>
+                           </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading" class="state-container hidden">
+            <div class="state-card">
+                <div class="spinner"></div>
+                <h2>Loading...</h2>
+            </div>
+        </div>
+    </main>
+
+    <!-- Hidden File Inputs -->
+    <input type="file" id="photo-input" accept="image/*" style="display: none;">
+    <input type="file" id="logo-input" accept="image/*" style="display: none;">
+
+        </div> <!-- Close mobile-container -->
+    </main>
+
+    <script src="config.js?v=3"></script>
+    <script src="app.js?v=3"></script>
+    
+    <!-- Debug script -->
+    <script>
+        // Force reset if stuck in loading
+        setTimeout(() => {
+            const loading = document.getElementById('loading');
+            const notConnected = document.getElementById('not-connected');
+            if (loading && !loading.classList.contains('hidden') && notConnected) {
+                console.log('Force showing not connected state');
+                loading.classList.add('hidden');
+                notConnected.classList.remove('hidden');
+            }
+        }, 2000);
+    </script>
+</body>
+</html>
