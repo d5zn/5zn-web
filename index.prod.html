@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5zn Web</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="stylesheet" href="styles.min.css">
+</head>
+<body>
+    <div class="mobile-container">
+        <!-- Top Navigation -->
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="nav-brand">
+                    <h1>5zn</h1>
+                </div>
+                <div class="nav-actions">
+                    <button id="connect-strava-btn" class="btn btn-primary">Connect Strava</button>
+                    <button id="demo-btn" class="btn">Demo</button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Preview Area -->
+        <div class="preview-area ratio-9-16">
+            <!-- Not Connected State -->
+            <div id="not-connected" class="state-container">
+                <div class="state-card">
+                    <h2>Connect to Strava</h2>
+                    <p>Visualize your cycling routes and workout data.</p>
+                    <button id="connect-strava-btn" class="btn btn-primary">Connect with Strava</button>
+                    <button id="demo-btn" class="btn" style="margin-top: 1rem;">Try Demo Mode</button>
+                </div>
+            </div>
+
+            <!-- Connected State -->
+            <div id="connected" class="connected-state ratio-9-16 hidden">
+                <!-- Preview Canvas -->
+                <canvas id="route-canvas"></canvas>
+                
+                <!-- Stats Overlay -->
+                <div class="stats-overlay">
+                    <div class="stat-item">
+                        <span class="stat-label">DISTANCE</span>
+                        <span class="stat-value" id="distance-value">3 000 m</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">ELEVATION</span>
+                        <span class="stat-value" id="elevation-value">3 000 m</span>
+                    </div>
+                </div>
+                
+                <!-- Bottom Stats Overlay -->
+                <div class="bottom-stats-overlay">
+                    <div class="stat-item">
+                        <span class="stat-label">AVG SPEED</span>
+                        <span class="stat-value" id="speed-value">15.2 km/h</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">TIME</span>
+                        <span class="stat-value" id="time-value">1h 23m</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Editing Panel -->
+        <div class="editing-panel">
+            <!-- Tab Navigation -->
+            <div class="tab-nav">
+                <button class="tab-btn active" data-tab="photo">PHOTO</button>
+                <button class="tab-btn" data-tab="data">DATA</button>
+                <button class="tab-btn" data-tab="colors" style="display: none;">COLORS</button>
+                <button class="tab-btn" data-tab="ratio" style="display: none;">RATIO</button>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="tab-content">
+                <!-- Photo Tab -->
+                <div id="photo-tab" class="tab-panel active">
+                    <button class="action-btn" id="upload-photo-btn" style="height: 40px; display: flex; align-items: center; justify-content: center;">Upload Photo</button>
+                    <button class="action-btn" id="mono-toggle-btn" style="height: 40px; margin-top: 8px; display: none; align-items: center; justify-content: center;">Convert to Mono</button>
+                </div>
+
+                <!-- Data Tab -->
+                <div id="data-tab" class="tab-panel">
+                    <div class="data-buttons">
+                        <button class="data-btn active" data-metric="distance">Distance</button>
+                        <button class="data-btn" data-metric="elevation">Elevation</button>
+                        <button class="data-btn" data-metric="time">Time</button>
+                        <button class="data-btn" data-metric="speed">Speed/Avg</button>
+                        <button class="data-btn" data-metric="calories">Calories</button>
+                        <button class="data-btn" data-metric="power">Power/Avg</button>
+                    </div>
+                </div>
+
+                <!-- Logo Tab -->
+                <div id="logo-tab" class="tab-panel" style="display: none;">
+                    <button class="action-btn" id="upload-logo-btn">+ Upload Logo</button>
+                </div>
+
+                <!-- Position Tab -->
+                <div id="position-tab" class="tab-panel" style="display: none;">
+                    <div class="position-controls">
+                        <button class="action-btn" id="position-top-btn">Top</button>
+                        <button class="action-btn" id="position-center-btn">Center</button>
+                        <button class="action-btn" id="position-bottom-btn">Bottom</button>
+                    </div>
+                </div>
+
+                <!-- Colors Tab -->
+                <div id="colors-tab" class="tab-panel" style="display: none;">
+                    <div class="color-controls">
+                        <button class="color-btn" data-color="gradient">Gradient</button>
+                        <button class="color-btn" data-color="solid">Solid</button>
+                    </div>
+                </div>
+
+                <!-- Ratio Tab -->
+                <div id="ratio-tab" class="tab-panel" style="display: none;">
+                    <div class="ratio-controls">
+                        <button class="ratio-btn active" data-ratio="9:16">9:16</button>
+                        <button class="ratio-btn" data-ratio="4:5">4:5</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading" class="loading hidden">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Loading workouts...</div>
+        </div>
+    </div>
+
+    <!-- Hidden file inputs -->
+    <input type="file" id="photo-input" accept="image/*" style="display: none;">
+    <input type="file" id="logo-input" accept="image/*" style="display: none;">
+
+    <script src="app.min.js"></script>
+</body>
+</html>

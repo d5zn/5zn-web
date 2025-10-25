@@ -401,29 +401,29 @@ class TrinkyApp {
 
         // Обновляем значения только для активных метрик
         if (this.activeMetrics.has('distance')) {
-            const distance = this.formatDistance(this.currentWorkout.distance);
-            document.getElementById('distance-value').textContent = distance;
+        const distance = this.formatDistance(this.currentWorkout.distance);
+        document.getElementById('distance-value').textContent = distance;
         } else {
             document.getElementById('distance-value').textContent = '';
         }
 
         if (this.activeMetrics.has('elevation')) {
             const elevation = this.formatElevation(this.currentWorkout.total_elevation_gain);
-            document.getElementById('elevation-value').textContent = elevation;
+        document.getElementById('elevation-value').textContent = elevation;
         } else {
             document.getElementById('elevation-value').textContent = '';
         }
 
         if (this.activeMetrics.has('speed')) {
             const speed = this.formatSpeed(this.currentWorkout.average_speed);
-            document.getElementById('speed-value').textContent = speed;
+        document.getElementById('speed-value').textContent = speed;
         } else {
             document.getElementById('speed-value').textContent = '';
         }
 
         if (this.activeMetrics.has('time')) {
             const time = this.formatTime(this.currentWorkout.moving_time);
-            document.getElementById('time-value').textContent = time;
+        document.getElementById('time-value').textContent = time;
         } else {
             document.getElementById('time-value').textContent = '';
         }
@@ -476,7 +476,7 @@ class TrinkyApp {
                 this.drawBackgroundImage(img);
             } else {
                 // Если не загружено, ждем загрузки
-                img.onload = () => {
+            img.onload = () => {
                     this.drawBackgroundImage(img);
                     // Перерисовываем маршрут и данные поверх фона
                     this.drawDemoRoute();
@@ -490,24 +490,24 @@ class TrinkyApp {
         // Получаем размеры canvas (уже с учетом DPR)
         const canvasWidth = this.canvas.width / (window.devicePixelRatio || 1);
         const canvasHeight = this.canvas.height / (window.devicePixelRatio || 1);
-        
-        const imgAspect = img.width / img.height;
+                
+                const imgAspect = img.width / img.height;
         const canvasAspect = canvasWidth / canvasHeight;
-        
-        let drawWidth, drawHeight, drawX, drawY;
-        
+                
+                let drawWidth, drawHeight, drawX, drawY;
+                
         // Адаптируем изображение под высоту канваса (cover по высоте)
         if (imgAspect > canvasAspect) {
             // Изображение шире - масштабируем по высоте и обрезаем по бокам
-            drawHeight = canvasHeight;
-            drawWidth = drawHeight * imgAspect;
-            drawX = (canvasWidth - drawWidth) / 2;
-            drawY = 0;
+                drawHeight = canvasHeight;
+                drawWidth = drawHeight * imgAspect;
+                drawX = (canvasWidth - drawWidth) / 2;
+                drawY = 0;
         } else {
             // Изображение уже - масштабируем по ширине и обрезаем сверху/снизу
-            drawWidth = canvasWidth;
+                    drawWidth = canvasWidth;
             drawHeight = drawWidth / imgAspect;
-            drawX = 0;
+                    drawX = 0;
             drawY = (canvasHeight - drawHeight) / 2;
         }
         
@@ -834,13 +834,8 @@ class TrinkyApp {
         const connectedState = document.getElementById('connected');
         const is4_5 = connectedState && connectedState.classList.contains('ratio-4-5');
         
-        if (is4_5) {
-            // Для 4:5 используем старый layout
-            this.drawStravaDataOld();
-        } else {
-            // Для 9:16 используем новый layout в стиле карточки
+        // Для обоих соотношений используем новый layout в стиле карточки
             this.drawStravaDataCard();
-        }
     }
 
     drawStravaDataCard() {
@@ -848,9 +843,21 @@ class TrinkyApp {
         const canvasWidth = this.canvas.width / (window.devicePixelRatio || 1);
         const canvasHeight = this.canvas.height / (window.devicePixelRatio || 1);
         
-        // Отступы для 9:16: 7% сверху, 4% снизу
-        const topPadding = canvasHeight * 0.07;
-        const bottomPadding = canvasHeight * 0.04;
+        // Определяем соотношение сторон
+        const connectedState = document.getElementById('connected');
+        const is4_5 = connectedState && connectedState.classList.contains('ratio-4-5');
+        
+        // Отступы в зависимости от соотношения
+        let topPadding, bottomPadding;
+        if (is4_5) {
+            // Для 4:5 используем 8% со всех сторон
+            topPadding = canvasHeight * 0.08;
+            bottomPadding = canvasHeight * 0.08;
+        } else {
+            // Для 9:16: 7% сверху, 4% снизу
+            topPadding = canvasHeight * 0.07;
+            bottomPadding = canvasHeight * 0.04;
+        }
         
         // Заголовок и дата в безопасной зоне (7% отступ сверху)
         this.ctx.fillStyle = '#FFFFFF';
@@ -862,10 +869,18 @@ class TrinkyApp {
         this.ctx.fillStyle = '#FFFFFF';
         this.ctx.fillText('25 OCT, 15:30', 20, topPadding + 80);
         
-        // Контейнер для логотипа у правого края канваса (72x72)
-        const logoX = canvasWidth - 72 - 20; // Правый край с отступом 20px
-        const logoY = topPadding + 50 - 36; // Центрируем по вертикали относительно заголовка
-        this.drawLogoContainer(logoX, logoY, 72, 72);
+        // Контейнер для логотипа - разное позиционирование для разных соотношений
+        if (is4_5) {
+            // Для 4:5 - по центру снизу
+            const logoX = (canvasWidth - 72) / 2; // Центр по горизонтали
+            const logoY = canvasHeight - bottomPadding - 72 - 20; // Отступ снизу
+            this.drawLogoContainer(logoX, logoY, 72, 72);
+        } else {
+            // Для 9:16 - у правого края (как было)
+            const logoX = canvasWidth - 72 - 20; // Правый край с отступом 20px
+            const logoY = topPadding + 50 - 36; // Центрируем по вертикали относительно заголовка
+            this.drawLogoContainer(logoX, logoY, 72, 72);
+        }
         
         // Иконка велосипеда справа (в безопасной зоне) - ВРЕМЕННО СКРЫТА
         // this.drawBikeIcon(canvasWidth - 60, topPadding + 30);
@@ -893,41 +908,94 @@ class TrinkyApp {
         // Простая логика - показываем только активные метрики
         const stats = allStats.filter(stat => this.activeMetrics.has(stat.key));
         
+        if (is4_5) {
+            // Для 4:5 - позиционирование по углам и центру сторон
+            this.drawMetrics4_5(stats, canvasWidth, canvasHeight, topPadding, bottomPadding);
+        } else {
+            // Для 9:16 - стандартная сетка 3x2
         for (let i = 0; i < stats.length; i++) {
             const col = i % 3;
             const row = Math.floor(i / 3);
-            const y = statsY + row * 70;
-            
-            let x, textAlign;
-            
-            // Определяем позицию и выравнивание для каждой метрики
-            if (col === 0) {
-                // 1-я и 4-я колонка (DISTANCE, SPEED/AVG) - слева
-                x = 20;
-                textAlign = 'left';
-            } else if (col === 1) {
-                // 2-я и 5-я колонка (ELEVATION, CALORIES) - по центру
-                x = 20 + colWidth + colWidth / 2;
-                textAlign = 'center';
-            } else {
-                // 3-я и 6-я колонка (TIME, POWER/AVG) - справа
-                x = canvasWidth - 20;
-                textAlign = 'right';
-            }
+                const y = statsY + row * 70;
+                
+                let x, textAlign;
+                
+                // Определяем позицию и выравнивание для каждой метрики
+                if (col === 0) {
+                    // 1-я и 4-я колонка (DISTANCE, SPEED/AVG) - слева
+                    x = 20;
+                    textAlign = 'left';
+                } else if (col === 1) {
+                    // 2-я и 5-я колонка (ELEVATION, CALORIES) - по центру
+                    x = 20 + colWidth + colWidth / 2;
+                    textAlign = 'center';
+                } else {
+                    // 3-я и 6-я колонка (TIME, POWER/AVG) - справа
+                    x = canvasWidth - 20;
+                    textAlign = 'right';
+                }
             
             // Label
-            this.ctx.fillStyle = '#FFFFFF';
-            this.ctx.font = '13px Inter, sans-serif';
-            this.ctx.textAlign = textAlign;
+                this.ctx.fillStyle = '#FFFFFF';
+                this.ctx.font = '13px Inter, sans-serif';
+                this.ctx.textAlign = textAlign;
             this.ctx.fillText(stats[i].label, x, y + 20);
             
             // Value
             this.ctx.fillStyle = '#FFFFFF';
-            this.ctx.font = '600 22px Inter, sans-serif';
-            this.ctx.fillText(stats[i].value, x, y + 50); // 30px отступ от названия (20 + 30)
+                this.ctx.font = '600 22px Inter, sans-serif';
+                this.ctx.fillText(stats[i].value, x, y + 50); // 30px отступ от названия (20 + 30)
+            }
         }
         
         console.log('📊 Strava data card drawn to canvas');
+    }
+
+    drawMetrics4_5(stats, canvasWidth, canvasHeight, topPadding, bottomPadding) {
+        // Позиции для метрик в соотношении 4:5 с учетом 8% отступов
+        // 1. Верхний левый угол
+        // 2. Верхний правый угол  
+        // 3. Центр левой стороны
+        // 4. Центр правой стороны
+        // 5. Нижний левый угол
+        // 6. Нижний правый угол
+        
+        const leftPadding = canvasWidth * 0.08;
+        const rightPadding = canvasWidth * 0.08;
+        const centerY = canvasHeight / 2;
+        
+        const positions = [
+            // Позиция 1: Верхний левый угол
+            { x: leftPadding + 20, y: topPadding + 60, textAlign: 'left' },
+            // Позиция 2: Верхний правый угол
+            { x: canvasWidth - rightPadding - 20, y: topPadding + 60, textAlign: 'right' },
+            // Позиция 3: Центр левой стороны
+            { x: leftPadding + 20, y: centerY, textAlign: 'left' },
+            // Позиция 4: Центр правой стороны
+            { x: canvasWidth - rightPadding - 20, y: centerY, textAlign: 'right' },
+            // Позиция 5: Нижний левый угол
+            { x: leftPadding + 20, y: canvasHeight - bottomPadding - 40, textAlign: 'left' },
+            // Позиция 6: Нижний правый угол
+            { x: canvasWidth - rightPadding - 20, y: canvasHeight - bottomPadding - 40, textAlign: 'right' }
+        ];
+        
+        // Отображаем только активные метрики в соответствии с их позициями
+        for (let i = 0; i < stats.length && i < positions.length; i++) {
+            const pos = positions[i];
+            
+            // Label
+            this.ctx.fillStyle = '#FFFFFF';
+            this.ctx.font = '13px Inter, sans-serif';
+            this.ctx.textAlign = pos.textAlign;
+            this.ctx.fillText(stats[i].label, pos.x, pos.y);
+            
+            // Value
+            this.ctx.fillStyle = '#FFFFFF';
+            this.ctx.font = '600 22px Inter, sans-serif';
+            this.ctx.fillText(stats[i].value, pos.x, pos.y + 30);
+        }
+        
+        console.log('📊 Metrics positioned for 4:5 ratio - showing', stats.length, 'active metrics');
     }
 
     drawStravaDataOld() {
@@ -1061,10 +1129,8 @@ class TrinkyApp {
         const connectedState = document.getElementById('connected');
         const is4_5 = connectedState && connectedState.classList.contains('ratio-4-5');
         
-        let padding = 20; // Базовый отступ
-        
         if (!is4_5) {
-            // Для 9:16 используем те же отступы что и в drawStravaDataCard
+            // Для 9:16 используем те же отступы что и в drawStravaDataCard (как было)
             const topPadding = height * 0.07;
             const bottomPadding = height * 0.04;
             
@@ -1074,14 +1140,24 @@ class TrinkyApp {
             const routeBottomPadding = availableHeight * 0.3; // Оставляем место для метрик (30% от доступной высоты)
             const routeHeight = height - routeTopPadding - routeBottomPadding;
             
-            // Генерируем маршрут в ограниченной области
-            const points = this.generateDemoRoute(width, routeHeight, padding, routeTopPadding);
+            // Генерируем маршрут в ограниченной области (как было)
+            const points = this.generateDemoRoute(width, routeHeight, 20, routeTopPadding);
             
             // Draw main route (только одна линия)
             this.drawSingleRoute(points);
         } else {
-            // Для 4:5 используем старую логику
-            const points = this.generateDemoRoute(width, height, padding);
+            // Для 4:5 используем 8% отступы со всех сторон
+            const topPadding = height * 0.08;
+            const bottomPadding = height * 0.08;
+            const leftPadding = width * 0.08;
+            const rightPadding = width * 0.08;
+            
+            // Область для маршрута с учетом отступов
+            const routeWidth = width - leftPadding - rightPadding;
+            const routeHeight = height - topPadding - bottomPadding;
+            const routeTopPadding = topPadding;
+            
+            const points = this.generateDemoRoute(routeWidth, routeHeight, 20, routeTopPadding);
             
             // Draw main route (только одна линия)
             this.drawSingleRoute(points);
@@ -1254,6 +1330,7 @@ class TrinkyApp {
         }
         
         this.updateWorkoutDisplay();
+        this.drawRoute();
     }
 
     // Position Setting
