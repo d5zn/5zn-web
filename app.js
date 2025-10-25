@@ -245,7 +245,7 @@ class TrinkyApp {
         // Scale context for crisp rendering
         this.ctx.scale(dpr, dpr);
         
-        console.log('📐 Canvas resized:', canvasWidth, 'x', canvasHeight);
+        console.log('📐 Canvas resized:', canvasWidth, 'x', canvasHeight, 'DPR:', dpr, 'Actual canvas size:', this.canvas.width, 'x', this.canvas.height);
         
         if (this.currentWorkout) {
             this.drawRoute();
@@ -394,8 +394,10 @@ class TrinkyApp {
 
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         
-        // Рисуем фоновую картинку если есть
-        this.drawBackground();
+        // Рисуем фоновую картинку если есть (синхронно)
+        if (this.backgroundImage) {
+            this.drawBackgroundSync();
+        }
         
         // Рисуем маршрут
         this.drawDemoRoute();
@@ -404,37 +406,64 @@ class TrinkyApp {
         this.drawStravaData();
     }
 
+    drawBackgroundSync() {
+        if (this.backgroundImage) {
+            const img = new Image();
+            img.src = this.backgroundImage;
+            
+            // Если изображение уже загружено, рисуем сразу
+            if (img.complete) {
+                this.drawBackgroundImage(img);
+            } else {
+                // Если не загружено, ждем загрузки
+                img.onload = () => {
+                    this.drawBackgroundImage(img);
+                    // Перерисовываем маршрут и данные поверх фона
+                    this.drawDemoRoute();
+                    this.drawStravaData();
+                };
+            }
+        }
+    }
+
+    drawBackgroundImage(img) {
+        // Получаем размеры canvas (уже с учетом DPR)
+        const canvasWidth = this.canvas.width / (window.devicePixelRatio || 1);
+        const canvasHeight = this.canvas.height / (window.devicePixelRatio || 1);
+        
+        const imgAspect = img.width / img.height;
+        const canvasAspect = canvasWidth / canvasHeight;
+        
+        let drawWidth, drawHeight, drawX, drawY;
+        
+        // Адаптируем изображение под высоту канваса (cover по высоте)
+        if (imgAspect > canvasAspect) {
+            // Изображение шире - масштабируем по высоте и обрезаем по бокам
+            drawHeight = canvasHeight;
+            drawWidth = drawHeight * imgAspect;
+            drawX = (canvasWidth - drawWidth) / 2;
+            drawY = 0;
+        } else {
+            // Изображение уже - масштабируем по ширине и обрезаем сверху/снизу
+            drawWidth = canvasWidth;
+            drawHeight = drawWidth / imgAspect;
+            drawX = 0;
+            drawY = (canvasHeight - drawHeight) / 2;
+        }
+        
+        // Рисуем изображение, заполняющее весь канвас
+        this.ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+        console.log('🖼️ Background image drawn to canvas (height-adaptive)');
+    }
+
     drawBackground() {
         if (this.backgroundImage) {
             const img = new Image();
             img.onload = () => {
-                // Получаем размеры canvas (уже с учетом DPR)
-                const canvasWidth = this.canvas.width / (window.devicePixelRatio || 1);
-                const canvasHeight = this.canvas.height / (window.devicePixelRatio || 1);
-                
-                const imgAspect = img.width / img.height;
-                const canvasAspect = canvasWidth / canvasHeight;
-                
-                let drawWidth, drawHeight, drawX, drawY;
-                
-                // Адаптируем изображение под высоту канваса (cover по высоте)
-                if (imgAspect > canvasAspect) {
-                    // Изображение шире - масштабируем по высоте и обрезаем по бокам
-                    drawHeight = canvasHeight;
-                    drawWidth = drawHeight * imgAspect;
-                    drawX = (canvasWidth - drawWidth) / 2;
-                    drawY = 0;
-                } else {
-                    // Изображение уже - масштабируем по ширине и обрезаем сверху/снизу
-                    drawWidth = canvasWidth;
-                    drawHeight = drawWidth / imgAspect;
-                    drawX = 0;
-                    drawY = (canvasHeight - drawHeight) / 2;
-                }
-                
-                // Рисуем изображение, заполняющее весь канвас
-                this.ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
-                console.log('🖼️ Background image drawn to canvas (height-adaptive)');
+                this.drawBackgroundImage(img);
+                // Перерисовываем маршрут и данные поверх фона
+                this.drawDemoRoute();
+                this.drawStravaData();
             };
             img.src = this.backgroundImage;
         }
@@ -460,28 +489,41 @@ class TrinkyApp {
     }
 
     drawStravaDataCard() {
-        const canvasWidth = this.canvas.width;
-        const canvasHeight = this.canvas.height;
+        // Получаем реальные размеры канваса (без DPR)
+        const canvasWidth = this.canvas.width / (window.devicePixelRatio || 1);
+        const canvasHeight = this.canvas.height / (window.devicePixelRatio || 1);
         
-        // Заголовок и дата в верхней части
+        // Отступы для 9:16: 7% сверху, 4% снизу
+        const topPadding = canvasHeight * 0.07;
+        const bottomPadding = canvasHeight * 0.04;
+        
+        // Заголовок и дата в безопасной зоне (7% отступ сверху)
         this.ctx.fillStyle = '#FFFFFF';
-        this.ctx.font = 'bold 32px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        this.ctx.font = '600 22px Inter, sans-serif';
         this.ctx.textAlign = 'left';
-        this.ctx.fillText('Morning Ride', 20, 50);
+        this.ctx.fillText('Morning Ride', 20, topPadding + 50);
         
-        this.ctx.font = '18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-        this.ctx.fillStyle = '#CCCCCC';
-        this.ctx.fillText('25 OCT, 15:30', 20, 80);
+        this.ctx.font = '13px Inter, sans-serif';
+        this.ctx.fillStyle = '#FFFFFF';
+        this.ctx.fillText('25 OCT, 15:30', 20, topPadding + 80);
         
-        // Иконка велосипеда справа
-        this.drawBikeIcon(canvasWidth - 60, 30);
+        // Контейнер для логотипа у правого края канваса (72x72)
+        const logoX = canvasWidth - 72 - 20; // Правый край с отступом 20px
+        const logoY = topPadding + 50 - 36; // Центрируем по вертикали относительно заголовка
+        this.drawLogoContainer(logoX, logoY, 72, 72);
         
-        // График в центральной части
-        this.drawActivityGraph(20, 120, canvasWidth - 40, 200);
+        // Иконка велосипеда справа (в безопасной зоне) - ВРЕМЕННО СКРЫТА
+        // this.drawBikeIcon(canvasWidth - 60, topPadding + 30);
         
-        // Статистики внизу (3x2 сетка)
-        const statsY = 350;
-        const statsHeight = canvasHeight - statsY - 20;
+        // График в центральной части (с учетом отступов)
+        const graphY = topPadding + 120;
+        const availableHeight = canvasHeight - topPadding - bottomPadding;
+        const graphHeight = availableHeight * 0.5; // 50% от доступной высоты для графика
+        this.drawActivityGraph(20, graphY, canvasWidth - 40, graphHeight);
+        
+        // Статистики в самом низу канваса (3x2 сетка)
+        const statsHeight = availableHeight * 0.3; // 30% от доступной высоты для статистик
+        const statsY = canvasHeight - statsHeight + 20; // В самом низу канваса + 20px ниже
         const statsWidth = canvasWidth - 40;
         const colWidth = statsWidth / 3;
         const rowHeight = statsHeight / 2;
@@ -498,31 +540,48 @@ class TrinkyApp {
         for (let i = 0; i < stats.length; i++) {
             const col = i % 3;
             const row = Math.floor(i / 3);
-            const x = 20 + col * colWidth;
-            const y = statsY + row * rowHeight;
+            const y = statsY + row * 70;
+            
+            let x, textAlign;
+            
+            // Определяем позицию и выравнивание для каждой метрики
+            if (col === 0) {
+                // 1-я и 4-я колонка (DISTANCE, SPEED/AVG) - слева
+                x = 20;
+                textAlign = 'left';
+            } else if (col === 1) {
+                // 2-я и 5-я колонка (ELEVATION, CALORIES) - по центру
+                x = 20 + colWidth + colWidth / 2;
+                textAlign = 'center';
+            } else {
+                // 3-я и 6-я колонка (TIME, POWER/AVG) - справа
+                x = canvasWidth - 20;
+                textAlign = 'right';
+            }
             
             // Label
-            this.ctx.fillStyle = '#AAAAAA';
-            this.ctx.font = '14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-            this.ctx.textAlign = 'left';
+            this.ctx.fillStyle = '#FFFFFF';
+            this.ctx.font = '13px Inter, sans-serif';
+            this.ctx.textAlign = textAlign;
             this.ctx.fillText(stats[i].label, x, y + 20);
             
             // Value
             this.ctx.fillStyle = '#FFFFFF';
-            this.ctx.font = 'bold 20px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-            this.ctx.fillText(stats[i].value, x, y + 45);
+            this.ctx.font = '600 22px Inter, sans-serif';
+            this.ctx.fillText(stats[i].value, x, y + 50); // 30px отступ от названия (20 + 30)
         }
         
         console.log('📊 Strava data card drawn to canvas');
     }
 
     drawStravaDataOld() {
-        const canvasWidth = this.canvas.width;
-        const canvasHeight = this.canvas.height;
+        // Получаем реальные размеры канваса (без DPR)
+        const canvasWidth = this.canvas.width / (window.devicePixelRatio || 1);
+        const canvasHeight = this.canvas.height / (window.devicePixelRatio || 1);
         
         // Настройки текста
         this.ctx.fillStyle = '#FFFFFF';
-        this.ctx.font = 'bold 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        this.ctx.font = '600 22px Inter, sans-serif';
         this.ctx.textAlign = 'left';
         
         // Верхние данные
@@ -549,6 +608,33 @@ class TrinkyApp {
         this.ctx.fillText(time, canvasWidth - 20, canvasHeight - 20);
         
         console.log('📊 Strava data old layout drawn to canvas');
+    }
+
+    drawLogoContainer(x, y, width, height) {
+        // Загружаем и отображаем SVG логотип
+        this.drawSVGLogo(x, y, width, height);
+        
+        console.log('🖼️ Logo container drawn:', x, y, width, height);
+    }
+
+    drawSVGLogo(x, y, width, height) {
+        // Создаем изображение из SVG
+        const img = new Image();
+        img.onload = () => {
+            // Рисуем SVG логотип в контейнере
+            this.ctx.drawImage(img, x, y, width, height);
+            console.log('🖼️ SVG logo loaded and drawn at:', x, y, width, height);
+        };
+        img.onerror = () => {
+                   // Если SVG не загрузился, показываем плейсхолдер
+                   this.ctx.fillStyle = '#FFFFFF';
+                   this.ctx.font = '13px Inter, sans-serif';
+                   this.ctx.textAlign = 'center';
+                   this.ctx.fillText('LOGO', x + width/2, y + height/2 + 4);
+            console.log('⚠️ SVG logo failed to load, showing placeholder at:', x, y);
+        };
+        img.src = 'logo_NIP.svg';
+        console.log('🖼️ Attempting to load SVG logo from: logo_NIP.svg');
     }
 
     drawBikeIcon(x, y) {
@@ -611,31 +697,58 @@ class TrinkyApp {
     }
 
     drawDemoRoute() {
-        const width = this.canvas.width;
-        const height = this.canvas.height;
-        const padding = 20;
+        // Получаем реальные размеры канваса (без DPR)
+        const width = this.canvas.width / (window.devicePixelRatio || 1);
+        const height = this.canvas.height / (window.devicePixelRatio || 1);
         
-        const points = this.generateDemoRoute(width, height, padding);
+        // Проверяем соотношение для определения отступов
+        const connectedState = document.getElementById('connected');
+        const is4_5 = connectedState && connectedState.classList.contains('ratio-4-5');
         
-        // Draw shadow
-        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-        this.ctx.lineWidth = 8;
+        let padding = 20; // Базовый отступ
+        
+        if (!is4_5) {
+            // Для 9:16 используем те же отступы что и в drawStravaDataCard
+            const topPadding = height * 0.07;
+            const bottomPadding = height * 0.04;
+            
+            // Ограничиваем область маршрута между заголовком и метриками
+            const routeTopPadding = topPadding + 120; // После заголовка и логотипа
+            const availableHeight = height - topPadding - bottomPadding;
+            const routeBottomPadding = availableHeight * 0.3; // Оставляем место для метрик (30% от доступной высоты)
+            const routeHeight = height - routeTopPadding - routeBottomPadding;
+            
+            // Генерируем маршрут в ограниченной области
+            const points = this.generateDemoRoute(width, routeHeight, padding, routeTopPadding);
+            
+            // Draw main route (только одна линия)
+            this.drawSingleRoute(points);
+        } else {
+            // Для 4:5 используем старую логику
+            const points = this.generateDemoRoute(width, height, padding);
+            
+            // Draw main route (только одна линия)
+            this.drawSingleRoute(points);
+        }
+    }
+
+    drawSingleRoute(points) {
+        // Рисуем одну простую линию маршрута
+        this.ctx.strokeStyle = '#FF6B35';
+        this.ctx.lineWidth = 4;
         this.ctx.lineCap = 'round';
         this.ctx.lineJoin = 'round';
         this.drawPath(points);
-        
-        // Draw main route with French flag colors
-        this.drawSegmentedPath(points);
     }
 
-    generateDemoRoute(width, height, padding) {
+    generateDemoRoute(width, height, padding, topPadding = 0) {
         const points = [];
         const numPoints = 40;
         
         for (let i = 0; i <= numPoints; i++) {
             const t = i / numPoints;
             const x = padding + (width - 2 * padding) * t;
-            const y = padding + (height - 2 * padding) * (0.5 + 0.3 * Math.sin(t * Math.PI * 3) + 0.2 * Math.sin(t * Math.PI * 7));
+            const y = topPadding + padding + (height - 2 * padding) * (0.5 + 0.3 * Math.sin(t * Math.PI * 3) + 0.2 * Math.sin(t * Math.PI * 7));
             
             // Ensure valid coordinates
             if (!isNaN(x) && !isNaN(y) && isFinite(x) && isFinite(y)) {
