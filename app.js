@@ -247,21 +247,16 @@ class TrinkyApp {
         
         let canvasWidth, canvasHeight;
         
+        // Для обоих соотношений используем размеры preview-area
+        const previewArea = document.querySelector('.preview-area');
+        const previewRect = previewArea.getBoundingClientRect();
+        
+        canvasWidth = previewRect.width;
+        canvasHeight = previewRect.height;
+        
         if (is4_5) {
-            // Для 4:5 canvas рассчитывается по ширине экрана
-            const screenWidth = window.innerWidth;
-            canvasWidth = screenWidth;
-            canvasHeight = screenWidth * 5 / 4;
-            
-            console.log('📐 4:5 Canvas - calculated from screen width:', canvasWidth, 'x', canvasHeight);
+            console.log('📐 4:5 Canvas - using preview area:', canvasWidth, 'x', canvasHeight);
         } else {
-            // Для 9:16 используем размеры preview-area
-            const previewArea = document.querySelector('.preview-area');
-            const previewRect = previewArea.getBoundingClientRect();
-            
-            canvasWidth = previewRect.width;
-            canvasHeight = previewRect.height;
-            
             console.log('📐 9:16 Canvas - using preview area:', canvasWidth, 'x', canvasHeight);
         }
         
