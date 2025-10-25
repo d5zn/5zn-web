@@ -59,12 +59,6 @@ class TrinkyApp {
         
         // Обработчики для управления фоновым изображением будут добавлены в setupCanvas()
         
-        // Demo button
-        document.getElementById('demo-btn')?.addEventListener('click', () => this.enableDemoMode());
-        document.getElementById('demo-btn')?.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            this.enableDemoMode();
-        });
         
         // File uploads
         document.getElementById('upload-photo-btn')?.addEventListener('click', () => {
@@ -305,12 +299,6 @@ class TrinkyApp {
         window.location.href = authUrl;
     }
 
-    enableDemoMode() {
-        localStorage.setItem('strava_token', 'demo_token');
-        this.stravaToken = 'demo_token';
-        this.showConnectedState();
-        this.loadWorkouts();
-    }
 
     showDevInstructions() {
         const instructions = `
