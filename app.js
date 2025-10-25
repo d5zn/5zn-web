@@ -1614,21 +1614,42 @@ class TrinkyApp {
             connected.style.display = 'block';
             console.log('✅ Connected shown');
             
+            // Принудительно показываем навигацию сразу
+            const navbar = document.querySelector('.navbar');
+            if (navbar) {
+                navbar.style.display = 'flex';
+                navbar.style.visibility = 'visible';
+                navbar.style.opacity = '1';
+                console.log('✅ Navbar shown');
+            }
+            
             // Показываем навигационные кнопки
             const navActions = document.querySelector('.nav-actions');
             const workoutBtn = document.getElementById('workout-selector-btn');
             const shareBtn = document.getElementById('share-btn');
             
+            console.log('🔍 Navigation elements found:', {
+                navActions: !!navActions,
+                workoutBtn: !!workoutBtn,
+                shareBtn: !!shareBtn
+            });
+            
             if (navActions) {
                 navActions.style.display = 'flex';
+                navActions.style.visibility = 'visible';
+                navActions.style.opacity = '1';
                 console.log('✅ Navigation container shown');
             }
             if (workoutBtn) {
                 workoutBtn.style.display = 'block';
+                workoutBtn.style.visibility = 'visible';
+                workoutBtn.style.opacity = '1';
                 console.log('✅ Workout selector button shown');
             }
             if (shareBtn) {
                 shareBtn.style.display = 'block';
+                shareBtn.style.visibility = 'visible';
+                shareBtn.style.opacity = '1';
                 console.log('✅ Share button shown');
             }
             // Принудительно устанавливаем правильные пропорции 9:16
