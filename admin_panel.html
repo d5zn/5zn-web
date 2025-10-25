@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - 5zn-web</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #000000;
+            color: #ffffff;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 300;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            opacity: 0.7;
+            margin-bottom: 30px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #111111;
+            border: 1px solid #333333;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            opacity: 0.7;
+            font-size: 14px;
+        }
+
+        .users-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .user-card {
+            background: #111111;
+            border: 1px solid #333333;
+            border-radius: 8px;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 60px 1fr 150px;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #333333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .user-info h3 {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .user-info p {
+            opacity: 0.7;
+            font-size: 14px;
+        }
+
+        .user-meta {
+            text-align: right;
+            font-size: 12px;
+            opacity: 0.6;
+        }
+
+        .refresh-btn {
+            background: #ffffff;
+            color: #000000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: opacity 0.2s;
+        }
+
+        .refresh-btn:hover {
+            opacity: 0.8;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 60px 20px;
+            opacity: 0.5;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+
+        .badge-active {
+            background: #00ff00;
+            color: #000000;
+        }
+
+        .badge-inactive {
+            background: #333333;
+            color: #888888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Admin Panel</h1>
+        <p class="subtitle">User Management Dashboard</p>
+
+        <button class="refresh-btn" onclick="loadUsers()">🔄 Refresh</button>
+
+        <div class="stats" id="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="total-users">-</div>
+                <div class="stat-label">Total Users</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="active-users">-</div>
+                <div class="stat-label">Active Users</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="recent-users">-</div>
+                <div class="stat-label">Last 7 Days</div>
+            </div>
+        </div>
+
+        <div class="users-grid" id="users-grid">
+            <div class="empty">Loading users...</div>
+        </div>
+    </div>
+
+    <script>
+        let users = [];
+
+        async function loadUsers() {
+            try {
+                const response = await fetch('/api/admin/users');
+                const data = await response.json();
+                users = data.users || [];
+                
+                updateStats();
+                renderUsers();
+            } catch (error) {
+                console.error('Error loading users:', error);
+                document.getElementById('users-grid').innerHTML = 
+                    '<div class="empty">Error loading users. Make sure server is running.</div>';
+            }
+        }
+
+        function updateStats() {
+            const total = users.length;
+            const recent = users.filter(u => {
+                const connected = new Date(u.connected_at);
+                const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+                return connected > weekAgo;
+            }).length;
+
+            document.getElementById('total-users').textContent = total;
+            document.getElementById('active-users').textContent = total;
+            document.getElementById('recent-users').textContent = recent;
+        }
+
+        function renderUsers() {
+            const grid = document.getElementById('users-grid');
+            
+            if (users.length === 0) {
+                grid.innerHTML = '<div class="empty">No users yet</div>';
+                return;
+            }
+
+            grid.innerHTML = users.map(user => {
+                const initials = (user.firstname?.[0] || '') + (user.lastname?.[0] || '');
+                const name = `${user.firstname || ''} ${user.lastname || ''}`.trim() || user.username || 'Unknown';
+                const email = user.email || 'no email';
+                const location = [user.city, user.country].filter(Boolean).join(', ') || 'Unknown location';
+                const date = new Date(user.connected_at).toLocaleDateString();
+
+                return `
+                    <div class="user-card">
+                        <div class="user-avatar">${initials}</div>
+                        <div class="user-info">
+                            <h3>${name}</h3>
+                            <p>${email} • ${location}</p>
+                            <span class="badge badge-active">Active</span>
+                        </div>
+                        <div class="user-meta">
+                            <div>ID: ${user.athlete_id}</div>
+                            <div>Joined: ${date}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Load on page load
+        loadUsers();
+        
+        // Auto-refresh every 30 seconds
+        setInterval(loadUsers, 30000);
+    </script>
+</body>
+</html>
