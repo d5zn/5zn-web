@@ -8,6 +8,7 @@ class TrinkyApp {
         this.ctx = null;
         this.currentTab = 'photo';
         this.currentMetric = 'distance';
+        this.activeMetrics = new Set(['distance']); // Отслеживаем активные метрики
         this.backgroundImage = null;
         this.originalBackgroundImage = null; // Для хранения оригинального изображения
         this.isMonochrome = false; // Отслеживаем состояние изображения
@@ -226,8 +227,11 @@ class TrinkyApp {
             // Добавляем обработчики для управления фоновым изображением
             this.setupImageManipulation();
             
-            // Обработчики для кнопок фото
-            this.setupPhotoButtons();
+        // Обработчики для кнопок фото
+        this.setupPhotoButtons();
+        
+        // Инициализируем активные метрики
+        this.initializeActiveMetrics();
         }
     }
 
@@ -395,15 +399,37 @@ class TrinkyApp {
     updateWorkoutDisplay() {
         if (!this.currentWorkout) return;
 
-        const distance = this.formatDistance(this.currentWorkout.distance);
-        const elevation = this.formatElevation(this.currentWorkout.total_elevation_gain);
-        const speed = this.formatSpeed(this.currentWorkout.average_speed);
-        const time = this.formatTime(this.currentWorkout.moving_time);
+        // Обновляем значения только для активных метрик
+        if (this.activeMetrics.has('distance')) {
+            const distance = this.formatDistance(this.currentWorkout.distance);
+            document.getElementById('distance-value').textContent = distance;
+        } else {
+            document.getElementById('distance-value').textContent = '';
+        }
 
-        document.getElementById('distance-value').textContent = distance;
-        document.getElementById('elevation-value').textContent = elevation;
-        document.getElementById('speed-value').textContent = speed;
-        document.getElementById('time-value').textContent = time;
+        if (this.activeMetrics.has('elevation')) {
+            const elevation = this.formatElevation(this.currentWorkout.total_elevation_gain);
+            document.getElementById('elevation-value').textContent = elevation;
+        } else {
+            document.getElementById('elevation-value').textContent = '';
+        }
+
+        if (this.activeMetrics.has('speed')) {
+            const speed = this.formatSpeed(this.currentWorkout.average_speed);
+            document.getElementById('speed-value').textContent = speed;
+        } else {
+            document.getElementById('speed-value').textContent = '';
+        }
+
+        if (this.activeMetrics.has('time')) {
+            const time = this.formatTime(this.currentWorkout.moving_time);
+            document.getElementById('time-value').textContent = time;
+        } else {
+            document.getElementById('time-value').textContent = '';
+        }
+        
+        // Перерисовываем canvas с учетом активных метрик
+        this.drawRoute();
     }
 
     formatDistance(meters) {
@@ -765,6 +791,15 @@ class TrinkyApp {
         console.log('🔄 Returned to original image');
     }
 
+    initializeActiveMetrics() {
+        // Устанавливаем активную кнопку Distance по умолчанию
+        document.querySelectorAll('.data-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.querySelector(`[data-metric="distance"]`).classList.add('active');
+    }
+
+
     updateMonoButton() {
         const monoBtn = document.getElementById('mono-toggle-btn');
         if (!monoBtn) return;
@@ -845,14 +880,18 @@ class TrinkyApp {
         const colWidth = statsWidth / 3;
         const rowHeight = statsHeight / 2;
         
-        const stats = [
-            { label: 'DISTANCE', value: this.formatDistance(this.currentWorkout.distance) },
-            { label: 'ELEVATION', value: this.formatElevation(this.currentWorkout.total_elevation_gain) },
-            { label: 'TIME', value: this.formatTime(this.currentWorkout.moving_time) },
-            { label: 'SPEED/AVG', value: this.formatSpeed(this.currentWorkout.average_speed) },
-            { label: 'CALORIES', value: '1,200' },
-            { label: 'POWER/AVG', value: '180W' }
+        // Создаем массив только активных метрик
+        const allStats = [
+            { key: 'distance', label: 'DISTANCE', value: this.formatDistance(this.currentWorkout.distance) },
+            { key: 'elevation', label: 'ELEVATION', value: this.formatElevation(this.currentWorkout.total_elevation_gain) },
+            { key: 'time', label: 'TIME', value: this.formatTime(this.currentWorkout.moving_time) },
+            { key: 'speed', label: 'SPEED/AVG', value: this.formatSpeed(this.currentWorkout.average_speed) },
+            { key: 'calories', label: 'CALORIES', value: '1,200' },
+            { key: 'power', label: 'POWER/AVG', value: '180W' }
         ];
+        
+        // Простая логика - показываем только активные метрики
+        const stats = allStats.filter(stat => this.activeMetrics.has(stat.key));
         
         for (let i = 0; i < stats.length; i++) {
             const col = i % 3;
@@ -1196,12 +1235,24 @@ class TrinkyApp {
 
     // Metric Selection
     selectMetric(metric) {
-        document.querySelectorAll('.data-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        document.querySelector(`[data-metric="${metric}"]`).classList.add('active');
+        const button = document.querySelector(`[data-metric="${metric}"]`);
         
-        this.currentMetric = metric;
+        if (this.activeMetrics.has(metric)) {
+            // Если метрика уже активна - отключаем её
+            this.activeMetrics.delete(metric);
+            button.classList.remove('active');
+            
+            // Если это была единственная активная метрика, оставляем distance
+            if (this.activeMetrics.size === 0) {
+                this.activeMetrics.add('distance');
+                document.querySelector(`[data-metric="distance"]`).classList.add('active');
+            }
+        } else {
+            // Если метрика неактивна - включаем её
+            this.activeMetrics.add(metric);
+            button.classList.add('active');
+        }
+        
         this.updateWorkoutDisplay();
     }
 
