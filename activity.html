@@ -77,6 +77,9 @@
         #activity-canvas {
             width: 100%;
             height: 100%;
+            display: block;
+            /* Canvas рисуется в 1080x1920, CSS масштабирует до контейнера */
+            object-fit: contain;
         }
         
         .stats-grid {
@@ -196,6 +199,10 @@
                 this.stravaToken = localStorage.getItem('strava_token');
                 this.activityId = this.getActivityIdFromURL();
                 
+                // Фиксированное внутреннее разрешение (как в app.js)
+                this.internalWidth = 1080;
+                this.internalHeight = 1920;
+                
                 if (!this.activityId) {
                     this.showError('ID активности не указан в URL');
                     return;
@@ -219,9 +226,23 @@
             }
             
             initCanvas() {
-                // Фиксированные размеры для отрисовки
-                this.canvas.width = 1080;
-                this.canvas.height = 1920;
+                // Подход как в app.js: фиксированные размеры + CSS масштабирование
+                const rawDpr = window.devicePixelRatio || 1;
+                const dpr = Math.min(rawDpr, 2);
+                
+                // Canvas рисуется в фиксированном разрешении
+                this.canvas.width = this.internalWidth * dpr;
+                this.canvas.height = this.internalHeight * dpr;
+                
+                // CSS управляет отображением (всегда показывает 1080x1920 через CSS)
+                this.canvas.style.width = this.internalWidth + 'px';
+                this.canvas.style.height = this.internalHeight + 'px';
+                
+                // Применяем DPR масштаб
+                this.ctx.scale(dpr, dpr);
+                
+                console.log('✅ Canvas initialized:', this.canvas.width, 'x', this.canvas.height, 'at DPR', dpr);
+                console.log('✅ Canvas display size:', this.internalWidth, 'x', this.internalHeight);
             }
             
             async loadActivity() {
@@ -246,6 +267,9 @@
             }
             
             displayActivity(activity) {
+                console.log('📊 Displaying activity:', activity.name);
+                console.log('📊 Activity data:', activity);
+                
                 // Скрываем загрузку, показываем контент
                 document.getElementById('loading').classList.add('hidden');
                 document.getElementById('content').classList.remove('hidden');
@@ -266,6 +290,9 @@
             drawRoute(activity) {
                 if (!this.ctx) return;
                 
+                console.log('🗺️ Drawing route for activity:', activity.name);
+                console.log('🗺️ Map data:', activity.map);
+                
                 // Очищаем canvas
                 this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
                 
@@ -276,29 +303,44 @@
                 // Получаем точки маршрута
                 const map = activity.map?.polyline || activity.map?.summary_polyline;
                 
+                console.log('🗺️ Polyline data:', map ? `Found (${map.length} chars)` : 'Not found');
+                
                 if (!map) {
+                    console.warn('⚠️ No polyline data found');
                     // Если нет маршрута, рисуем заглушку
                     this.drawNoRouteMessage();
                     return;
                 }
                 
                 const points = this.decodePolyline(map);
+                console.log('🗺️ Decoded points:', points ? points.length : 0);
+                
                 if (!points || points.length === 0) {
+                    console.warn('⚠️ No points decoded');
                     this.drawNoRouteMessage();
                     return;
                 }
+                
+                console.log('🗺️ First 3 raw points:', points.slice(0, 3));
                 
                 // Отрисовываем маршрут с градиентом французского флага
                 this.drawRouteWithGradient(points);
             }
             
             drawRouteWithGradient(points) {
-                const width = this.canvas.width;
-                const height = this.canvas.height;
+                // Используем внутренние размеры (до масштабирования DPR)
+                const width = this.internalWidth;
+                const height = this.internalHeight;
+                
+                console.log('🔍 Drawing route with points:', points.length);
+                console.log('🔍 Canvas internal size:', width, 'x', height);
                 
                 // Рассчитываем границы и масштаб для правильного размещения маршрута
                 const bounds = this.calculateBounds(points);
+                console.log('🔍 Bounds:', bounds);
+                
                 const scale = this.calculateScale(bounds, width - 100, height - 300);
+                console.log('🔍 Scale:', scale);
                 
                 // Преобразуем координаты в пиксели canvas
                 const canvasPoints = points.map(([lat, lng]) => {
@@ -306,6 +348,9 @@
                     const y = (bounds.maxLat - lat) * scale + 100; // Инвертируем Y
                     return { x, y };
                 });
+                
+                console.log('🔍 First 3 canvas points:', canvasPoints.slice(0, 3));
+                console.log('🔍 Last 3 canvas points:', canvasPoints.slice(-3));
                 
                 // Рисуем маршрут с градиентом французского флага
                 this.ctx.lineWidth = 4;
@@ -315,6 +360,8 @@
                 // Находим границы линии для правильного градиента
                 let minX = Math.min(...canvasPoints.map(p => p.x));
                 let maxX = Math.max(...canvasPoints.map(p => p.x));
+                
+                console.log('🔍 Gradient bounds:', { minX, maxX });
                 
                 // Создаем линейный градиент
                 const gradient = this.ctx.createLinearGradient(minX, 0, maxX, 0);
@@ -327,22 +374,47 @@
                 
                 // Рисуем путь
                 this.ctx.beginPath();
+                let firstValidPoint = null;
+                
                 for (let i = 0; i < canvasPoints.length; i++) {
-                    if (i === 0) {
-                        this.ctx.moveTo(canvasPoints[i].x, canvasPoints[i].y);
-                    } else {
-                        this.ctx.lineTo(canvasPoints[i].x, canvasPoints[i].y);
+                    const point = canvasPoints[i];
+                    if (!isNaN(point.x) && !isNaN(point.y) && isFinite(point.x) && isFinite(point.y)) {
+                        if (firstValidPoint === null) {
+                            firstValidPoint = point;
+                            this.ctx.moveTo(point.x, point.y);
+                        } else {
+                            this.ctx.lineTo(point.x, point.y);
+                        }
                     }
                 }
+                
+                if (firstValidPoint === null) {
+                    console.error('❌ No valid points to draw!');
+                    this.drawNoRouteMessage();
+                    return;
+                }
+                
                 this.ctx.stroke();
+                console.log('✅ Route drawn successfully');
             }
             
             decodePolyline(encoded) {
-                if (!encoded || encoded.length < 10) return null;
+                console.log('🔍 Decoding polyline, length:', encoded?.length);
+                console.log('🔍 window.polyline exists:', typeof window.polyline);
+                
+                if (!encoded || encoded.length < 10) {
+                    console.warn('⚠️ Invalid polyline data');
+                    return null;
+                }
                 
                 if (typeof window.polyline !== 'undefined' && window.polyline.decode) {
-                    return window.polyline.decode(encoded);
+                    console.log('✅ Using window.polyline.decode');
+                    const decoded = window.polyline.decode(encoded);
+                    console.log('✅ Decoded', decoded.length, 'points');
+                    return decoded;
                 }
+                
+                console.log('⚠️ Using fallback decoder');
                 
                 // Fallback decoder - точно такой же как в app.js
                 const coordinates = [];
