@@ -358,22 +358,27 @@ class TrinkyApp {
         const rawDpr = window.devicePixelRatio || 1;
         const dpr = Math.min(rawDpr, 2);
         
+        // Устанавливаем реальный размер canvas в фиксированном разрешении
+        this.canvas.width = this.internalWidth * dpr;
+        this.canvas.height = this.internalHeight * dpr;
+        
         // Устанавливаем размеры canvas равными контейнеру
         this.canvas.style.width = containerWidth + 'px';
         this.canvas.style.height = containerHeight + 'px';
         
-        // Устанавливаем реальный размер canvas с учетом DPR
-        this.canvas.width = containerWidth * dpr;
-        this.canvas.height = containerHeight * dpr;
+        // Применяем CSS transform для масштабирования canvas как единого целого
+        this.canvas.style.transform = `translate(${this.offsetX}px, ${this.offsetY}px) scale(${this.scale})`;
+        this.canvas.style.transformOrigin = '0 0';
         
         // Масштабируем контекст для четкого рендеринга
         this.ctx.scale(dpr, dpr);
         
-        console.log('📐 Canvas resized with fixed resolution system:', {
+        console.log('📐 Canvas resized with CSS transform scaling:', {
             container: `${containerWidth}x${containerHeight}`,
             canvas: `${this.canvas.width}x${this.canvas.height}`,
             dpr: dpr,
-            scale: this.scale.toFixed(3)
+            scale: this.scale.toFixed(3),
+            transform: `translate(${this.offsetX}px, ${this.offsetY}px) scale(${this.scale})`
         });
         
         if (this.currentWorkout) {
@@ -584,13 +589,6 @@ class TrinkyApp {
         // Очищаем canvas
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         
-        // Сохраняем состояние контекста
-        this.ctx.save();
-        
-        // Применяем трансформации для фиксированного разрешения
-        this.ctx.translate(this.offsetX, this.offsetY);
-        this.ctx.scale(this.scale, this.scale);
-        
         // Рисуем фоновую картинку если есть
         if (this.backgroundImage) {
             this.drawBackgroundSync();
@@ -601,9 +599,6 @@ class TrinkyApp {
         
         // Рисуем данные Strava
         this.drawStravaData();
-        
-        // Восстанавливаем состояние контекста
-        this.ctx.restore();
     }
 
     drawBackgroundSync() {
