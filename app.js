@@ -1709,15 +1709,9 @@ class TrinkyApp {
             // Показываем навигационные кнопки с задержкой
             setTimeout(() => {
                 const navActions = document.querySelector('.nav-actions');
-                const workoutBtn = document.getElementById('workout-selector-btn');
-                const shareBtn = document.getElementById('share-btn');
-                const logoutBtn = document.getElementById('logout-btn');
                 
                 console.log('🔍 Navigation elements found (with delay):', {
-                    navActions: !!navActions,
-                    workoutBtn: !!workoutBtn,
-                    shareBtn: !!shareBtn,
-                    logoutBtn: !!logoutBtn
+                    navActions: !!navActions
                 });
                 
                 // Show all navigation icons when connected
@@ -1749,32 +1743,36 @@ class TrinkyApp {
                     `;
                 }
                 
-                // Re-add event listeners after innerHTML update
+                // Re-add event listeners after innerHTML update - wait for DOM to be ready
                 setTimeout(() => {
-                    document.getElementById('workout-selector-btn')?.addEventListener('click', () => this.openWorkoutSelector());
-                    document.getElementById('share-btn')?.addEventListener('click', () => this.shareData());
-                    document.getElementById('logout-btn')?.addEventListener('click', () => this.logout());
-                    console.log('✅ Event listeners re-added for navigation buttons');
+                    const workoutBtn = document.getElementById('workout-selector-btn');
+                    const shareBtn = document.getElementById('share-btn');
+                    const logoutBtn = document.getElementById('logout-btn');
+                    
+                    if (workoutBtn) {
+                        workoutBtn.addEventListener('click', () => this.openWorkoutSelector());
+                        console.log('✅ Workout selector button listener added');
+                    }
+                    
+                    if (shareBtn) {
+                        shareBtn.addEventListener('click', () => this.shareData());
+                        console.log('✅ Share button listener added');
+                    }
+                    
+                    if (logoutBtn) {
+                        logoutBtn.addEventListener('click', () => this.logout());
+                        console.log('✅ Logout button listener added');
+                    }
                 }, 10);
                 
-                // Попробуем альтернативные селекторы
-                const allButtons = document.querySelectorAll('button');
-                console.log('🔍 All buttons found:', allButtons.length);
-                allButtons.forEach((btn, index) => {
-                    console.log(`Button ${index}:`, btn.id, btn.className, btn.textContent?.trim());
-                });
-                
-                // Проверим навигацию более детально
+                // Проверим навигацию
                 const navbar = document.querySelector('.navbar');
                 const navContainer = document.querySelector('.nav-container');
-                // navActions уже объявлена выше в этом блоке
                 
                 console.log('🔍 Navigation structure:', {
                     navbar: !!navbar,
                     navContainer: !!navContainer,
-                    navActions: !!navActions,
-                    navbarHTML: navbar?.innerHTML?.substring(0, 200),
-                    navActionsHTML: navActions?.innerHTML?.substring(0, 200)
+                    navActions: !!navActions
                 });
                 
                 if (navActions) {
@@ -1782,28 +1780,6 @@ class TrinkyApp {
                     navActions.style.visibility = 'visible';
                     navActions.style.opacity = '1';
                     console.log('✅ Navigation container shown');
-                }
-                if (workoutBtn) {
-                    workoutBtn.style.display = 'block';
-                    workoutBtn.style.visibility = 'visible';
-                    workoutBtn.style.opacity = '1';
-                    workoutBtn.classList.remove('hidden');
-                    workoutBtn.style.position = 'relative';
-                    workoutBtn.style.zIndex = '9999';
-                    console.log('✅ Workout selector button shown');
-                } else {
-                    console.log('❌ Workout selector button not found!');
-                }
-                if (shareBtn) {
-                    shareBtn.style.display = 'block';
-                    shareBtn.style.visibility = 'visible';
-                    shareBtn.style.opacity = '1';
-                    shareBtn.classList.remove('hidden');
-                    shareBtn.style.position = 'relative';
-                    shareBtn.style.zIndex = '9999';
-                    console.log('✅ Share button shown');
-                } else {
-                    console.log('❌ Share button not found!');
                 }
             }, 500); // Задержка 500ms
             // Принудительно устанавливаем правильные пропорции 9:16
