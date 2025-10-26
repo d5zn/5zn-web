@@ -65,6 +65,16 @@ class TrinkyApp {
         this.isMonochrome = false; // Отслеживаем состояние изображения
         this.logoImage = null;
         
+        // Фиксированное внутреннее разрешение (как в геймдеве)
+        this.internalWidth = 1080;
+        this.internalHeight = 1920;
+        this.internalAspectRatio = 9 / 16;
+        
+        // Переменные для масштабирования
+        this.scale = 1;
+        this.offsetX = 0;
+        this.offsetY = 0;
+        
         // Переменные для управления фоновым изображением
         this.imageTransform = {
             x: 0,           // Смещение по X
@@ -273,7 +283,10 @@ class TrinkyApp {
                 connectedState.style.setProperty('height', '100%', 'important');
             }
             
-            console.log('🔧 Простая flex структура установлена');
+            // Пересчитываем viewport для фиксированного разрешения
+            this.calculateViewport();
+            
+            console.log('🔧 Простая flex структура установлена с фиксированным разрешением');
         }
     }
 
@@ -281,8 +294,12 @@ class TrinkyApp {
         this.canvas = document.getElementById('route-canvas');
         if (this.canvas) {
             this.ctx = this.canvas.getContext('2d');
+            this.calculateViewport();
             this.resizeCanvas();
-            window.addEventListener('resize', () => this.resizeCanvas());
+            window.addEventListener('resize', () => {
+                this.calculateViewport();
+                this.resizeCanvas();
+            });
             
             // Добавляем обработчики для управления фоновым изображением
             this.setupImageManipulation();
@@ -294,46 +311,70 @@ class TrinkyApp {
         this.initializeActiveMetrics();
         }
     }
+    
+    calculateViewport() {
+        // Получаем размеры контейнера превью
+        const previewArea = document.querySelector('.preview-area');
+        if (!previewArea) return;
+        
+        const containerRect = previewArea.getBoundingClientRect();
+        const containerWidth = containerRect.width;
+        const containerHeight = containerRect.height;
+        
+        // Рассчитываем масштаб для фиксированного разрешения
+        const scaleX = containerWidth / this.internalWidth;
+        const scaleY = containerHeight / this.internalHeight;
+        
+        // Используем минимальный масштаб для сохранения пропорций
+        this.scale = Math.min(scaleX, scaleY);
+        
+        // Рассчитываем отступы для центрирования
+        const scaledWidth = this.internalWidth * this.scale;
+        const scaledHeight = this.internalHeight * this.scale;
+        
+        this.offsetX = (containerWidth - scaledWidth) / 2;
+        this.offsetY = (containerHeight - scaledHeight) / 2;
+        
+        console.log('📐 Viewport calculated:', {
+            container: `${containerWidth}x${containerHeight}`,
+            internal: `${this.internalWidth}x${this.internalHeight}`,
+            scale: this.scale.toFixed(3),
+            offset: `${this.offsetX.toFixed(1)}, ${this.offsetY.toFixed(1)}`
+        });
+    }
 
     resizeCanvas() {
         if (!this.canvas) return;
         
-        // Проверяем текущее соотношение
-        const connectedState = document.getElementById('connected');
-        const is4_5 = connectedState && connectedState.classList.contains('ratio-4-5');
+        // Получаем размеры контейнера превью
+        const previewArea = document.querySelector('.preview-area');
+        if (!previewArea) return;
+        
+        const containerRect = previewArea.getBoundingClientRect();
+        const containerWidth = containerRect.width;
+        const containerHeight = containerRect.height;
         
         // Get device pixel ratio, но ограничиваем для производительности
         const rawDpr = window.devicePixelRatio || 1;
-        // Ограничиваем DPR максимум до 2 для предотвращения проблем на слабых устройствах
         const dpr = Math.min(rawDpr, 2);
         
-        let canvasWidth, canvasHeight;
+        // Устанавливаем размеры canvas равными контейнеру
+        this.canvas.style.width = containerWidth + 'px';
+        this.canvas.style.height = containerHeight + 'px';
         
-        // Для обоих соотношений используем размеры preview-area
-        const previewArea = document.querySelector('.preview-area');
-        const previewRect = previewArea.getBoundingClientRect();
+        // Устанавливаем реальный размер canvas с учетом DPR
+        this.canvas.width = containerWidth * dpr;
+        this.canvas.height = containerHeight * dpr;
         
-        canvasWidth = previewRect.width;
-        canvasHeight = previewRect.height;
-        
-        if (is4_5) {
-            console.log('📐 4:5 Canvas - using preview area:', canvasWidth, 'x', canvasHeight);
-        } else {
-            console.log('📐 9:16 Canvas - using preview area:', canvasWidth, 'x', canvasHeight);
-        }
-        
-        // Set display size
-        this.canvas.style.width = canvasWidth + 'px';
-        this.canvas.style.height = canvasHeight + 'px';
-        
-        // Set actual canvas size with DPR for crisp rendering
-        this.canvas.width = canvasWidth * dpr;
-        this.canvas.height = canvasHeight * dpr;
-        
-        // Scale context for crisp rendering
+        // Масштабируем контекст для четкого рендеринга
         this.ctx.scale(dpr, dpr);
         
-        console.log('📐 Canvas resized:', canvasWidth, 'x', canvasHeight, 'DPR:', rawDpr, '->', dpr, 'Actual canvas size:', this.canvas.width, 'x', this.canvas.height);
+        console.log('📐 Canvas resized with fixed resolution system:', {
+            container: `${containerWidth}x${containerHeight}`,
+            canvas: `${this.canvas.width}x${this.canvas.height}`,
+            dpr: dpr,
+            scale: this.scale.toFixed(3)
+        });
         
         if (this.currentWorkout) {
             this.drawRoute();
@@ -540,9 +581,17 @@ class TrinkyApp {
     drawRoute() {
         if (!this.ctx || !this.currentWorkout) return;
 
+        // Очищаем canvas
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         
-        // Рисуем фоновую картинку если есть (синхронно)
+        // Сохраняем состояние контекста
+        this.ctx.save();
+        
+        // Применяем трансформации для фиксированного разрешения
+        this.ctx.translate(this.offsetX, this.offsetY);
+        this.ctx.scale(this.scale, this.scale);
+        
+        // Рисуем фоновую картинку если есть
         if (this.backgroundImage) {
             this.drawBackgroundSync();
         }
@@ -552,6 +601,9 @@ class TrinkyApp {
         
         // Рисуем данные Strava
         this.drawStravaData();
+        
+        // Восстанавливаем состояние контекста
+        this.ctx.restore();
     }
 
     drawBackgroundSync() {
@@ -575,27 +627,27 @@ class TrinkyApp {
     }
 
     drawBackgroundImage(img) {
-        // Получаем размеры canvas (уже с учетом DPR)
-        const canvasWidth = this.canvas.width / (window.devicePixelRatio || 1);
-        const canvasHeight = this.canvas.height / (window.devicePixelRatio || 1);
+        // Используем фиксированное разрешение 1080x1920
+        const canvasWidth = this.internalWidth;
+        const canvasHeight = this.internalHeight;
                 
-                const imgAspect = img.width / img.height;
+        const imgAspect = img.width / img.height;
         const canvasAspect = canvasWidth / canvasHeight;
                 
-                let drawWidth, drawHeight, drawX, drawY;
+        let drawWidth, drawHeight, drawX, drawY;
                 
-        // Адаптируем изображение под высоту канваса (cover по высоте)
+        // Адаптируем изображение под фиксированное разрешение (cover)
         if (imgAspect > canvasAspect) {
             // Изображение шире - масштабируем по высоте и обрезаем по бокам
-                drawHeight = canvasHeight;
-                drawWidth = drawHeight * imgAspect;
-                drawX = (canvasWidth - drawWidth) / 2;
-                drawY = 0;
+            drawHeight = canvasHeight;
+            drawWidth = drawHeight * imgAspect;
+            drawX = (canvasWidth - drawWidth) / 2;
+            drawY = 0;
         } else {
             // Изображение уже - масштабируем по ширине и обрезаем сверху/снизу
-                    drawWidth = canvasWidth;
+            drawWidth = canvasWidth;
             drawHeight = drawWidth / imgAspect;
-                    drawX = 0;
+            drawX = 0;
             drawY = (canvasHeight - drawHeight) / 2;
         }
         
@@ -618,13 +670,13 @@ class TrinkyApp {
         // Добавляем полупрозрачную черную подложку для контраста
         this.drawOrangeOverlay();
         
-        console.log('🖼️ Background image drawn to canvas (height-adaptive)');
+        console.log('🖼️ Background image drawn to fixed resolution canvas');
     }
 
     drawOrangeOverlay() {
-        // Получаем размеры canvas (без DPR)
-        const canvasWidth = this.canvas.width / (window.devicePixelRatio || 1);
-        const canvasHeight = this.canvas.height / (window.devicePixelRatio || 1);
+        // Используем фиксированное разрешение
+        const canvasWidth = this.internalWidth;
+        const canvasHeight = this.internalHeight;
         
         // Рисуем полупрозрачную черную подложку
         this.ctx.fillStyle = 'rgba(0, 0, 0, 0.4)'; // Черный с прозрачностью 40%
@@ -927,9 +979,9 @@ class TrinkyApp {
     }
 
     drawStravaDataCard() {
-        // Получаем реальные размеры канваса (без DPR)
-        const canvasWidth = this.canvas.width / (window.devicePixelRatio || 1);
-        const canvasHeight = this.canvas.height / (window.devicePixelRatio || 1);
+        // Используем фиксированное разрешение
+        const canvasWidth = this.internalWidth;
+        const canvasHeight = this.internalHeight;
         
         // Определяем соотношение сторон
         const connectedState = document.getElementById('connected');
@@ -1216,9 +1268,9 @@ class TrinkyApp {
     }
 
     drawDemoRoute() {
-        // Получаем реальные размеры канваса (без DPR)
-        const width = this.canvas.width / (window.devicePixelRatio || 1);
-        const height = this.canvas.height / (window.devicePixelRatio || 1);
+        // Используем фиксированное разрешение
+        const width = this.internalWidth;
+        const height = this.internalHeight;
         
         // Проверяем соотношение для определения отступов
         const connectedState = document.getElementById('connected');
@@ -1574,18 +1626,18 @@ class TrinkyApp {
         });
         document.querySelector(`[data-ratio="${ratio}"]`).classList.add('active');
         
-        // Update preview-area ratio с правильной формулой
+        // Update preview-area ratio
         const previewArea = document.querySelector('.preview-area');
         const connectedState = document.getElementById('connected');
         
         if (previewArea && connectedState) {
-            // Просто переключаем ratio классы
+            // Переключаем ratio классы
             previewArea.classList.remove('ratio-9-16', 'ratio-4-5');
             connectedState.classList.remove('ratio-9-16', 'ratio-4-5');
             
             switch(ratio) {
                 case '9:16':
-                    // Для 9:16 рассчитываем от доступной высоты экрана
+                    // Для 9:16 используем стандартную формулу
                     const screenHeight = window.innerHeight;
                     const navBarHeight = 60;
                     const tabBarHeight = 180;
@@ -1597,7 +1649,7 @@ class TrinkyApp {
                     previewArea.classList.add('ratio-9-16');
                     connectedState.classList.add('ratio-9-16');
                     
-                    // Устанавливаем правильные размеры для preview-area
+                    // Устанавливаем размеры для preview-area
                     previewArea.style.setProperty('width', `${viewportWidth9_16}px`, 'important');
                     previewArea.style.setProperty('height', `${viewportHeight9_16}px`, 'important');
                     previewArea.style.setProperty('max-width', `${viewportWidth9_16}px`, 'important');
@@ -1610,44 +1662,38 @@ class TrinkyApp {
                     console.log('🔧 Установлено соотношение 9:16:', viewportWidth9_16, 'x', viewportHeight9_16);
                     break;
                 case '4:5':
-                    // Для 4:5 контейнер превью остается на своем месте (по высоте)
-                    // А canvas внутри рассчитывается по ширине экрана
+                    // Для 4:5 используем ту же логику что и для 9:16
                     const screenHeight4_5 = window.innerHeight;
-                    const screenWidth4_5 = window.innerWidth;
                     const navBarHeight4_5 = 60;
                     const tabBarHeight4_5 = 180;
                     const safeAreaInsets4_5 = 0;
                     
-                    // Контейнер превью - фиксированная высота (как для 9:16)
-                    const containerHeight4_5 = screenHeight4_5 - navBarHeight4_5 - tabBarHeight4_5 - safeAreaInsets4_5;
-                    
-                    // Canvas для 4:5 - рассчитывается по ширине экрана
-                    const canvasWidth4_5 = screenWidth4_5;
-                    const canvasHeight4_5 = screenWidth4_5 * 5 / 4;
+                    const viewportHeight4_5 = screenHeight4_5 - navBarHeight4_5 - tabBarHeight4_5 - safeAreaInsets4_5;
+                    const viewportWidth4_5 = viewportHeight4_5 * 4 / 5;
                     
                     previewArea.classList.add('ratio-4-5');
                     connectedState.classList.add('ratio-4-5');
                     
-                    // Контейнер превью - остается на своем месте
-                    previewArea.style.setProperty('width', '100%', 'important');
-                    previewArea.style.setProperty('height', `${containerHeight4_5}px`, 'important');
-                    previewArea.style.setProperty('max-width', '100%', 'important');
-                    previewArea.style.setProperty('max-height', `${containerHeight4_5}px`, 'important');
+                    // Устанавливаем размеры для preview-area
+                    previewArea.style.setProperty('width', `${viewportWidth4_5}px`, 'important');
+                    previewArea.style.setProperty('height', `${viewportHeight4_5}px`, 'important');
+                    previewArea.style.setProperty('max-width', `${viewportWidth4_5}px`, 'important');
+                    previewArea.style.setProperty('max-height', `${viewportHeight4_5}px`, 'important');
                     
-                    // Connected state - заполняет контейнер
                     connectedState.style.setProperty('aspect-ratio', '4 / 5', 'important');
                     connectedState.style.setProperty('width', '100%', 'important');
                     connectedState.style.setProperty('height', '100%', 'important');
                     
-                    console.log('🔧 Установлено соотношение 4:5 - контейнер:', '100% x', containerHeight4_5, 'canvas:', canvasWidth4_5, 'x', canvasHeight4_5);
+                    console.log('🔧 Установлено соотношение 4:5:', viewportWidth4_5, 'x', viewportHeight4_5);
                     break;
             }
         }
         
         console.log('🔧 Ratio изменен на:', ratio, '- превью обновлен');
         
-        // Перерисовываем canvas после изменения соотношения
+        // Пересчитываем viewport и перерисовываем canvas
         setTimeout(() => {
+            this.calculateViewport();
             this.resizeCanvas();
             console.log('🔧 Canvas перерисован после изменения соотношения');
         }, 100);
@@ -1928,8 +1974,9 @@ class TrinkyApp {
             // Просто показываем connected state
             console.log('🔧 Connected state показан');
             
-            // Перерисовываем canvas для правильного размера
+            // Пересчитываем viewport и перерисовываем canvas
             setTimeout(() => {
+                this.calculateViewport();
                 this.resizeCanvas();
                 console.log('🔧 Canvas перерисован при показе connected state');
             }, 100);
@@ -2155,22 +2202,22 @@ class TrinkyApp {
             return;
         }
 
-        // Create a new canvas with exact 1080x1920 resolution (оригинальный размер)
+        // Create a new canvas with exact 1080x1920 resolution (фиксированное разрешение)
         const exportCanvas = document.createElement('canvas');
-        exportCanvas.width = 1080;
-        exportCanvas.height = 1920;
+        exportCanvas.width = this.internalWidth;
+        exportCanvas.height = this.internalHeight;
         const exportCtx = exportCanvas.getContext('2d');
 
         // Fill background
         exportCtx.fillStyle = '#000000';
-        exportCtx.fillRect(0, 0, 1080, 1920);
+        exportCtx.fillRect(0, 0, this.internalWidth, this.internalHeight);
 
-        // Draw route with proper scaling for 1080x1920
+        // Draw route with proper scaling for фиксированное разрешение
         const padding = 40;
-        const routeWidth = 1080 - (padding * 2);
-        const routeHeight = 1920 - (padding * 2) - 200; // Leave space for stats
+        const routeWidth = this.internalWidth - (padding * 2);
+        const routeHeight = this.internalHeight - (padding * 2) - 200; // Leave space for stats
 
-        // Generate route points for export resolution (1080x1920)
+        // Generate route points for export resolution
         const points = this.generateDemoRoute(routeWidth, routeHeight, 0);
         
         // Draw route with French flag colors
@@ -2208,7 +2255,7 @@ class TrinkyApp {
         link.href = exportCanvas.toDataURL('image/png');
         link.click();
 
-        console.log('📸 Exported workout image: 1080x1920 (оригинальный размер)');
+        console.log(`📸 Exported workout image: ${this.internalWidth}x${this.internalHeight} (фиксированное разрешение)`);
     }
 
     drawExportPathSegment(ctx, points, start, end, offsetX) {
