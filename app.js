@@ -392,9 +392,12 @@ class TrinkyApp {
         this.canvas.width = this.internalWidth * dpr;
         this.canvas.height = this.internalHeight * dpr;
         
-        // Canvas отображается в фиксированном размере
+        // Canvas отображается в фиксированном размере (без масштабирования)
         this.canvas.style.width = this.internalWidth + 'px';
         this.canvas.style.height = this.internalHeight + 'px';
+        this.canvas.style.position = 'absolute';
+        this.canvas.style.top = '0';
+        this.canvas.style.left = '0';
         
         // Масштабируем контекст для четкого рендеринга
         this.ctx.scale(dpr, dpr);

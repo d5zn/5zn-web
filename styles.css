@@ -91,6 +91,15 @@ html, body {
     border-radius: 24px;              /* опционально, чтобы красиво выглядело в демо */
 }
 
+/* Canvas внутри connected должен быть абсолютно позиционирован */
+#connected canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1080px;
+    height: 1920px;
+}
+
 /* Preview area с ratio 9:16 */
 .preview-area.ratio-9-16 {
     /* Просто flex, JavaScript будет управлять размерами */
