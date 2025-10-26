@@ -1750,17 +1750,36 @@ class TrinkyApp {
                     const logoutBtn = document.getElementById('logout-btn');
                     
                     if (workoutBtn) {
-                        workoutBtn.addEventListener('click', () => this.openWorkoutSelector());
+                        // Clone and replace to remove old listeners
+                        const newWorkoutBtn = workoutBtn.cloneNode(true);
+                        workoutBtn.parentNode.replaceChild(newWorkoutBtn, workoutBtn);
+                        
+                        newWorkoutBtn.addEventListener('click', () => {
+                            console.log('🔵 Workout selector button clicked');
+                            this.openWorkoutSelector();
+                        });
                         console.log('✅ Workout selector button listener added');
                     }
                     
                     if (shareBtn) {
-                        shareBtn.addEventListener('click', () => this.shareData());
+                        const newShareBtn = shareBtn.cloneNode(true);
+                        shareBtn.parentNode.replaceChild(newShareBtn, shareBtn);
+                        
+                        newShareBtn.addEventListener('click', () => {
+                            console.log('🔵 Share button clicked');
+                            this.shareData();
+                        });
                         console.log('✅ Share button listener added');
                     }
                     
                     if (logoutBtn) {
-                        logoutBtn.addEventListener('click', () => this.logout());
+                        const newLogoutBtn = logoutBtn.cloneNode(true);
+                        logoutBtn.parentNode.replaceChild(newLogoutBtn, logoutBtn);
+                        
+                        newLogoutBtn.addEventListener('click', () => {
+                            console.log('🔵 Logout button clicked');
+                            this.logout();
+                        });
                         console.log('✅ Logout button listener added');
                     }
                 }, 10);
