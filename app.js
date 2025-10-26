@@ -234,7 +234,7 @@ class TrinkyApp {
             setTimeout(() => {
                 this.resizeCanvas();
                 this.forceMobileDisplay();
-                this.applyScale();
+                this.applyFigmaScale();
             }, 100);
         });
         
@@ -262,35 +262,47 @@ class TrinkyApp {
     }
     
     setupScaling() {
-        // НОВАЯ СИСТЕМА: Настраиваем масштабирование как в предложенном решении
+        // СИСТЕМА КАК В FIGMA: Фиксированный макет + масштабирование viewport
         this.viewport = document.getElementById('viewport');
         this.connected = document.getElementById('connected');
         
         if (this.viewport && this.connected) {
             // Применяем масштабирование при загрузке
-            this.applyScale();
+            this.applyFigmaScale();
             
             // Наблюдаем за изменениями размера viewport
             if (window.ResizeObserver) {
-                const ro = new ResizeObserver(() => this.applyScale());
+                const ro = new ResizeObserver(() => this.applyFigmaScale());
                 ro.observe(this.viewport);
             }
         }
     }
     
-    applyScale() {
+    applyFigmaScale() {
         if (!this.viewport || !this.connected) return;
         
         const vpRect = this.viewport.getBoundingClientRect();
         const scale = Math.min(vpRect.width / this.internalWidth, vpRect.height / this.internalHeight);
         
-        // Масштабируем только визуально. ВНУТРИ всё остается как для 1080×1920.
+        // FIGMA ПРИНЦИП: Масштабируем весь макет как единое целое
         this.connected.style.transform = `scale(${scale})`;
+        this.connected.style.transformOrigin = 'center center';
         
-        console.log('📺 Масштабирование применено:', {
+        // Центрируем масштабированный макет
+        const scaledWidth = this.internalWidth * scale;
+        const scaledHeight = this.internalHeight * scale;
+        const offsetX = (vpRect.width - scaledWidth) / 2;
+        const offsetY = (vpRect.height - scaledHeight) / 2;
+        
+        this.connected.style.left = offsetX + 'px';
+        this.connected.style.top = offsetY + 'px';
+        
+        console.log('🎨 FIGMA МАСШТАБИРОВАНИЕ:', {
             viewport: `${vpRect.width}x${vpRect.height}`,
             макет: `${this.internalWidth}x${this.internalHeight}`,
-            scale: scale.toFixed(3)
+            scale: scale.toFixed(3),
+            scaled: `${scaledWidth.toFixed(1)}x${scaledHeight.toFixed(1)}`,
+            offset: `${offsetX.toFixed(1)}, ${offsetY.toFixed(1)}`
         });
     }
 
@@ -2001,7 +2013,7 @@ class TrinkyApp {
             setTimeout(() => {
                 this.calculateViewport();
                 this.resizeCanvas();
-                this.applyScale();
+                this.applyFigmaScale();
                 console.log('🔧 Canvas перерисован при показе connected state');
             }, 100);
             

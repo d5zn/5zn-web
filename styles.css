@@ -78,17 +78,20 @@ html, body {
     place-items: center;
 }
 
-/* Фиксированный корень 1080×1920. НИКОГДА не меняет своих реальных размеров. */
+/* FIGMA СИСТЕМА: Фиксированный макет 1080×1920 */
 #connected {
-    position: relative;
+    position: absolute;
     width: 1080px;
     height: 1920px;
-    /* Важно для масштабирования из угла/центра */
+    /* Важно для масштабирования из центра */
     transform-origin: center center;
     /* Подсказка браузеру: этот узел часто будет трансформироваться */
     will-change: transform;
-    overflow: hidden;                 /* ничего за края */
-    border-radius: 24px;              /* опционально, чтобы красиво выглядело в демо */
+    overflow: hidden;
+    border-radius: 24px;
+    /* Позиционирование будет управляться JavaScript */
+    left: 0;
+    top: 0;
 }
 
 /* Canvas внутри connected должен быть абсолютно позиционирован */
