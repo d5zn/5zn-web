@@ -59,11 +59,14 @@ html, body {
     background-repeat: repeat;
 }
 
-/* Viewport контейнер */
+/* Подход как в polymer-workshop: обертка + canvas */
 #viewport {
     position: relative;
     width: 100%;
     height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     overflow: hidden;
 }
 
@@ -77,29 +80,32 @@ html, body {
     justify-content: center;
 }
 
-/* Фиксированный макет 1080×1920 */
+/* Обертка как в polymer-workshop: flex-1 flex items-center justify-center max-w-[500px] w-[90%] h-full max-h-[100%] m-auto overflow-hidden */
 #connected {
-    position: absolute;
-    width: 1080px;
-    height: 1920px;
-    transform-origin: center center;
-    will-change: transform;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 500px;
+    width: 90%;
+    height: 100%;
+    max-height: 100%;
+    margin: auto;
     overflow: hidden;
-    border-radius: 24px;
-    left: 50%;
-    top: 50%;
-    margin-left: -540px;
-    margin-top: -960px;
 }
 
-/* Canvas внутри макета */
+/* Canvas как в polymer-workshop: width="800" height="1000" style="max-width: 100%; max-height: 95%; margin: auto; aspect-ratio: 4 / 5; transition: height 0.3s ease-out, transform 0.3s ease-out;" */
 #connected canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
     width: 1080px;
     height: 1920px;
+    max-width: 100%;
+    max-height: 95%;
+    margin: auto;
+    aspect-ratio: 9 / 16;
+    border-radius: 24px;
+    transition: height 0.3s ease-out, transform 0.3s ease-out;
 }
+
 
 /* Preview area с ratio 9:16 */
 .preview-area.ratio-9-16 {

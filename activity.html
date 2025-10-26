@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="description" content="5zn-web - Activity Details">
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; script-src * 'unsafe-inline' 'unsafe-eval' 'unsafe-hashes'; style-src * 'unsafe-inline'; img-src * data: blob:; connect-src *; object-src *; media-src *; font-src *; worker-src *; manifest-src *; form-action *; base-uri *;">
+    <title>Activity - 5zn.io</title>
+    <link rel="stylesheet" href="styles.css?v=56">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+        
+        .activity-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .loading {
+            text-align: center;
+        }
+        
+        .spinner {
+            border: 3px solid #333;
+            border-top: 3px solid #fff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .activity-content {
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        .activity-header {
+            margin-bottom: 30px;
+        }
+        
+        .activity-title {
+            font-size: 28px;
+            font-weight: 300;
+            margin-bottom: 10px;
+        }
+        
+        .activity-date {
+            font-size: 14px;
+            color: #888;
+        }
+        
+        .canvas-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 9 / 16;
+            background: #111;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        #activity-canvas {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: #111;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #222;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #888;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: 300;
+        }
+        
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 20px;
+            background: #fff;
+            color: #000;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: opacity 0.2s;
+        }
+        
+        .back-button:hover {
+            opacity: 0.8;
+        }
+        
+        .error-message {
+            text-align: center;
+            color: #ff4444;
+            padding: 20px;
+        }
+        
+        @media (max-width: 480px) {
+            .activity-title {
+                font-size: 24px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="activity-container">
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Загрузка активности...</p>
+        </div>
+        
+        <div id="error" class="error-message hidden">
+            <h2>Ошибка загрузки</h2>
+            <p id="error-text"></p>
+            <button class="back-button" onclick="window.location.href='/'">← Назад</button>
+        </div>
+        
+        <div id="content" class="activity-content hidden">
+            <div class="activity-header">
+                <h1 class="activity-title" id="activity-title">Activity</h1>
+                <p class="activity-date" id="activity-date"></p>
+            </div>
+            
+            <div class="canvas-wrapper">
+                <canvas id="activity-canvas"></canvas>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">DISTANCE</div>
+                    <div class="stat-value" id="distance">—</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">ELEVATION</div>
+                    <div class="stat-value" id="elevation">—</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">TIME</div>
+                    <div class="stat-value" id="time">—</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">AVG SPEED</div>
+                    <div class="stat-value" id="speed">—</div>
+                </div>
+            </div>
+            
+            <button class="back-button" onclick="window.location.href='/'">← Назад к списку</button>
+        </div>
+    </div>
+
+    <script src="polyline.js"></script>
+    <script>
+        class ActivityViewer {
+            constructor() {
+                this.canvas = document.getElementById('activity-canvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.stravaToken = localStorage.getItem('strava_token');
+                this.activityId = this.getActivityIdFromURL();
+                
+                if (!this.activityId) {
+                    this.showError('ID активности не указан в URL');
+                    return;
+                }
+                
+                if (!this.stravaToken || this.stravaToken === 'YOUR_STRAVA_CLIENT_ID') {
+                    this.showError('Необходимо подключиться к Strava');
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 2000);
+                    return;
+                }
+                
+                this.initCanvas();
+                this.loadActivity();
+            }
+            
+            getActivityIdFromURL() {
+                const params = new URLSearchParams(window.location.search);
+                return params.get('activityId');
+            }
+            
+            initCanvas() {
+                // Фиксированные размеры для отрисовки
+                this.canvas.width = 1080;
+                this.canvas.height = 1920;
+            }
+            
+            async loadActivity() {
+                try {
+                    const response = await fetch(`https://www.strava.com/api/v3/activities/${this.activityId}`, {
+                        headers: {
+                            'Authorization': `Bearer ${this.stravaToken}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                    
+                    const activity = await response.json();
+                    this.displayActivity(activity);
+                } catch (error) {
+                    console.error('Error loading activity:', error);
+                    this.showError('Не удалось загрузить активность');
+                }
+            }
+            
+            displayActivity(activity) {
+                // Скрываем загрузку, показываем контент
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('content').classList.remove('hidden');
+                
+                // Заполняем данные
+                document.getElementById('activity-title').textContent = activity.name || 'Activity';
+                document.getElementById('activity-date').textContent = this.formatDate(activity.start_date);
+                
+                document.getElementById('distance').textContent = this.formatDistance(activity.distance);
+                document.getElementById('elevation').textContent = this.formatElevation(activity.total_elevation_gain);
+                document.getElementById('time').textContent = this.formatTime(activity.moving_time);
+                document.getElementById('speed').textContent = this.formatSpeed(activity.average_speed);
+                
+                // Отрисовываем маршрут
+                this.drawRoute(activity);
+            }
+            
+            drawRoute(activity) {
+                if (!this.ctx) return;
+                
+                // Очищаем canvas
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Заполняем фон
+                this.ctx.fillStyle = '#000000';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Получаем точки маршрута
+                const map = activity.map?.polyline || activity.map?.summary_polyline;
+                
+                if (!map) {
+                    // Если нет маршрута, рисуем заглушку
+                    this.drawNoRouteMessage();
+                    return;
+                }
+                
+                const points = this.decodePolyline(map);
+                if (!points || points.length === 0) {
+                    this.drawNoRouteMessage();
+                    return;
+                }
+                
+                // Отрисовываем маршрут с градиентом французского флага
+                this.drawRouteWithGradient(points);
+            }
+            
+            drawRouteWithGradient(points) {
+                const width = this.canvas.width;
+                const height = this.canvas.height;
+                
+                // Рассчитываем границы и масштаб для правильного размещения маршрута
+                const bounds = this.calculateBounds(points);
+                const scale = this.calculateScale(bounds, width - 100, height - 300);
+                
+                // Преобразуем координаты в пиксели canvas
+                const canvasPoints = points.map(([lat, lng]) => {
+                    const x = (lng - bounds.minLng) * scale + 50;
+                    const y = (bounds.maxLat - lat) * scale + 100; // Инвертируем Y
+                    return { x, y };
+                });
+                
+                // Рисуем маршрут с градиентом французского флага
+                this.ctx.lineWidth = 4;
+                this.ctx.lineCap = 'round';
+                this.ctx.lineJoin = 'round';
+                
+                // Находим границы линии для правильного градиента
+                let minX = Math.min(...canvasPoints.map(p => p.x));
+                let maxX = Math.max(...canvasPoints.map(p => p.x));
+                
+                // Создаем линейный градиент
+                const gradient = this.ctx.createLinearGradient(minX, 0, maxX, 0);
+                gradient.addColorStop(0, '#002395');    // Синий (французский синий)
+                gradient.addColorStop(0.4, '#FFFFFF');  // Белый (плавный переход)
+                gradient.addColorStop(0.6, '#FFFFFF');  // Белый (плавный переход)
+                gradient.addColorStop(1, '#ED2939');     // Красный (французский красный)
+                
+                this.ctx.strokeStyle = gradient;
+                
+                // Рисуем путь
+                this.ctx.beginPath();
+                for (let i = 0; i < canvasPoints.length; i++) {
+                    if (i === 0) {
+                        this.ctx.moveTo(canvasPoints[i].x, canvasPoints[i].y);
+                    } else {
+                        this.ctx.lineTo(canvasPoints[i].x, canvasPoints[i].y);
+                    }
+                }
+                this.ctx.stroke();
+            }
+            
+            decodePolyline(encoded) {
+                if (!encoded || encoded.length < 10) return null;
+                
+                if (typeof window.polyline !== 'undefined' && window.polyline.decode) {
+                    return window.polyline.decode(encoded);
+                }
+                
+                // Fallback decoder - точно такой же как в app.js
+                const coordinates = [];
+                let index = 0;
+                let lat = 0;
+                let lng = 0;
+                
+                while (index < encoded.length) {
+                    let shift = 0;
+                    let result = 0;
+                    let byte;
+                    
+                    do {
+                        byte = encoded.charCodeAt(index++) - 63;
+                        result |= (byte & 0x1f) << shift;
+                        shift += 5;
+                    } while (byte >= 0x20);
+                    
+                    const deltaLat = (result & 1) ? ~(result >> 1) : (result >> 1);
+                    lat += deltaLat;
+                    
+                    shift = 0;
+                    result = 0;
+                    
+                    do {
+                        byte = encoded.charCodeAt(index++) - 63;
+                        result |= (byte & 0x1f) << shift;
+                        shift += 5;
+                    } while (byte >= 0x20);
+                    
+                    const deltaLng = (result & 1) ? ~(result >> 1) : (result >> 1);
+                    lng += deltaLng;
+                    
+                    // Формат как в app.js: [lat, lng] (широта, долгота)
+                    coordinates.push([lat / 1e5, lng / 1e5]);
+                }
+                
+                return coordinates;
+            }
+            
+            calculateBounds(points) {
+                let minLat = Infinity, maxLat = -Infinity;
+                let minLng = Infinity, maxLng = -Infinity;
+                
+                for (const point of points) {
+                    minLat = Math.min(minLat, point[0]);
+                    maxLat = Math.max(maxLat, point[0]);
+                    minLng = Math.min(minLng, point[1]);
+                    maxLng = Math.max(maxLng, point[1]);
+                }
+                
+                return { minLat, maxLat, minLng, maxLng };
+            }
+            
+            calculateScale(bounds, width, height) {
+                const latRange = bounds.maxLat - bounds.minLat;
+                const lngRange = bounds.maxLng - bounds.minLng;
+                
+                const scaleX = width / lngRange;
+                const scaleY = height / latRange;
+                
+                return Math.min(scaleX, scaleY);
+            }
+            
+            drawNoRouteMessage() {
+                this.ctx.fillStyle = '#333';
+                this.ctx.font = 'bold 32px -apple-system';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText('Нет данных о маршруте', this.canvas.width / 2, this.canvas.height / 2);
+            }
+            
+            formatDate(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('ru-RU', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            }
+            
+            formatDistance(meters) {
+                if (!meters) return '—';
+                if (meters >= 1000) {
+                    return `${(meters / 1000).toFixed(1)} km`;
+                }
+                return `${meters} m`;
+            }
+            
+            formatElevation(meters) {
+                if (!meters) return '—';
+                return `${meters} m`;
+            }
+            
+            formatTime(seconds) {
+                if (!seconds) return '—';
+                const hours = Math.floor(seconds / 3600);
+                const minutes = Math.floor((seconds % 3600) / 60);
+                if (hours > 0) {
+                    return `${hours}h ${minutes}m`;
+                }
+                return `${minutes}m`;
+            }
+            
+            formatSpeed(mps) {
+                if (!mps) return '—';
+                const kmh = mps * 3.6;
+                return `${kmh.toFixed(1)} km/h`;
+            }
+            
+            showError(message) {
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('error').classList.remove('hidden');
+                document.getElementById('error-text').textContent = message;
+            }
+        }
+        
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', () => {
+            new ActivityViewer();
+        });
+    </script>
+</body>
+</html>

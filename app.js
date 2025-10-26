@@ -100,7 +100,6 @@ class TrinkyApp {
         
         // Force display after initialization
         setTimeout(() => {
-            this.forceMobileDisplay();
         }, 100);
     }
     
@@ -217,26 +216,28 @@ class TrinkyApp {
     }
 
     setupMobileOptimizations() {
-        // Force mobile display
-        this.forceMobileDisplay();
+        // Подход как в polymer-workshop: простое CSS масштабирование
+        const container = document.getElementById('mobile-container');
+        const previewArea = document.querySelector('.preview-area');
         
-        // НОВАЯ СИСТЕМА: Настраиваем масштабирование
-        this.setupScaling();
+        if (container && previewArea) {
+            container.style.setProperty('width', '100vw', 'important');
+            container.style.setProperty('height', '100vh', 'important');
+            container.style.setProperty('display', 'flex', 'important');
+            container.style.setProperty('flex-direction', 'column', 'important');
+            container.style.setProperty('margin', '0', 'important');
+            container.style.setProperty('padding', '0', 'important');
+            container.style.setProperty('overflow', 'hidden', 'important');
+            
+            previewArea.style.setProperty('flex', '1', 'important');
+            previewArea.style.setProperty('display', 'flex', 'important');
+            previewArea.style.setProperty('align-items', 'center', 'important');
+            previewArea.style.setProperty('justify-content', 'center', 'important');
+        }
         
-        // Handle orientation changes
+        // Обработчики событий
         window.addEventListener('orientationchange', () => {
-            setTimeout(() => {
-                this.resizeCanvas();
-                this.forceMobileDisplay();
-                this.applyFigmaScale();
-            }, 100);
-        });
-        
-        // Handle viewport changes
-        window.addEventListener('resize', () => {
-            this.resizeCanvas();
-            this.forceMobileDisplay();
-            this.applyScale();
+            setTimeout(() => this.updateCanvas(), 100);
         });
         
         // Prevent zoom on double tap for mobile
@@ -254,79 +255,17 @@ class TrinkyApp {
             e.preventDefault();
         });
     }
-    
-    setupScaling() {
-        // СИСТЕМА КАК В FIGMA: Фиксированный макет + масштабирование viewport
-        this.viewport = document.getElementById('viewport');
-        this.connected = document.getElementById('connected');
-        
-        if (this.viewport && this.connected) {
-            // Применяем масштабирование при загрузке
-            this.applyFigmaScale();
-            
-            // Наблюдаем за изменениями размера viewport
-            if (window.ResizeObserver) {
-                const ro = new ResizeObserver(() => this.applyFigmaScale());
-                ro.observe(this.viewport);
-            }
-        }
-    }
-    
-    applyFigmaScale() {
-        if (!this.viewport || !this.connected) return;
-        
-        const vpRect = this.viewport.getBoundingClientRect();
-        const scale = Math.min(vpRect.width / this.internalWidth, vpRect.height / this.internalHeight);
-        
-        // FIGMA ПРИНЦИП: Масштабируем весь макет как единое целое
-        // Используем только transform для масштабирования и центрирования
-        this.connected.style.transform = `translate(50%, 50%) scale(${scale}) translate(-50%, -50%)`;
-        this.connected.style.transformOrigin = 'center center';
-        
-        // Убираем left/top, используем только transform
-        this.connected.style.left = '50%';
-        this.connected.style.top = '50%';
-        this.connected.style.marginLeft = `-${this.internalWidth / 2}px`;
-        this.connected.style.marginTop = `-${this.internalHeight / 2}px`;
-        
-        console.log('🎨 FIGMA МАСШТАБИРОВАНИЕ:', {
-            viewport: `${vpRect.width}x${vpRect.height}`,
-            макет: `${this.internalWidth}x${this.internalHeight}`,
-            scale: scale.toFixed(3)
-        });
-    }
-
-    forceMobileDisplay() {
-        const container = document.getElementById('mobile-container');
-        const previewArea = document.querySelector('.preview-area');
-        
-        if (container && previewArea) {
-            container.style.setProperty('width', '100vw', 'important');
-            container.style.setProperty('height', '100vh', 'important');
-            container.style.setProperty('display', 'flex', 'important');
-            container.style.setProperty('flex-direction', 'column', 'important');
-            container.style.setProperty('margin', '0', 'important');
-            container.style.setProperty('padding', '0', 'important');
-            container.style.setProperty('overflow', 'hidden', 'important');
-            
-            previewArea.style.setProperty('flex', '1', 'important');
-            previewArea.style.setProperty('display', 'flex', 'important');
-            previewArea.style.setProperty('align-items', 'center', 'important');
-            previewArea.style.setProperty('justify-content', 'center', 'important');
-            
-            console.log('🔧 Mobile display установлен');
-        }
-    }
 
     setupCanvas() {
         this.canvas = document.getElementById('route-canvas');
         if (this.canvas) {
             this.ctx = this.canvas.getContext('2d');
-            this.resizeCanvas();
+            
+            // Настраиваем canvas и масштабирование
+            this.updateCanvas();
             
             window.addEventListener('resize', () => {
-                this.resizeCanvas();
-                this.applyFigmaScale();
+                this.updateCanvas();
             });
             
             this.setupImageManipulation();
@@ -335,17 +274,18 @@ class TrinkyApp {
         }
     }
     
-    // calculateViewport удален - больше не нужен
-
-    resizeCanvas() {
+    updateCanvas() {
         if (!this.canvas) return;
         
-        // Canvas рисуется в фиксированном разрешении 1080x1920
+        // Подход как в polymer-workshop: фиксированные размеры + CSS масштабирование
         const rawDpr = window.devicePixelRatio || 1;
         const dpr = Math.min(rawDpr, 2);
         
+        // Canvas рисуется в фиксированном разрешении
         this.canvas.width = this.internalWidth * dpr;
         this.canvas.height = this.internalHeight * dpr;
+        
+        // CSS управляет отображением
         this.canvas.style.width = this.internalWidth + 'px';
         this.canvas.style.height = this.internalHeight + 'px';
         
@@ -1658,8 +1598,8 @@ class TrinkyApp {
         
         // Пересчитываем viewport и перерисовываем canvas
         setTimeout(() => {
-            this.resizeCanvas();
-            this.applyScale();
+            this.updateCanvas();
+            this.applyFigmaScale();
             console.log('🔧 Canvas перерисован после изменения соотношения');
         }, 100);
     }
@@ -1941,7 +1881,7 @@ class TrinkyApp {
             
             // Пересчитываем viewport и перерисовываем canvas
             setTimeout(() => {
-                this.resizeCanvas();
+                this.updateCanvas();
                 this.applyFigmaScale();
                 console.log('🔧 Canvas перерисован при показе connected state');
             }, 100);
@@ -2020,20 +1960,29 @@ class TrinkyApp {
         workoutList.innerHTML = this.workouts.map((workout, index) => `
             <div class="workout-item ${workout.id === this.currentWorkout?.id ? 'active' : ''}" 
                  data-workout-id="${workout.id}">
-                <h4 class="workout-name">${workout.name || 'Unnamed Workout'}</h4>
-                <div class="workout-stats">
-                    <div class="workout-stat">
-                        <span class="workout-stat-label">Distance</span>
-                        <span class="workout-stat-value">${this.formatDistance(workout.distance)}</span>
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
+                    <div style="flex: 1;">
+                        <h4 class="workout-name">${workout.name || 'Unnamed Workout'}</h4>
+                        <div class="workout-stats">
+                            <div class="workout-stat">
+                                <span class="workout-stat-label">Distance</span>
+                                <span class="workout-stat-value">${this.formatDistance(workout.distance)}</span>
+                            </div>
+                            <div class="workout-stat">
+                                <span class="workout-stat-label">Elevation</span>
+                                <span class="workout-stat-value">${this.formatElevation(workout.total_elevation_gain)}</span>
+                            </div>
+                            <div class="workout-stat">
+                                <span class="workout-stat-label">Time</span>
+                                <span class="workout-stat-value">${this.formatTime(workout.moving_time)}</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="workout-stat">
-                        <span class="workout-stat-label">Elevation</span>
-                        <span class="workout-stat-value">${this.formatElevation(workout.total_elevation_gain)}</span>
-                    </div>
-                    <div class="workout-stat">
-                        <span class="workout-stat-label">Time</span>
-                        <span class="workout-stat-value">${this.formatTime(workout.moving_time)}</span>
-                    </div>
+                    <a href="activity.html?activityId=${workout.id}" 
+                       style="margin-left: 10px; padding: 8px 12px; background: #fff; color: #000; text-decoration: none; border-radius: 4px; font-size: 12px; white-space: nowrap;"
+                       onclick="event.stopPropagation();">
+                        View
+                    </a>
                 </div>
             </div>
         `).join('');
