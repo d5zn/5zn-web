@@ -354,31 +354,26 @@ class TrinkyApp {
         const containerWidth = containerRect.width;
         const containerHeight = containerRect.height;
         
-        // Get device pixel ratio, но ограничиваем для производительности
+        // Get device pixel ratio для четкого рендеринга
         const rawDpr = window.devicePixelRatio || 1;
         const dpr = Math.min(rawDpr, 2);
         
-        // Устанавливаем реальный размер canvas в фиксированном разрешении
+        // НОВАЯ СИСТЕМА: Canvas всегда рисуется в фиксированном разрешении
         this.canvas.width = this.internalWidth * dpr;
         this.canvas.height = this.internalHeight * dpr;
         
-        // Устанавливаем размеры canvas равными контейнеру
+        // Размеры отображения canvas равны контейнеру
         this.canvas.style.width = containerWidth + 'px';
         this.canvas.style.height = containerHeight + 'px';
-        
-        // Применяем CSS transform для масштабирования canvas как единого целого
-        this.canvas.style.transform = `translate(${this.offsetX}px, ${this.offsetY}px) scale(${this.scale})`;
-        this.canvas.style.transformOrigin = '0 0';
         
         // Масштабируем контекст для четкого рендеринга
         this.ctx.scale(dpr, dpr);
         
-        console.log('📐 Canvas resized with CSS transform scaling:', {
+        console.log('📐 НОВАЯ СИСТЕМА Canvas:', {
             container: `${containerWidth}x${containerHeight}`,
             canvas: `${this.canvas.width}x${this.canvas.height}`,
-            dpr: dpr,
-            scale: this.scale.toFixed(3),
-            transform: `translate(${this.offsetX}px, ${this.offsetY}px) scale(${this.scale})`
+            internal: `${this.internalWidth}x${this.internalHeight}`,
+            dpr: dpr
         });
         
         if (this.currentWorkout) {
@@ -622,7 +617,7 @@ class TrinkyApp {
     }
 
     drawBackgroundImage(img) {
-        // Используем фиксированное разрешение 1080x1920
+        // НОВАЯ СИСТЕМА: Рисуем в фиксированном разрешении 1080x1920
         const canvasWidth = this.internalWidth;
         const canvasHeight = this.internalHeight;
                 
@@ -665,11 +660,11 @@ class TrinkyApp {
         // Добавляем полупрозрачную черную подложку для контраста
         this.drawOrangeOverlay();
         
-        console.log('🖼️ Background image drawn to fixed resolution canvas');
+        console.log('🖼️ НОВАЯ СИСТЕМА: Background image drawn to fixed resolution canvas');
     }
 
     drawOrangeOverlay() {
-        // Используем фиксированное разрешение
+        // НОВАЯ СИСТЕМА: Используем фиксированное разрешение
         const canvasWidth = this.internalWidth;
         const canvasHeight = this.internalHeight;
         
@@ -677,7 +672,7 @@ class TrinkyApp {
         this.ctx.fillStyle = 'rgba(0, 0, 0, 0.4)'; // Черный с прозрачностью 40%
         this.ctx.fillRect(0, 0, canvasWidth, canvasHeight);
         
-        console.log('⚫ Black overlay drawn for contrast');
+        console.log('⚫ НОВАЯ СИСТЕМА: Black overlay drawn for contrast');
     }
 
     setupImageManipulation() {
@@ -974,7 +969,7 @@ class TrinkyApp {
     }
 
     drawStravaDataCard() {
-        // Используем фиксированное разрешение
+        // НОВАЯ СИСТЕМА: Используем фиксированное разрешение
         const canvasWidth = this.internalWidth;
         const canvasHeight = this.internalHeight;
         
@@ -1263,7 +1258,7 @@ class TrinkyApp {
     }
 
     drawDemoRoute() {
-        // Используем фиксированное разрешение
+        // НОВАЯ СИСТЕМА: Используем фиксированное разрешение
         const width = this.internalWidth;
         const height = this.internalHeight;
         
