@@ -115,6 +115,10 @@ html, body {
     padding: 0 20px;
 }
 
+.nav-brand {
+    flex-shrink: 0;
+}
+
 .nav-brand h1 {
     font-size: 18px;
     font-weight: 700;
