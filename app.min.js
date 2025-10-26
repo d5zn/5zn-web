@@ -1747,12 +1747,15 @@ class TrinkyApp {
                             </svg>
                         </button>
                     `;
-                    
-                    // Re-add event listeners
+                }
+                
+                // Re-add event listeners after innerHTML update
+                setTimeout(() => {
                     document.getElementById('workout-selector-btn')?.addEventListener('click', () => this.openWorkoutSelector());
                     document.getElementById('share-btn')?.addEventListener('click', () => this.shareData());
                     document.getElementById('logout-btn')?.addEventListener('click', () => this.logout());
-                }
+                    console.log('✅ Event listeners re-added for navigation buttons');
+                }, 10);
                 
                 // Попробуем альтернативные селекторы
                 const allButtons = document.querySelectorAll('button');
