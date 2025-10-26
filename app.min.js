@@ -4,6 +4,52 @@
 const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 const log = isDev ? console.log : () => {};
 
+// Define polyline decoder inline if not loaded
+if (typeof window.polyline === 'undefined') {
+    console.log('⚠️ Polyline library not found, defining inline decoder...');
+    window.polyline = {
+        decode: function(str, precision) {
+            var index = 0, lat = 0, lng = 0, coordinates = [];
+            var shift = 0, result = 0, byte = null;
+            var latitude_change, longitude_change;
+            var factor = Math.pow(10, Number.isInteger(precision) ? precision : 5);
+
+            while (index < str.length) {
+                byte = null;
+                shift = 1;
+                result = 0;
+
+                do {
+                    byte = str.charCodeAt(index++) - 63;
+                    result += (byte & 0x1f) * shift;
+                    shift *= 32;
+                } while (byte >= 0x20);
+
+                latitude_change = (result & 1) ? ((-result - 1) / 2) : (result / 2);
+
+                shift = 1;
+                result = 0;
+
+                do {
+                    byte = str.charCodeAt(index++) - 63;
+                    result += (byte & 0x1f) * shift;
+                    shift *= 32;
+                } while (byte >= 0x20);
+
+                longitude_change = (result & 1) ? ((-result - 1) / 2) : (result / 2);
+
+                lat += latitude_change;
+                lng += longitude_change;
+
+                coordinates.push([lat / factor, lng / factor]);
+            }
+
+            return coordinates;
+        }
+    };
+    console.log('✅ Inline polyline decoder loaded');
+}
+
 class TrinkyApp {
     constructor() {
         this.stravaToken = localStorage.getItem('strava_token');
