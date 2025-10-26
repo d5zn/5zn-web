@@ -68,12 +68,6 @@ class TrinkyApp {
         // Фиксированное внутреннее разрешение (как в геймдеве)
         this.internalWidth = 1080;
         this.internalHeight = 1920;
-        this.internalAspectRatio = 9 / 16;
-        
-        // Переменные для масштабирования
-        this.scale = 1;
-        this.offsetX = 0;
-        this.offsetY = 0;
         
         // Переменные для управления фоновым изображением
         this.imageTransform = {
@@ -285,34 +279,28 @@ class TrinkyApp {
         const scale = Math.min(vpRect.width / this.internalWidth, vpRect.height / this.internalHeight);
         
         // FIGMA ПРИНЦИП: Масштабируем весь макет как единое целое
-        this.connected.style.transform = `scale(${scale})`;
+        // Используем только transform для масштабирования и центрирования
+        this.connected.style.transform = `translate(50%, 50%) scale(${scale}) translate(-50%, -50%)`;
         this.connected.style.transformOrigin = 'center center';
         
-        // Центрируем масштабированный макет
-        const scaledWidth = this.internalWidth * scale;
-        const scaledHeight = this.internalHeight * scale;
-        const offsetX = (vpRect.width - scaledWidth) / 2;
-        const offsetY = (vpRect.height - scaledHeight) / 2;
-        
-        this.connected.style.left = offsetX + 'px';
-        this.connected.style.top = offsetY + 'px';
+        // Убираем left/top, используем только transform
+        this.connected.style.left = '50%';
+        this.connected.style.top = '50%';
+        this.connected.style.marginLeft = `-${this.internalWidth / 2}px`;
+        this.connected.style.marginTop = `-${this.internalHeight / 2}px`;
         
         console.log('🎨 FIGMA МАСШТАБИРОВАНИЕ:', {
             viewport: `${vpRect.width}x${vpRect.height}`,
             макет: `${this.internalWidth}x${this.internalHeight}`,
-            scale: scale.toFixed(3),
-            scaled: `${scaledWidth.toFixed(1)}x${scaledHeight.toFixed(1)}`,
-            offset: `${offsetX.toFixed(1)}, ${offsetY.toFixed(1)}`
+            scale: scale.toFixed(3)
         });
     }
 
     forceMobileDisplay() {
         const container = document.getElementById('mobile-container');
         const previewArea = document.querySelector('.preview-area');
-        const connectedState = document.getElementById('connected');
         
         if (container && previewArea) {
-            // Простая структура: navbar фикс, панель фикс, preview-area растягивается
             container.style.setProperty('width', '100vw', 'important');
             container.style.setProperty('height', '100vh', 'important');
             container.style.setProperty('display', 'flex', 'important');
@@ -321,22 +309,12 @@ class TrinkyApp {
             container.style.setProperty('padding', '0', 'important');
             container.style.setProperty('overflow', 'hidden', 'important');
             
-            // Preview area просто растягивается
             previewArea.style.setProperty('flex', '1', 'important');
             previewArea.style.setProperty('display', 'flex', 'important');
             previewArea.style.setProperty('align-items', 'center', 'important');
             previewArea.style.setProperty('justify-content', 'center', 'important');
             
-            // Connected state заполняет preview area
-            if (connectedState) {
-                connectedState.style.setProperty('width', '100%', 'important');
-                connectedState.style.setProperty('height', '100%', 'important');
-            }
-            
-            // Пересчитываем viewport для фиксированного разрешения
-            this.calculateViewport();
-            
-            console.log('🔧 Простая flex структура установлена с фиксированным разрешением');
+            console.log('🔧 Mobile display установлен');
         }
     }
 
@@ -344,81 +322,34 @@ class TrinkyApp {
         this.canvas = document.getElementById('route-canvas');
         if (this.canvas) {
             this.ctx = this.canvas.getContext('2d');
-            this.calculateViewport();
             this.resizeCanvas();
+            
             window.addEventListener('resize', () => {
-                this.calculateViewport();
                 this.resizeCanvas();
+                this.applyFigmaScale();
             });
             
-            // Добавляем обработчики для управления фоновым изображением
             this.setupImageManipulation();
-            
-        // Обработчики для кнопок фото
-        this.setupPhotoButtons();
-        
-        // Инициализируем активные метрики
-        this.initializeActiveMetrics();
+            this.setupPhotoButtons();
+            this.initializeActiveMetrics();
         }
     }
     
-    calculateViewport() {
-        // Получаем размеры контейнера превью
-        const previewArea = document.querySelector('.preview-area');
-        if (!previewArea) return;
-        
-        const containerRect = previewArea.getBoundingClientRect();
-        const containerWidth = containerRect.width;
-        const containerHeight = containerRect.height;
-        
-        // Рассчитываем масштаб для фиксированного разрешения
-        const scaleX = containerWidth / this.internalWidth;
-        const scaleY = containerHeight / this.internalHeight;
-        
-        // Используем минимальный масштаб для сохранения пропорций
-        this.scale = Math.min(scaleX, scaleY);
-        
-        // Рассчитываем отступы для центрирования
-        const scaledWidth = this.internalWidth * this.scale;
-        const scaledHeight = this.internalHeight * this.scale;
-        
-        this.offsetX = (containerWidth - scaledWidth) / 2;
-        this.offsetY = (containerHeight - scaledHeight) / 2;
-        
-        console.log('📐 Viewport calculated:', {
-            container: `${containerWidth}x${containerHeight}`,
-            internal: `${this.internalWidth}x${this.internalHeight}`,
-            scale: this.scale.toFixed(3),
-            offset: `${this.offsetX.toFixed(1)}, ${this.offsetY.toFixed(1)}`
-        });
-    }
+    // calculateViewport удален - больше не нужен
 
     resizeCanvas() {
         if (!this.canvas) return;
         
-        // НОВАЯ СИСТЕМА: Canvas всегда рисуется в фиксированном разрешении 1080x1920
+        // Canvas рисуется в фиксированном разрешении 1080x1920
         const rawDpr = window.devicePixelRatio || 1;
         const dpr = Math.min(rawDpr, 2);
         
-        // Canvas рисуется в фиксированном разрешении
         this.canvas.width = this.internalWidth * dpr;
         this.canvas.height = this.internalHeight * dpr;
-        
-        // Canvas отображается в фиксированном размере (без масштабирования)
         this.canvas.style.width = this.internalWidth + 'px';
         this.canvas.style.height = this.internalHeight + 'px';
-        this.canvas.style.position = 'absolute';
-        this.canvas.style.top = '0';
-        this.canvas.style.left = '0';
         
-        // Масштабируем контекст для четкого рендеринга
         this.ctx.scale(dpr, dpr);
-        
-        console.log('📺 НОВАЯ СИСТЕМА Canvas:', {
-            canvas: `${this.canvas.width}x${this.canvas.height}`,
-            макет: `${this.internalWidth}x${this.internalHeight}`,
-            dpr: dpr
-        });
         
         if (this.currentWorkout) {
             this.drawRoute();
@@ -1727,7 +1658,6 @@ class TrinkyApp {
         
         // Пересчитываем viewport и перерисовываем canvas
         setTimeout(() => {
-            this.calculateViewport();
             this.resizeCanvas();
             this.applyScale();
             console.log('🔧 Canvas перерисован после изменения соотношения');
@@ -2011,7 +1941,6 @@ class TrinkyApp {
             
             // Пересчитываем viewport и перерисовываем canvas
             setTimeout(() => {
-                this.calculateViewport();
                 this.resizeCanvas();
                 this.applyFigmaScale();
                 console.log('🔧 Canvas перерисован при показе connected state');
