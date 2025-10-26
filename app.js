@@ -226,11 +226,15 @@ class TrinkyApp {
         // Force mobile display
         this.forceMobileDisplay();
         
+        // НОВАЯ СИСТЕМА: Настраиваем масштабирование
+        this.setupScaling();
+        
         // Handle orientation changes
         window.addEventListener('orientationchange', () => {
             setTimeout(() => {
                 this.resizeCanvas();
                 this.forceMobileDisplay();
+                this.applyScale();
             }, 100);
         });
         
@@ -238,6 +242,7 @@ class TrinkyApp {
         window.addEventListener('resize', () => {
             this.resizeCanvas();
             this.forceMobileDisplay();
+            this.applyScale();
         });
         
         // Prevent zoom on double tap for mobile
@@ -253,6 +258,39 @@ class TrinkyApp {
         // Prevent context menu on long press
         document.addEventListener('contextmenu', (e) => {
             e.preventDefault();
+        });
+    }
+    
+    setupScaling() {
+        // НОВАЯ СИСТЕМА: Настраиваем масштабирование как в предложенном решении
+        this.viewport = document.getElementById('viewport');
+        this.connected = document.getElementById('connected');
+        
+        if (this.viewport && this.connected) {
+            // Применяем масштабирование при загрузке
+            this.applyScale();
+            
+            // Наблюдаем за изменениями размера viewport
+            if (window.ResizeObserver) {
+                const ro = new ResizeObserver(() => this.applyScale());
+                ro.observe(this.viewport);
+            }
+        }
+    }
+    
+    applyScale() {
+        if (!this.viewport || !this.connected) return;
+        
+        const vpRect = this.viewport.getBoundingClientRect();
+        const scale = Math.min(vpRect.width / this.internalWidth, vpRect.height / this.internalHeight);
+        
+        // Масштабируем только визуально. ВНУТРИ всё остается как для 1080×1920.
+        this.connected.style.transform = `scale(${scale})`;
+        
+        console.log('📺 Масштабирование применено:', {
+            viewport: `${vpRect.width}x${vpRect.height}`,
+            макет: `${this.internalWidth}x${this.internalHeight}`,
+            scale: scale.toFixed(3)
         });
     }
 
@@ -346,31 +384,22 @@ class TrinkyApp {
     resizeCanvas() {
         if (!this.canvas) return;
         
-        // Получаем размеры контейнера превью
-        const previewArea = document.querySelector('.preview-area');
-        if (!previewArea) return;
-        
-        const containerRect = previewArea.getBoundingClientRect();
-        const containerWidth = containerRect.width;
-        const containerHeight = containerRect.height;
-        
-        // Get device pixel ratio для четкого рендеринга
+        // НОВАЯ СИСТЕМА: Canvas всегда рисуется в фиксированном разрешении 1080x1920
         const rawDpr = window.devicePixelRatio || 1;
         const dpr = Math.min(rawDpr, 2);
         
-        // VIEWPORT КАК ТЕЛЕВИЗОР: Canvas всегда рисуется в фиксированном разрешении 1080x1920
+        // Canvas рисуется в фиксированном разрешении
         this.canvas.width = this.internalWidth * dpr;
         this.canvas.height = this.internalHeight * dpr;
         
-        // Viewport просто показывает макет в разных масштабах
-        this.canvas.style.width = containerWidth + 'px';
-        this.canvas.style.height = containerHeight + 'px';
+        // Canvas отображается в фиксированном размере
+        this.canvas.style.width = this.internalWidth + 'px';
+        this.canvas.style.height = this.internalHeight + 'px';
         
         // Масштабируем контекст для четкого рендеринга
         this.ctx.scale(dpr, dpr);
         
-        console.log('📺 VIEWPORT КАК ТЕЛЕВИЗОР:', {
-            container: `${containerWidth}x${containerHeight}`,
+        console.log('📺 НОВАЯ СИСТЕМА Canvas:', {
             canvas: `${this.canvas.width}x${this.canvas.height}`,
             макет: `${this.internalWidth}x${this.internalHeight}`,
             dpr: dpr
@@ -1685,6 +1714,7 @@ class TrinkyApp {
         setTimeout(() => {
             this.calculateViewport();
             this.resizeCanvas();
+            this.applyScale();
             console.log('🔧 Canvas перерисован после изменения соотношения');
         }, 100);
     }
@@ -1968,6 +1998,7 @@ class TrinkyApp {
             setTimeout(() => {
                 this.calculateViewport();
                 this.resizeCanvas();
+                this.applyScale();
                 console.log('🔧 Canvas перерисован при показе connected state');
             }, 100);
             

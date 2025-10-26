@@ -59,6 +59,38 @@ html, body {
     background-repeat: repeat;
 }
 
+/* НОВАЯ СИСТЕМА: Viewport как телевизор */
+#viewport {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;              /* центрируем stage */
+    overflow: hidden;                 /* лишнее не показываем */
+}
+
+/* Stage — слой, на котором мы визуально масштабируем фиксированный шаблон */
+#stage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+}
+
+/* Фиксированный корень 1080×1920. НИКОГДА не меняет своих реальных размеров. */
+#connected {
+    position: relative;
+    width: 1080px;
+    height: 1920px;
+    /* Важно для масштабирования из угла/центра */
+    transform-origin: center center;
+    /* Подсказка браузеру: этот узел часто будет трансформироваться */
+    will-change: transform;
+    overflow: hidden;                 /* ничего за края */
+    border-radius: 24px;              /* опционально, чтобы красиво выглядело в демо */
+}
+
 /* Preview area с ratio 9:16 */
 .preview-area.ratio-9-16 {
     /* Просто flex, JavaScript будет управлять размерами */

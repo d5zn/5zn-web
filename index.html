@@ -47,41 +47,47 @@
 
         <!-- Preview Area - как в VSCO -->
         <div class="preview-area ratio-9-16">
-            <!-- Not Connected State -->
-            <div id="not-connected" class="state-container">
-                <div class="state-card">
-                    <h2>Connect to Strava</h2>
-                    <p>Visualize your cycling routes and workout data.</p>
-                    <button id="connect-strava-btn" class="btn btn-primary" style="height: 40px; display: flex; align-items: center; justify-content: center;">Connect with Strava</button>
-                </div>
-            </div>
+            <!-- Viewport контейнер -->
+            <div id="viewport">
+                <!-- Stage для масштабирования -->
+                <div id="stage">
+                    <!-- Not Connected State -->
+                    <div id="not-connected" class="state-container">
+                        <div class="state-card">
+                            <h2>Connect to Strava</h2>
+                            <p>Visualize your cycling routes and workout data.</p>
+                            <button id="connect-strava-btn" class="btn btn-primary" style="height: 40px; display: flex; align-items: center; justify-content: center;">Connect with Strava</button>
+                        </div>
+                    </div>
 
-            <!-- Connected State - превью как в VSCO -->
-            <div id="connected" class="connected-state ratio-9-16 hidden">
-                <!-- Preview Canvas -->
-                <canvas id="route-canvas"></canvas>
-                
-                <!-- Stats Overlay -->
-                <div class="stats-overlay">
-                    <div class="stat-item">
-                        <span class="stat-label">DISTANCE</span>
-                        <span class="stat-value" id="distance-value">3 000 m</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">ELEVATION</span>
-                        <span class="stat-value" id="elevation-value">3 000 m</span>
-                    </div>
-                </div>
-                
-                <!-- Bottom Stats Overlay -->
-                <div class="bottom-stats-overlay">
-                    <div class="stat-item">
-                        <span class="stat-label">AVG SPEED</span>
-                        <span class="stat-value" id="speed-value">15.2 km/h</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">TIME</span>
-                        <span class="stat-value" id="time-value">1h 23m</span>
+                    <!-- Connected State - фиксированный корень 1080x1920 -->
+                    <div id="connected" class="connected-state ratio-9-16 hidden">
+                        <!-- Preview Canvas -->
+                        <canvas id="route-canvas"></canvas>
+                        
+                        <!-- Stats Overlay -->
+                        <div class="stats-overlay">
+                            <div class="stat-item">
+                                <span class="stat-label">DISTANCE</span>
+                                <span class="stat-value" id="distance-value">3 000 m</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">ELEVATION</span>
+                                <span class="stat-value" id="elevation-value">3 000 m</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Bottom Stats Overlay -->
+                        <div class="bottom-stats-overlay">
+                            <div class="stat-item">
+                                <span class="stat-label">AVG SPEED</span>
+                                <span class="stat-value" id="speed-value">15.2 km/h</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">TIME</span>
+                                <span class="stat-value" id="time-value">1h 23m</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
