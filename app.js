@@ -358,21 +358,21 @@ class TrinkyApp {
         const rawDpr = window.devicePixelRatio || 1;
         const dpr = Math.min(rawDpr, 2);
         
-        // НОВАЯ СИСТЕМА: Canvas всегда рисуется в фиксированном разрешении
+        // VIEWPORT КАК ТЕЛЕВИЗОР: Canvas всегда рисуется в фиксированном разрешении 1080x1920
         this.canvas.width = this.internalWidth * dpr;
         this.canvas.height = this.internalHeight * dpr;
         
-        // Размеры отображения canvas равны контейнеру
+        // Viewport просто показывает макет в разных масштабах
         this.canvas.style.width = containerWidth + 'px';
         this.canvas.style.height = containerHeight + 'px';
         
         // Масштабируем контекст для четкого рендеринга
         this.ctx.scale(dpr, dpr);
         
-        console.log('📐 НОВАЯ СИСТЕМА Canvas:', {
+        console.log('📺 VIEWPORT КАК ТЕЛЕВИЗОР:', {
             container: `${containerWidth}x${containerHeight}`,
             canvas: `${this.canvas.width}x${this.canvas.height}`,
-            internal: `${this.internalWidth}x${this.internalHeight}`,
+            макет: `${this.internalWidth}x${this.internalHeight}`,
             dpr: dpr
         });
         
