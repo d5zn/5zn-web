@@ -1260,38 +1260,82 @@ class TrinkyApp {
         return this.generateDemoRoute(width, height, padding, topPadding);
     }
     
-    decodePolyline(polyline, width, height, padding, topPadding) {
-        // Простая реализация декодирования polyline
-        // В реальном приложении лучше использовать библиотеку polyline
-        const points = [];
+    decodePolyline(encodedPolyline, width, height, padding, topPadding) {
+        console.log('🔍 Decoding polyline, length:', encodedPolyline?.length);
         
-        // Если polyline пустой или некорректный, используем fallback
-        if (!polyline || polyline.length < 10) {
-            console.log('Invalid polyline, using demo route');
+        // Проверяем наличие polyline
+        if (!encodedPolyline || encodedPolyline.length < 10) {
+            console.log('⚠️ Invalid polyline, using demo route');
             return this.generateDemoRoute(width, height, padding, topPadding);
         }
         
         try {
-            // Простое декодирование polyline (упрощенная версия)
-            // В реальности нужна библиотека для правильного декодирования
-            const numPoints = Math.min(50, Math.max(20, Math.floor(polyline.length / 20)));
-            
-            for (let i = 0; i <= numPoints; i++) {
-                const t = i / numPoints;
-                const x = padding + (width - 2 * padding) * t;
-                // Добавляем вариацию на основе polyline
-                const variation = Math.sin(t * Math.PI * 2 + polyline.charCodeAt(i % polyline.length) * 0.01) * 0.3;
-                const y = topPadding + padding + (height - 2 * padding) * (0.5 + variation);
-                
-                if (!isNaN(x) && !isNaN(y) && isFinite(x) && isFinite(y)) {
-                    points.push({ x: Math.round(x), y: Math.round(y) });
-                }
+            // Декодируем polyline с помощью библиотеки
+            if (!window.polyline) {
+                console.log('⚠️ Polyline library not loaded, using demo route');
+                return this.generateDemoRoute(width, height, padding, topPadding);
             }
             
-            console.log(`Decoded ${points.length} points from Strava polyline`);
-            return points;
+            const decodedPoints = window.polyline.decode(encodedPolyline);
+            console.log('✅ Decoded points count:', decodedPoints?.length);
+            
+            if (!decodedPoints || decodedPoints.length === 0) {
+                console.log('⚠️ Empty decoded points, using demo route');
+                return this.generateDemoRoute(width, height, padding, topPadding);
+            }
+            
+            // Находим границы маршрута для масштабирования
+            const lats = decodedPoints.map(p => p[0]);
+            const lngs = decodedPoints.map(p => p[1]);
+            
+            const minLat = Math.min(...lats);
+            const maxLat = Math.max(...lats);
+            const minLng = Math.min(...lngs);
+            const maxLng = Math.max(...lngs);
+            
+            console.log('📍 Route bounds:', { minLat, maxLat, minLng, maxLng });
+            
+            // Рассчитываем масштаб для проецирования на canvas
+            const latRange = maxLat - minLat;
+            const lngRange = maxLng - minLng;
+            const canvasWidth = width - 2 * padding;
+            const canvasHeight = height - 2 * padding;
+            
+            console.log('📏 Canvas dimensions:', { width, height, padding, canvasWidth, canvasHeight });
+            console.log('📏 Route ranges:', { latRange, lngRange });
+            
+            // Используем больший диапазон для сохранения пропорций
+            const aspectRatio = Math.max(latRange, lngRange) / Math.max(canvasWidth, canvasHeight);
+            const scale = Math.min(canvasWidth / lngRange, canvasHeight / latRange) * 0.9; // 0.9 для отступов
+            
+            console.log('🔍 Scale calculation:', { aspectRatio, scale });
+            
+            // Центрируем маршрут
+            const centerLat = (minLat + maxLat) / 2;
+            const centerLng = (minLng + maxLng) / 2;
+            
+            // Преобразуем координаты в пиксели canvas
+            const canvasPoints = decodedPoints.map(([lat, lng]) => {
+                const x = padding + canvasWidth / 2 + (lng - centerLng) * scale;
+                const y = topPadding + padding + canvasHeight / 2 + (lat - centerLat) * scale;
+                return { x, y };
+            });
+            
+            // Фильтруем валидные точки
+            const validPoints = canvasPoints.filter(p => 
+                !isNaN(p.x) && !isNaN(p.y) && isFinite(p.x) && isFinite(p.y)
+            );
+            
+            if (validPoints.length === 0) {
+                console.log('⚠️ No valid points after conversion, using demo route');
+                return this.generateDemoRoute(width, height, padding, topPadding);
+            }
+            
+            console.log(`✅ Successfully decoded ${validPoints.length} points from Strava polyline`);
+            console.log('📍 First point:', validPoints[0], 'Last point:', validPoints[validPoints.length - 1]);
+            return validPoints;
         } catch (error) {
-            console.warn('Polyline decoding error:', error);
+            console.warn('❌ Polyline decoding error:', error);
             return this.generateDemoRoute(width, height, padding, topPadding);
         }
     }

@@ -29,5 +29,8 @@
   "bugs": {
     "url": "https://github.com/d5zn/5zn-web/issues"
   },
-  "homepage": "https://github.com/d5zn/5zn-web"
+  "homepage": "https://github.com/d5zn/5zn-web",
+  "dependencies": {
+    "@mapbox/polyline": "^1.2.1"
+  }
 }
