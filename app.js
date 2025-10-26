@@ -1239,21 +1239,29 @@ class TrinkyApp {
 
     generateStravaRoute(width, height, padding, topPadding = 0) {
         console.log('🗺️ Generating route for workout:', this.currentWorkout?.name);
+        console.log('🗺️ Full workout data:', this.currentWorkout);
         console.log('🗺️ Workout map data:', this.currentWorkout?.map);
         
         // Пытаемся использовать реальные данные маршрута из Strava
         const polylineData = this.currentWorkout?.map?.polyline || this.currentWorkout?.map?.summary_polyline;
+        
         if (polylineData) {
-            console.log('🗺️ Found polyline data, length:', polylineData.length);
+            console.log('🗺️ Found polyline data!');
+            console.log('🗺️ Polyline length:', polylineData.length);
+            console.log('🗺️ First 100 chars:', polylineData.substring(0, 100));
+            
             try {
                 const points = this.decodePolyline(polylineData, width, height, padding, topPadding);
-                console.log('🗺️ Successfully decoded Strava route with', points.length, 'points');
+                console.log('✅ Successfully decoded Strava route with', points.length, 'points');
                 return points;
             } catch (error) {
-                console.warn('Failed to decode Strava polyline, using fallback:', error);
+                console.error('❌ Failed to decode Strava polyline:', error);
+                console.log('🗺️ Using demo route as fallback');
             }
         } else {
-            console.log('🗺️ No polyline data found, using demo route');
+            console.log('⚠️ No polyline data found in workout');
+            console.log('🗺️ Available map keys:', Object.keys(this.currentWorkout?.map || {}));
+            console.log('🗺️ Using demo route');
         }
         
         // Fallback к демо маршруту если нет данных Strava
@@ -1262,6 +1270,7 @@ class TrinkyApp {
     
     decodePolyline(encodedPolyline, width, height, padding, topPadding) {
         console.log('🔍 Decoding polyline, length:', encodedPolyline?.length);
+        console.log('🔍 window.polyline exists:', typeof window.polyline);
         
         // Проверяем наличие polyline
         if (!encodedPolyline || encodedPolyline.length < 10) {
@@ -1271,22 +1280,28 @@ class TrinkyApp {
         
         try {
             // Декодируем polyline с помощью библиотеки
-            if (!window.polyline) {
-                console.log('⚠️ Polyline library not loaded, using demo route');
+            if (!window.polyline || !window.polyline.decode) {
+                console.log('⚠️ Polyline library not loaded!');
+                console.log('⚠️ window.polyline:', window.polyline);
+                console.log('⚠️ Checking if polyline.js is loaded...');
+                console.log('⚠️ Available in window:', Object.keys(window).filter(k => k.includes('poly')));
                 return this.generateDemoRoute(width, height, padding, topPadding);
             }
             
+            console.log('🔍 Polyline library loaded, decoding...');
             const decodedPoints = window.polyline.decode(encodedPolyline);
             console.log('✅ Decoded points count:', decodedPoints?.length);
+            console.log('✅ First 3 points:', decodedPoints?.slice(0, 3));
             
             if (!decodedPoints || decodedPoints.length === 0) {
                 console.log('⚠️ Empty decoded points, using demo route');
                 return this.generateDemoRoute(width, height, padding, topPadding);
             }
             
+            // ВАЖНО: polyline возвращает [lat, lng], а не [lng, lat]!
             // Находим границы маршрута для масштабирования
-            const lats = decodedPoints.map(p => p[0]);
-            const lngs = decodedPoints.map(p => p[1]);
+            const lats = decodedPoints.map(p => p[0]); // широта
+            const lngs = decodedPoints.map(p => p[1]); // долгота
             
             const minLat = Math.min(...lats);
             const maxLat = Math.max(...lats);
@@ -1304,20 +1319,24 @@ class TrinkyApp {
             console.log('📏 Canvas dimensions:', { width, height, padding, canvasWidth, canvasHeight });
             console.log('📏 Route ranges:', { latRange, lngRange });
             
-            // Используем больший диапазон для сохранения пропорций
-            const aspectRatio = Math.max(latRange, lngRange) / Math.max(canvasWidth, canvasHeight);
-            const scale = Math.min(canvasWidth / lngRange, canvasHeight / latRange) * 0.9; // 0.9 для отступов
+            // Рассчитываем scale для сохранения пропорций
+            // Важно: учитываем, что lng соответствует X, а lat соответствует Y
+            const scaleLng = canvasWidth / lngRange;
+            const scaleLat = canvasHeight / latRange;
+            const scale = Math.min(scaleLng, scaleLat) * 0.9; // 0.9 для отступов
             
-            console.log('🔍 Scale calculation:', { aspectRatio, scale });
+            console.log('🔍 Scale calculation:', { scaleLng, scaleLat, scale });
             
             // Центрируем маршрут
             const centerLat = (minLat + maxLat) / 2;
             const centerLng = (minLng + maxLng) / 2;
             
             // Преобразуем координаты в пиксели canvas
+            // lng -> X (горизонталь), lat -> Y (вертикаль)
             const canvasPoints = decodedPoints.map(([lat, lng]) => {
+                // Инвертируем Y для правильного отображения (lat растет вверх, canvas Y растет вниз)
                 const x = padding + canvasWidth / 2 + (lng - centerLng) * scale;
-                const y = topPadding + padding + canvasHeight / 2 + (lat - centerLat) * scale;
+                const y = topPadding + padding + canvasHeight / 2 - (lat - centerLat) * scale;
                 return { x, y };
             });
             

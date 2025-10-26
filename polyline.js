@@ -90,4 +90,5 @@ polyline.encode = function(coordinates, precision) {
 // Make polyline available globally for browser use
 if (typeof window !== 'undefined') {
     window.polyline = polyline;
+    console.log('✅ Polyline library loaded and available at window.polyline');
 }

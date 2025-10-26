@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Polyline Test</title>
+</head>
+<body>
+    <h1>Polyline Decoding Test</h1>
+    <div id="results"></div>
+    
+    <script src="polyline.js"></script>
+    <script>
+        // Test polyline from Strava
+        const testPolyline = 'wd`{@i`|`W]?]Ce@Be@CmBAg@C]BqAC}ASqCCo@KoAI{A_@k@C';
+        
+        console.log('Test polyline:', testPolyline);
+        console.log('window.polyline:', window.polyline);
+        
+        if (window.polyline && window.polyline.decode) {
+            try {
+                const decoded = window.polyline.decode(testPolyline);
+                console.log('✅ Decoded successfully!');
+                console.log('Points count:', decoded.length);
+                console.log('First 5 points:', decoded.slice(0, 5));
+                
+                document.getElementById('results').innerHTML = 
+                    '<h2>✅ Success!</h2>' +
+                    '<p>Decoded ' + decoded.length + ' points</p>' +
+                    '<pre>' + JSON.stringify(decoded.slice(0, 5), null, 2) + '</pre>';
+            } catch (error) {
+                console.error('❌ Error decoding:', error);
+                document.getElementById('results').innerHTML = 
+                    '<h2>❌ Error</h2>' +
+                    '<p>' + error.message + '</p>';
+            }
+        } else {
+            console.error('❌ Polyline library not loaded!');
+            document.getElementById('results').innerHTML = 
+                '<h2>❌ Library not loaded</h2>';
+        }
+    </script>
+</body>
+</html>
