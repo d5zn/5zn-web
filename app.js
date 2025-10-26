@@ -48,13 +48,20 @@ class TrinkyApp {
         this.setupMobileOptimizations();
         this.checkAuthStatus();
         
-        // Принудительно показываем навигацию при инициализации
-        this.forceShowNavigation();
-        
         // Force display after initialization
         setTimeout(() => {
             this.forceMobileDisplay();
         }, 100);
+    }
+    
+    forceShowNavigation() {
+        // Метод для принудительного показа навигации
+        const navbar = document.querySelector('.navbar');
+        if (navbar) {
+            navbar.style.display = 'flex';
+            navbar.style.visibility = 'visible';
+            navbar.style.opacity = '1';
+        }
     }
 
     setupEventListeners() {
