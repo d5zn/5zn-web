@@ -419,9 +419,16 @@ html, body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 20px; /* Увеличили отступ между элементами до 20px */
     padding: 40px;
     text-align: center;
+}
+
+.state-card h2 {
+    margin-bottom: 10px; /* Отступ между заголовком и подписью 10px */
+}
+
+.state-card p {
+    margin-bottom: 20px; /* Отступ между подписью и кнопкой 20px */
 }
 
 /* Loading States */
