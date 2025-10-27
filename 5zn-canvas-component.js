@@ -531,18 +531,26 @@ class SznCanvasComponent {
             const currX = routeLeft + routeWidth / 2 + (currPoint[1] - centerLng) * routeScale;
             const currY = routeTop + routeHeight / 2 - (currPoint[0] - centerLat) * routeScale;
             
-            // Определяем цвет на основе прогресса расстояния
+            // Определяем цвет на основе прогресса расстояния с плавными переходами
             const progress = currentLength / totalLength;
             let color;
             
-            if (progress <= 0.33) {
-                // Синий участок (первые 33% расстояния)
+            if (progress <= 0.3) {
+                // Синий участок (первые 30% расстояния)
                 color = '#2A3587';
-            } else if (progress <= 0.66) {
-                // Белый участок (33% - 66% расстояния)
+            } else if (progress <= 0.4) {
+                // Плавный переход от синего к белому (30% - 40%)
+                const t = (progress - 0.3) / (0.4 - 0.3);
+                color = this.interpolateColor('#2A3587', '#FFFFFF', t);
+            } else if (progress <= 0.6) {
+                // Белый участок (40% - 60% расстояния)
                 color = '#FFFFFF';
+            } else if (progress <= 0.7) {
+                // Плавный переход от белого к красному (60% - 70%)
+                const t = (progress - 0.6) / (0.7 - 0.6);
+                color = this.interpolateColor('#FFFFFF', '#CF2228', t);
             } else {
-                // Красный участок (последние 33% расстояния)
+                // Красный участок (последние 30% расстояния)
                 color = '#CF2228';
             }
             
@@ -558,6 +566,28 @@ class SznCanvasComponent {
         this.ctx.restore();
         
         console.log(`🗺️ Route rendered: ${this.decodedRoute.length} points`);
+    }
+    
+    interpolateColor(color1, color2, factor) {
+        // Конвертируем hex цвета в RGB
+        const hex1 = color1.replace('#', '');
+        const hex2 = color2.replace('#', '');
+        
+        const r1 = parseInt(hex1.substr(0, 2), 16);
+        const g1 = parseInt(hex1.substr(2, 2), 16);
+        const b1 = parseInt(hex1.substr(4, 2), 16);
+        
+        const r2 = parseInt(hex2.substr(0, 2), 16);
+        const g2 = parseInt(hex2.substr(2, 2), 16);
+        const b2 = parseInt(hex2.substr(4, 2), 16);
+        
+        // Интерполируем каждый канал
+        const r = Math.round(r1 + (r2 - r1) * factor);
+        const g = Math.round(g1 + (g2 - g1) * factor);
+        const b = Math.round(b1 + (b2 - b1) * factor);
+        
+        // Конвертируем обратно в hex
+        return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
     }
     
     getRouteBounds(route) {
