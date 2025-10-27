@@ -189,6 +189,13 @@ html, body {
     filter: brightness(0) invert(1); /* Делает логотип белым */
 }
 
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto; /* Перемещает кнопки вправо */
+}
+
 .nav-actions .btn {
     height: 36px;
     padding: 6px 12px;
