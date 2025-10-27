@@ -712,78 +712,9 @@ class SznApp {
             }
             
             setTimeout(() => {
-                const navActions = document.querySelector('.nav-actions');
+                // Кнопки теперь в HTML, не создаем их динамически
                 
-                console.log('🔍 Navigation elements found (with delay):', {
-                    navActions: !!navActions
-                });
-                
-                if (navActions) {
-                    navActions.innerHTML = `
-                        <button class="nav-btn" title="Select Workout" id="workout-selector-btn">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M3 6h18"/>
-                                <path d="M3 12h18"/>
-                                <path d="M3 18h18"/>
-                            </svg>
-                        </button>
-                        <button class="nav-btn" title="Share" id="share-btn">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="18" cy="5" r="3"/>
-                                <circle cx="6" cy="12" r="3"/>
-                                <circle cx="18" cy="19" r="3"/>
-                                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
-                                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
-                            </svg>
-                        </button>
-                        <button class="nav-btn" title="Logout" id="logout-btn">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                                <polyline points="16,17 21,12 16,7"/>
-                                <line x1="21" y1="12" x2="9" y2="12"/>
-                            </svg>
-                        </button>
-                    `;
-                }
-                
-                setTimeout(() => {
-                    const workoutBtn = document.getElementById('workout-selector-btn');
-                    const shareBtn = document.getElementById('share-btn');
-                    const logoutBtn = document.getElementById('logout-btn');
-                    
-                    if (workoutBtn) {
-                        const newWorkoutBtn = workoutBtn.cloneNode(true);
-                        workoutBtn.parentNode.replaceChild(newWorkoutBtn, workoutBtn);
-                        
-                        newWorkoutBtn.addEventListener('click', () => {
-                            console.log('🔵 Workout selector button clicked');
-                            this.openWorkoutSelector();
-                        });
-                        console.log('✅ Workout selector button listener added');
-                    }
-                    
-                    if (shareBtn) {
-                        const newShareBtn = shareBtn.cloneNode(true);
-                        shareBtn.parentNode.replaceChild(newShareBtn, shareBtn);
-                        
-                        newShareBtn.addEventListener('click', () => {
-                            console.log('🔵 Share button clicked');
-                            this.shareData();
-                        });
-                        console.log('✅ Share button listener added');
-                    }
-                    
-                    if (logoutBtn) {
-                        const newLogoutBtn = logoutBtn.cloneNode(true);
-                        logoutBtn.parentNode.replaceChild(newLogoutBtn, logoutBtn);
-                        
-                        newLogoutBtn.addEventListener('click', () => {
-                            console.log('🔵 Logout button clicked');
-                            this.logout();
-                        });
-                        console.log('✅ Logout button listener added');
-                    }
-                }, 10);
+                // Обработчики событий уже добавлены в setupEventListeners
                 
                 const navbar = document.querySelector('.navbar');
                 const navContainer = document.querySelector('.nav-container');
