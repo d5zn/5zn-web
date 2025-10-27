@@ -16,6 +16,8 @@ class SznCanvasComponent {
         this.backgroundImage = new Image();
         this.logoImage = new Image();
         this.dpr = 1; // Инициализируем DPR по умолчанию
+        this.polylineData = null; // Данные маршрута
+        this.decodedRoute = null; // Декодированный маршрут
         
         // Конфигурация - фиксированный размер canvas 1080x1920
         this.config = {
@@ -459,9 +461,81 @@ class SznCanvasComponent {
     }
     
     renderRoute(state, width, height) {
-        // Здесь должна быть логика рендеринга маршрута
-        // Пока что заглушка
-        console.log('Route rendering placeholder');
+        if (!this.decodedRoute || this.decodedRoute.length === 0) {
+            return;
+        }
+        
+        // Получаем границы маршрута
+        const bounds = this.getRouteBounds(this.decodedRoute);
+        if (!bounds) return;
+        
+        // Рассчитываем масштаб и смещение для центрирования
+        const scale = width / 1080;
+        const safeArea = this.config.safeArea;
+        
+        // Доступная область для маршрута (между заголовком и метриками)
+        const routeTop = (safeArea.top + 150) * scale; // После заголовка
+        const routeBottom = height - (safeArea.bottom + 200) * scale; // Над метриками
+        const routeLeft = safeArea.left * scale;
+        const routeRight = width - (safeArea.right * scale);
+        
+        const routeWidth = routeRight - routeLeft;
+        const routeHeight = routeBottom - routeTop;
+        
+        // Масштаб для вписывания маршрута
+        const latRange = bounds.maxLat - bounds.minLat;
+        const lngRange = bounds.maxLng - bounds.minLng;
+        
+        const scaleX = routeWidth / lngRange;
+        const scaleY = routeHeight / latRange;
+        const routeScale = Math.min(scaleX, scaleY) * 0.9; // 90% для отступов
+        
+        // Центрирование
+        const centerLat = (bounds.maxLat + bounds.minLat) / 2;
+        const centerLng = (bounds.maxLng + bounds.minLng) / 2;
+        
+        // Рисуем маршрут
+        this.ctx.save();
+        this.ctx.strokeStyle = state.fontColor || '#FFFFFF';
+        this.ctx.lineWidth = 8 * scale;
+        this.ctx.lineCap = 'round';
+        this.ctx.lineJoin = 'round';
+        
+        this.ctx.beginPath();
+        
+        this.decodedRoute.forEach((point, index) => {
+            const x = routeLeft + routeWidth / 2 + (point[1] - centerLng) * routeScale;
+            const y = routeTop + routeHeight / 2 - (point[0] - centerLat) * routeScale;
+            
+            if (index === 0) {
+                this.ctx.moveTo(x, y);
+            } else {
+                this.ctx.lineTo(x, y);
+            }
+        });
+        
+        this.ctx.stroke();
+        this.ctx.restore();
+        
+        console.log(`🗺️ Route rendered: ${this.decodedRoute.length} points`);
+    }
+    
+    getRouteBounds(route) {
+        if (!route || route.length === 0) return null;
+        
+        let minLat = route[0][0];
+        let maxLat = route[0][0];
+        let minLng = route[0][1];
+        let maxLng = route[0][1];
+        
+        route.forEach(point => {
+            minLat = Math.min(minLat, point[0]);
+            maxLat = Math.max(maxLat, point[0]);
+            minLng = Math.min(minLng, point[1]);
+            maxLng = Math.max(maxLng, point[1]);
+        });
+        
+        return { minLat, maxLat, minLng, maxLng };
     }
     
     renderLogo(state, width, height) {
@@ -506,8 +580,26 @@ class SznCanvasComponent {
     
     // Методы для обновления состояния
     setPolylineData(polyline) {
-        // Здесь будет логика установки данных маршрута
-        console.log('Polyline data set:', polyline);
+        if (!polyline) {
+            console.warn('⚠️ No polyline data provided');
+            return;
+        }
+        
+        this.polylineData = polyline;
+        
+        // Декодируем polyline используя window.polyline
+        if (typeof window.polyline !== 'undefined') {
+            try {
+                this.decodedRoute = window.polyline.decode(polyline);
+                console.log(`✅ Polyline decoded: ${this.decodedRoute.length} points`);
+                this.render();
+            } catch (error) {
+                console.error('❌ Error decoding polyline:', error);
+                this.decodedRoute = null;
+            }
+        } else {
+            console.error('❌ Polyline library not loaded');
+        }
     }
     
     // Экспорт
