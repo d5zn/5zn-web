@@ -559,6 +559,7 @@ class SznApp {
                     connectedState.style.setProperty('aspect-ratio', '9 / 16', 'important');
                     connectedState.style.setProperty('width', '100%', 'important');
                     connectedState.style.setProperty('height', '100%', 'important');
+                    connectedState.style.setProperty('display', 'flex', 'important');
                     
                     console.log('🔧 Установлено соотношение 9:16:', viewportWidth9_16, 'x', viewportHeight9_16);
                     break;
@@ -582,6 +583,7 @@ class SznApp {
                     connectedState.style.setProperty('aspect-ratio', '4 / 5', 'important');
                     connectedState.style.setProperty('width', '100%', 'important');
                     connectedState.style.setProperty('height', '100%', 'important');
+                    connectedState.style.setProperty('display', 'flex', 'important');
                     
                     console.log('🔧 Установлено соотношение 4:5:', viewportWidth4_5, 'x', viewportHeight4_5);
                     break;
@@ -705,7 +707,7 @@ class SznApp {
         }
         if (connected) {
             connected.classList.remove('hidden');
-            connected.style.display = 'block';
+            connected.style.display = 'flex';
             console.log('✅ Connected shown');
             
             const navbar = document.querySelector('.navbar');
@@ -815,7 +817,8 @@ class SznApp {
             connected.style.setProperty('overflow', 'hidden', 'important');
             connected.style.setProperty('box-sizing', 'border-box', 'important');
             connected.style.setProperty('width', '100%', 'important');
-            connected.style.setProperty('height', 'auto', 'important');
+            connected.style.setProperty('height', '100%', 'important');
+            connected.style.setProperty('display', 'flex', 'important');
             
             console.log('🔧 Connected state показан');
             
