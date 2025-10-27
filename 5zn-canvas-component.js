@@ -393,7 +393,7 @@ class SznCanvasComponent {
         const subtitleFontSize = Math.floor(32 * scale);
         this.ctx.font = `${subtitleFontSize}px Inter, sans-serif`;
         
-        const subtitleY = titleTop + titleFontSize + 10 * scale;
+        const subtitleY = titleTop + titleFontSize + 40 * scale; // Увеличили отступ до 40px (примерно 4 символа)
         this.wrapText(state.date.toUpperCase(), leftMargin, subtitleY, maxWidth, subtitleFontSize);
         
         this.ctx.restore();
@@ -512,8 +512,15 @@ class SznCanvasComponent {
         const centerLat = (bounds.maxLat + bounds.minLat) / 2;
         const centerLng = (bounds.maxLng + bounds.minLng) / 2;
         
-        // Создаем линейный градиент с точными координатами из SVG
-        const gradient = this.ctx.createLinearGradient(508, 19.5, -106, 633.5);
+        // Создаем линейный градиент, центрированный по области маршрута
+        const gradientCenterX = routeLeft + routeWidth / 2;
+        const gradientTop = routeTop;
+        const gradientBottom = routeBottom;
+        
+        const gradient = this.ctx.createLinearGradient(
+            gradientCenterX, gradientTop, 
+            gradientCenterX, gradientBottom
+        );
         gradient.addColorStop(0, '#2A3587');
         gradient.addColorStop(0.495192, 'white');
         gradient.addColorStop(1, '#CF2228');
