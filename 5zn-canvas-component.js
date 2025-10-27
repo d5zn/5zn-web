@@ -535,22 +535,22 @@ class SznCanvasComponent {
             const progress = currentLength / totalLength;
             let color;
             
-            if (progress <= 0.13) {
-                // Синий участок (0% - 13%)
+            if (progress <= 0.33) {
+                // Синий участок (0% - 33%)
                 color = '#2A3587';
-            } else if (progress <= 0.2) {
-                // Плавный переход от синего к белому (13% - 20%)
-                const t = (progress - 0.13) / (0.2 - 0.13);
+            } else if (progress <= 0.4) {
+                // Плавный переход от синего к белому (33% - 40%)
+                const t = (progress - 0.33) / (0.4 - 0.33);
                 color = this.interpolateColor('#2A3587', '#FFFFFF', t);
-            } else if (progress <= 0.8) {
-                // Белый участок (20% - 80%)
+            } else if (progress <= 0.6) {
+                // Белый участок (40% - 60%)
                 color = '#FFFFFF';
-            } else if (progress <= 0.87) {
-                // Плавный переход от белого к красному (80% - 87%)
-                const t = (progress - 0.8) / (0.87 - 0.8);
+            } else if (progress <= 0.67) {
+                // Плавный переход от белого к красному (60% - 67%)
+                const t = (progress - 0.6) / (0.67 - 0.6);
                 color = this.interpolateColor('#FFFFFF', '#CF2228', t);
             } else {
-                // Красный участок (87% - 100%)
+                // Красный участок (67% - 100%)
                 color = '#CF2228';
             }
             
