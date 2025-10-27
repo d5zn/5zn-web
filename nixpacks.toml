@@ -1,13 +1,11 @@
-# Nixpacks configuration for Railway
 [phases.setup]
-nixPkgs = ["python311", "postgresql"]
+nixPkgs = ["python39"]
 
 [phases.install]
-cmds = ["pip install --no-cache-dir -r requirements.txt"]
+cmds = ["pip install -r requirements.txt"]
+
+[phases.build]
+cmds = ["echo 'Build complete'"]
 
 [start]
 cmd = "python3 server.py"
-
-[variables]
-PYTHONUNBUFFERED = "1"
-
