@@ -512,74 +512,32 @@ class SznCanvasComponent {
         const centerLat = (bounds.maxLat + bounds.minLat) / 2;
         const centerLng = (bounds.maxLng + bounds.minLng) / 2;
         
-        // Рисуем маршрут с градиентом, привязанным к расстоянию
+        // Создаем линейный градиент с точными координатами из SVG
+        const gradient = this.ctx.createLinearGradient(508, 19.5, -106, 633.5);
+        gradient.addColorStop(0, '#2A3587');
+        gradient.addColorStop(0.495192, 'white');
+        gradient.addColorStop(1, '#CF2228');
+        
+        // Рисуем маршрут с градиентом
         this.ctx.save();
-        
-        // Вычисляем общую длину маршрута для привязки к расстоянию
-        let totalLength = 0;
-        const segmentLengths = [];
-        
-        for (let i = 1; i < this.decodedRoute.length; i++) {
-            const prevPoint = this.decodedRoute[i - 1];
-            const currPoint = this.decodedRoute[i];
-            
-            const prevX = routeLeft + routeWidth / 2 + (prevPoint[1] - centerLng) * routeScale;
-            const prevY = routeTop + routeHeight / 2 - (prevPoint[0] - centerLat) * routeScale;
-            const currX = routeLeft + routeWidth / 2 + (currPoint[1] - centerLng) * routeScale;
-            const currY = routeTop + routeHeight / 2 - (currPoint[0] - centerLat) * routeScale;
-            
-            const segmentLength = Math.sqrt((currX - prevX) ** 2 + (currY - prevY) ** 2);
-            segmentLengths.push(segmentLength);
-            totalLength += segmentLength;
-        }
-        
-        // Рисуем маршрут по сегментам с цветом, привязанным к прогрессу расстояния
+        this.ctx.strokeStyle = gradient;
         this.ctx.lineWidth = 8 * scale;
         this.ctx.lineCap = 'round';
         this.ctx.lineJoin = 'round';
         
-        let currentLength = 0;
-        
-        for (let i = 1; i < this.decodedRoute.length; i++) {
-            const prevPoint = this.decodedRoute[i - 1];
-            const currPoint = this.decodedRoute[i];
+        this.ctx.beginPath();
+        for (let i = 0; i < this.decodedRoute.length; i++) {
+            const point = this.decodedRoute[i];
+            const x = routeLeft + routeWidth / 2 + (point[1] - centerLng) * routeScale;
+            const y = routeTop + routeHeight / 2 - (point[0] - centerLat) * routeScale;
             
-            const prevX = routeLeft + routeWidth / 2 + (prevPoint[1] - centerLng) * routeScale;
-            const prevY = routeTop + routeHeight / 2 - (prevPoint[0] - centerLat) * routeScale;
-            const currX = routeLeft + routeWidth / 2 + (currPoint[1] - centerLng) * routeScale;
-            const currY = routeTop + routeHeight / 2 - (currPoint[0] - centerLat) * routeScale;
-            
-            // Определяем цвет на основе прогресса расстояния с очень плавными переходами
-            const progress = currentLength / totalLength;
-            let color;
-            
-            if (progress <= 0.25) {
-                // Синий участок (первые 25% расстояния)
-                color = '#2A3587';
-            } else if (progress <= 0.35) {
-                // Плавный переход от синего к белому (25% - 35%)
-                const t = (progress - 0.25) / (0.35 - 0.25);
-                color = this.interpolateColor('#2A3587', '#FFFFFF', t);
-            } else if (progress <= 0.65) {
-                // Белый участок (35% - 65% расстояния)
-                color = '#FFFFFF';
-            } else if (progress <= 0.75) {
-                // Плавный переход от белого к красному (65% - 75%)
-                const t = (progress - 0.65) / (0.75 - 0.65);
-                color = this.interpolateColor('#FFFFFF', '#CF2228', t);
+            if (i === 0) {
+                this.ctx.moveTo(x, y);
             } else {
-                // Красный участок (последние 25% расстояния)
-                color = '#CF2228';
+                this.ctx.lineTo(x, y);
             }
-            
-            this.ctx.strokeStyle = color;
-            this.ctx.beginPath();
-            this.ctx.moveTo(prevX, prevY);
-            this.ctx.lineTo(currX, currY);
-            this.ctx.stroke();
-            
-            currentLength += segmentLengths[i - 1];
         }
+        this.ctx.stroke();
         
         this.ctx.restore();
         
