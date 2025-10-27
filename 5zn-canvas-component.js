@@ -450,23 +450,34 @@ class SznCanvasComponent {
         this.ctx.fillStyle = state.fontColor;
         this.ctx.textAlign = 'left';
         
-        // Рендерим метрики в правильном порядке: Distance, Elevation, Time, Speed
-        // Первый ряд: Distance (col=0), Elevation (col=1), Time (col=2)
-        // Второй ряд: Speed (col=1, по центру)
+        // Рендерим метрики в обратном порядке: Speed в первом ряду, остальные во втором
+        // Первый ряд: Speed (по центру)
+        // Второй ряд: Distance (col=0), Elevation (col=1), Time (col=2)
         
         // Первый ряд
         const firstRowY = startY;
         const secondRowY = startY - cellHeight - 44 * scale;
+        
+        // Speed (первый ряд, по центру)
+        if (orderedMetrics[3]) {
+            const x = leftMargin + cellWidth + (cellWidth / 2);
+            this.ctx.textAlign = 'center';
+            this.ctx.font = `${labelFontSize}px Inter, sans-serif`;
+            this.ctx.fillText(orderedMetrics[3].dataName.toUpperCase(), x, firstRowY - valueFontSize - 10 * scale);
+            this.ctx.font = `bold ${valueFontSize}px Inter, sans-serif`;
+            const displayValue = orderedMetrics[3].data && orderedMetrics[3].data !== '' && orderedMetrics[3].data !== '0' ? orderedMetrics[3].data : '—';
+            this.ctx.fillText(displayValue, x, firstRowY);
+        }
         
         // Distance (col=0, левое выравнивание)
         if (orderedMetrics[0]) {
             const x = leftMargin;
             this.ctx.textAlign = 'left';
             this.ctx.font = `${labelFontSize}px Inter, sans-serif`;
-            this.ctx.fillText(orderedMetrics[0].dataName.toUpperCase(), x, firstRowY - valueFontSize - 10 * scale);
+            this.ctx.fillText(orderedMetrics[0].dataName.toUpperCase(), x, secondRowY - valueFontSize - 10 * scale);
             this.ctx.font = `bold ${valueFontSize}px Inter, sans-serif`;
             const displayValue = orderedMetrics[0].data && orderedMetrics[0].data !== '' && orderedMetrics[0].data !== '0' ? orderedMetrics[0].data : '—';
-            this.ctx.fillText(displayValue, x, firstRowY);
+            this.ctx.fillText(displayValue, x, secondRowY);
         }
         
         // Elevation (col=1, центральное выравнивание)
@@ -474,10 +485,10 @@ class SznCanvasComponent {
             const x = leftMargin + cellWidth + (cellWidth / 2);
             this.ctx.textAlign = 'center';
             this.ctx.font = `${labelFontSize}px Inter, sans-serif`;
-            this.ctx.fillText(orderedMetrics[1].dataName.toUpperCase(), x, firstRowY - valueFontSize - 10 * scale);
+            this.ctx.fillText(orderedMetrics[1].dataName.toUpperCase(), x, secondRowY - valueFontSize - 10 * scale);
             this.ctx.font = `bold ${valueFontSize}px Inter, sans-serif`;
             const displayValue = orderedMetrics[1].data && orderedMetrics[1].data !== '' && orderedMetrics[1].data !== '0' ? orderedMetrics[1].data : '—';
-            this.ctx.fillText(displayValue, x, firstRowY);
+            this.ctx.fillText(displayValue, x, secondRowY);
         }
         
         // Time (col=2, правое выравнивание)
@@ -485,20 +496,9 @@ class SznCanvasComponent {
             const x = leftMargin + (2 * cellWidth) + cellWidth;
             this.ctx.textAlign = 'right';
             this.ctx.font = `${labelFontSize}px Inter, sans-serif`;
-            this.ctx.fillText(orderedMetrics[2].dataName.toUpperCase(), x, firstRowY - valueFontSize - 10 * scale);
+            this.ctx.fillText(orderedMetrics[2].dataName.toUpperCase(), x, secondRowY - valueFontSize - 10 * scale);
             this.ctx.font = `bold ${valueFontSize}px Inter, sans-serif`;
             const displayValue = orderedMetrics[2].data && orderedMetrics[2].data !== '' && orderedMetrics[2].data !== '0' ? orderedMetrics[2].data : '—';
-            this.ctx.fillText(displayValue, x, firstRowY);
-        }
-        
-        // Speed (второй ряд, по центру)
-        if (orderedMetrics[3]) {
-            const x = leftMargin + cellWidth + (cellWidth / 2);
-            this.ctx.textAlign = 'center';
-            this.ctx.font = `${labelFontSize}px Inter, sans-serif`;
-            this.ctx.fillText(orderedMetrics[3].dataName.toUpperCase(), x, secondRowY - valueFontSize - 10 * scale);
-            this.ctx.font = `bold ${valueFontSize}px Inter, sans-serif`;
-            const displayValue = orderedMetrics[3].data && orderedMetrics[3].data !== '' && orderedMetrics[3].data !== '0' ? orderedMetrics[3].data : '—';
             this.ctx.fillText(displayValue, x, secondRowY);
         }
         
