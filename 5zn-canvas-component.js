@@ -56,10 +56,24 @@ class SznCanvasComponent {
         // Обновляем размеры в зависимости от postStyle
         this.updateCanvasSize();
         
-        // Получаем размеры контейнера для CSS масштабирования
-        const container = this.canvas.parentElement;
-        const containerWidth = container.clientWidth;
-        const containerHeight = container.clientHeight;
+        // Получаем размеры области просмотра (между navbar 48px и editing panel 180px)
+        const viewportHeight = window.innerHeight - 48 - 180;
+        const viewportWidth = window.innerWidth;
+        
+        // Используем viewport размеры если контейнер пустой
+        let containerWidth = viewportWidth;
+        let containerHeight = viewportHeight;
+        
+        // Пытаемся получить реальные размеры контейнера
+        try {
+            const container = this.canvas.parentElement;
+            if (container && container.clientWidth > 0 && container.clientHeight > 0) {
+                containerWidth = container.clientWidth;
+                containerHeight = container.clientHeight;
+            }
+        } catch (e) {
+            console.warn('⚠️ Could not get container size, using viewport:', e);
+        }
         
         // Рассчитываем CSS размеры для отображения (масштабируем под контейнер)
         let displayWidth, displayHeight;
@@ -76,9 +90,15 @@ class SznCanvasComponent {
             displayHeight = displayWidth / canvasAspect;
         }
         
+        // Минимальные размеры для видимости
+        if (displayWidth < 100) displayWidth = containerWidth * 0.9;
+        if (displayHeight < 100) displayHeight = containerHeight * 0.9;
+        
         // Устанавливаем CSS размеры для отображения
         this.canvas.style.width = Math.floor(displayWidth) + 'px';
         this.canvas.style.height = Math.floor(displayHeight) + 'px';
+        this.canvas.style.display = 'block';
+        this.canvas.style.margin = '0 auto';
         
         // Устанавливаем фиксированные размеры canvas для рендеринга (1080x1920)
         // Применяем размеры только если они изменились
@@ -96,8 +116,10 @@ class SznCanvasComponent {
         if (!this._resizeHandlerAdded) {
             this._resizeHandlerAdded = true;
             window.addEventListener('resize', () => {
-                this.setupCanvas();
-                this.render();
+                setTimeout(() => {
+                    this.setupCanvas();
+                    this.render();
+                }, 100);
             });
         }
     }
