@@ -182,6 +182,12 @@ html, body {
     margin: 0;
 }
 
+.nav-logo {
+    height: 24px;
+    width: auto;
+    filter: brightness(0) invert(1); /* Делает логотип белым */
+}
+
 .nav-actions {
     display: flex;
     gap: 8px;
