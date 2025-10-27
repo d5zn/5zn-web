@@ -372,16 +372,21 @@ class SznCanvasComponent {
         
         let currentY = bottomY;
         
-        metrics.forEach(metric => {
-            // Label
-            this.ctx.fillText(metric.dataName, leftPadding, currentY);
+        // Рендерим в обратном порядке (снизу вверх)
+        for (let i = metrics.length - 1; i >= 0; i--) {
+            const metric = metrics[i];
             
-            // Value
+            // Value (рисуем первым, так как идем снизу вверх)
             this.ctx.font = `bold ${fontSize}px Inter, sans-serif`;
-            this.ctx.fillText(metric.data, leftPadding, currentY + lineHeight);
+            this.ctx.fillText(metric.data, leftPadding, currentY);
             
-            currentY += lineHeight * 2 + 12;
-        });
+            // Label (выше value)
+            this.ctx.font = `${fontSize}px Inter, sans-serif`;
+            this.ctx.fillText(metric.dataName, leftPadding, currentY - lineHeight);
+            
+            // Двигаемся вверх для следующей метрики
+            currentY -= (lineHeight * 2 + 12);
+        }
         
         this.ctx.restore();
         return currentY;

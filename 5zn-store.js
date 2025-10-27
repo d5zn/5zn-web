@@ -107,7 +107,7 @@ class SznStore {
     }
     
     formatRideData(activity) {
-        return [{
+        const rideData = [{
             dataName: "Distance",
             data: `${Number(activity.distance / 1000).toFixed(2)}km`,
             visible: true
@@ -120,6 +120,17 @@ class SznStore {
             data: this.formatTime(activity.moving_time),
             visible: true
         }];
+        
+        // Добавляем Calories если есть данные
+        if (activity.kilojoules || activity.calories) {
+            rideData.push({
+                dataName: "Calories",
+                data: `${activity.kilojoules || activity.calories || 0} kJ`,
+                visible: true
+            });
+        }
+        
+        return rideData;
     }
     
     formatSpeedData(activity) {

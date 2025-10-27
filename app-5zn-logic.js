@@ -500,14 +500,28 @@ class SznApp {
         );
         
         if (metricItem) {
+            console.log(`🔧 Toggling metric: ${metricItem.dataName} (current: ${metricItem.visible})`);
+            
             // Используем метод store для переключения видимости
             this.store.toggleVisibility(dataType, metricItem.dataName);
             
-            // Обновляем UI
+            // Обновляем UI после переключения (используем новое состояние)
+            const newState = this.store.getState();
+            const updatedMetric = newState[dataType].find(item => 
+                item.dataName === metricItem.dataName
+            );
+            
             const button = document.querySelector(`[data-metric="${metric}"]`);
-            if (button) {
-                button.classList.toggle('active', metricItem.visible);
+            if (button && updatedMetric) {
+                if (updatedMetric.visible) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
+                console.log(`✅ Metric ${updatedMetric.dataName} is now ${updatedMetric.visible ? 'visible' : 'hidden'}`);
             }
+        } else {
+            console.warn(`⚠️ Metric not found: ${metric}`);
         }
     }
 
