@@ -169,6 +169,7 @@ html, body {
 .nav-container {
     display: flex;
     align-items: center;
+    width: 100%; /* Растягиваем на всю ширину */
     max-width: 100%;
     margin: 0; /* Убираем все отступы */
     height: 100%;
