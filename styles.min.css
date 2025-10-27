@@ -97,7 +97,9 @@ html, body {
 
 /* Canvas стили управляются JavaScript - убираем конфликтующие CSS */
 #connected canvas {
-    /* Размеры устанавливаются в JavaScript */
+    /* Базовые размеры для инициализации */
+    width: 400px;
+    height: 1400px;
     max-width: 100%;
     max-height: 95%;
     margin: auto;
@@ -107,6 +109,9 @@ html, body {
 
 /* Canvas для превью - размеры управляются JavaScript */
 #route-canvas {
+    /* Базовые размеры для инициализации */
+    width: 400px;
+    height: 1400px;
     display: block;
     margin: 0 auto;
     padding: 0;
