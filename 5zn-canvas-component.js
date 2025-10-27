@@ -520,7 +520,7 @@ class SznCanvasComponent {
         
         // Доступная область для маршрута (между заголовком и метриками)
         const routeTop = (safeArea.top + 150) * scale; // После заголовка
-        const routeBottom = height - (safeArea.bottom + 20) * scale; // Над метриками с отступом 20px
+        const routeBottom = height - (safeArea.bottom + 350) * scale; // Над метриками с отступом 350px
         const routeLeft = safeArea.left * scale;
         const routeRight = width - (safeArea.right * scale);
         
