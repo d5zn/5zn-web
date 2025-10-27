@@ -75,6 +75,54 @@ def init_database():
     finally:
         conn.close()
 
+def inject_config(html_content):
+    """Inject configuration from environment variables into HTML"""
+    try:
+        from server_config import STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET
+    except ImportError:
+        STRAVA_CLIENT_ID = os.environ.get('STRAVA_CLIENT_ID', 'YOUR_STRAVA_CLIENT_ID')
+        STRAVA_CLIENT_SECRET = os.environ.get('STRAVA_CLIENT_SECRET', 'YOUR_STRAVA_CLIENT_SECRET')
+    
+    is_production = os.environ.get('ENVIRONMENT') == 'production'
+    is_railway = os.environ.get('RAILWAY_ENVIRONMENT') is not None
+    
+    # Generate config script
+    config_script = f"""
+<script>
+window.CONFIG = {{
+    STRAVA: {{
+        CLIENT_ID: '{STRAVA_CLIENT_ID}',
+        CLIENT_SECRET: '{STRAVA_CLIENT_SECRET}',
+        REDIRECT_URI: window.location.origin + '/oauth/',
+        SCOPE: 'read,activity:read_all',
+        API_BASE_URL: 'https://www.strava.com/api/v3'
+    }},
+    ENV: {{
+        PRODUCTION: {str(is_production or is_railway).lower()},
+        DEBUG: {str(not (is_production or is_railway)).lower()},
+        MOCK_DATA: false
+    }},
+    APP: {{
+        NAME: '5zn.io',
+        VERSION: '1.0.0',
+        DEFAULT_WORKOUTS_COUNT: 10
+    }}
+}};
+
+if (CONFIG.ENV.DEBUG) {{
+    console.log('🔧 5zn Web Configuration:', CONFIG);
+}}
+</script>
+"""
+    
+    # Replace config.js script tag with inline config
+    html_content = html_content.replace(
+        '<script src="config.js?v=3"></script>',
+        config_script
+    )
+    
+    return html_content
+
 class ProductionHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
     # Rate limiting storage
     rate_limit_store = defaultdict(list)
@@ -154,6 +202,26 @@ class ProductionHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         if self.path == '/api/admin/users':
             self.handle_admin_users()
             return
+        
+        # Inject config for HTML files
+        if self.path == '/' or self.path == '/index.html':
+            try:
+                with open('index.html', 'r', encoding='utf-8') as f:
+                    html_content = f.read()
+                
+                # Inject configuration
+                html_content = inject_config(html_content)
+                
+                # Send response
+                self.send_response(200)
+                self.send_header('Content-Type', 'text/html; charset=utf-8')
+                self.send_header('Content-Length', len(html_content.encode('utf-8')))
+                self.end_headers()
+                self.wfile.write(html_content.encode('utf-8'))
+                return
+            except Exception as e:
+                print(f"❌ Error injecting config: {e}")
+                # Fallback to default handling
         
         # Продолжаем как обычно
         super().do_GET()
