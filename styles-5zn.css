@@ -286,10 +286,11 @@ html, body {
 
 /* Data Buttons Container */
 .data-buttons {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr; /* 3 колонки */
+    grid-template-rows: 1fr 1fr; /* 2 ряда */
     gap: 8px;
-    justify-content: flex-start;
+    width: 100%;
 }
 
 /* Data Buttons */

@@ -463,9 +463,10 @@ class SznCanvasComponent {
                 this.ctx.font = `${labelFontSize}px Inter, sans-serif`;
                 this.ctx.fillText(metric.dataName.toUpperCase(), x, y - valueFontSize - 10 * scale);
                 
-                // Value (снизу)
+                // Value (снизу) - показываем прочерк если нет данных
                 this.ctx.font = `bold ${valueFontSize}px Inter, sans-serif`;
-                this.ctx.fillText(metric.data, x, y);
+                const displayValue = metric.data && metric.data !== '' && metric.data !== '0' ? metric.data : '—';
+                this.ctx.fillText(displayValue, x, y);
             }
         }
         
