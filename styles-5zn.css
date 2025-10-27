@@ -259,13 +259,17 @@ html, body {
     background: transparent;
     border: none;
     color: #888888;
-    padding: 16px 8px;
+    padding: 8px 8px; /* Уменьшили padding для высоты 32px */
     cursor: pointer;
-    font-size: 14px;
+    font-size: 11px; /* Изменили размер текста на 11px */
     font-weight: 300;
     transition: all 0.2s ease;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    height: 32px; /* Явно задали высоту 32px */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .tab-btn.active {
