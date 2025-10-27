@@ -116,7 +116,7 @@ html, body {
     max-width: 100%;
     max-height: 95%;
     margin: auto;
-    border-radius: 24px;
+    border-radius: 8px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
     transition: height 0.3s ease-out, transform 0.3s ease-out;
 }
