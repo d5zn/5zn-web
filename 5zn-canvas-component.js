@@ -441,9 +441,9 @@ class SznCanvasComponent {
                 const metric = allMetrics[index];
                 const x = leftMargin + (col * cellWidth);
                 
-                // Label (сверху)
+                // Label (сверху) - в верхнем регистре
                 this.ctx.font = `${labelFontSize}px Inter, sans-serif`;
-                this.ctx.fillText(metric.dataName, x, y - valueFontSize - 10 * scale);
+                this.ctx.fillText(metric.dataName.toUpperCase(), x, y - valueFontSize - 10 * scale);
                 
                 // Value (снизу)
                 this.ctx.font = `bold ${valueFontSize}px Inter, sans-serif`;
