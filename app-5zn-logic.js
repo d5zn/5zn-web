@@ -529,68 +529,23 @@ class SznApp {
         document.querySelectorAll('.ratio-btn').forEach(btn => {
             btn.classList.remove('active');
         });
-        document.querySelector(`[data-ratio="${ratio}"]`).classList.add('active');
+        document.querySelector(`[data-ratio="${ratio}"]`)?.classList.add('active');
         
-        const previewArea = document.querySelector('.preview-area');
         const connectedState = document.getElementById('connected');
         
-        if (previewArea && connectedState) {
-            previewArea.classList.remove('ratio-9-16', 'ratio-4-5');
+        if (connectedState) {
             connectedState.classList.remove('ratio-9-16', 'ratio-4-5');
             
-            switch(ratio) {
-                case '9:16':
-                    const screenHeight = window.innerHeight;
-                    const navBarHeight = 60;
-                    const tabBarHeight = 180;
-                    const safeAreaInsets = 0;
-                    
-                    const viewportHeight9_16 = screenHeight - navBarHeight - tabBarHeight - safeAreaInsets;
-                    const viewportWidth9_16 = viewportHeight9_16 * 9 / 16;
-                    
-                    previewArea.classList.add('ratio-9-16');
-                    connectedState.classList.add('ratio-9-16');
-                    
-                    previewArea.style.setProperty('width', `${viewportWidth9_16}px`, 'important');
-                    previewArea.style.setProperty('height', `${viewportHeight9_16}px`, 'important');
-                    previewArea.style.setProperty('max-width', `${viewportWidth9_16}px`, 'important');
-                    previewArea.style.setProperty('max-height', `${viewportWidth9_16}px`, 'important');
-                    
-                    connectedState.style.setProperty('aspect-ratio', '9 / 16', 'important');
-                    connectedState.style.setProperty('width', '100%', 'important');
-                    connectedState.style.setProperty('height', '100%', 'important');
-                    connectedState.style.setProperty('display', 'flex', 'important');
-                    
-                    console.log('🔧 Установлено соотношение 9:16:', viewportWidth9_16, 'x', viewportHeight9_16);
-                    break;
-                case '4:5':
-                    const screenHeight4_5 = window.innerHeight;
-                    const navBarHeight4_5 = 60;
-                    const tabBarHeight4_5 = 180;
-                    const safeAreaInsets4_5 = 0;
-                    
-                    const viewportHeight4_5 = screenHeight4_5 - navBarHeight4_5 - tabBarHeight4_5 - safeAreaInsets4_5;
-                    const viewportWidth4_5 = viewportHeight4_5 * 4 / 5;
-                    
-                    previewArea.classList.add('ratio-4-5');
-                    connectedState.classList.add('ratio-4-5');
-                    
-                    previewArea.style.setProperty('width', `${viewportWidth4_5}px`, 'important');
-                    previewArea.style.setProperty('height', `${viewportWidth4_5}px`, 'important');
-                    previewArea.style.setProperty('max-width', `${viewportWidth4_5}px`, 'important');
-                    previewArea.style.setProperty('max-height', `${viewportWidth4_5}px`, 'important');
-                    
-                    connectedState.style.setProperty('aspect-ratio', '4 / 5', 'important');
-                    connectedState.style.setProperty('width', '100%', 'important');
-                    connectedState.style.setProperty('height', '100%', 'important');
-                    connectedState.style.setProperty('display', 'flex', 'important');
-                    
-                    console.log('🔧 Установлено соотношение 4:5:', viewportWidth4_5, 'x', viewportHeight4_5);
-                    break;
+            if (ratio === '9:16') {
+                connectedState.classList.add('ratio-9-16');
+                console.log('🔧 Установлено соотношение 9:16');
+            } else if (ratio === '4:5') {
+                connectedState.classList.add('ratio-4-5');
+                console.log('🔧 Установлено соотношение 4:5');
             }
         }
         
-        console.log('🔧 Ratio изменен на:', ratio, '- превью обновлен');
+        console.log('🔧 Ratio изменен на:', ratio);
         
         setTimeout(() => {
             this.updateCanvas();
