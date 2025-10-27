@@ -29,6 +29,8 @@ class SznApp {
         
         setTimeout(() => {
             console.log('✅ SznApp with 5zn Logic initialized');
+            // Синхронизируем кнопки метрик после инициализации
+            this.syncMetricButtons();
         }, 100);
     }
     
@@ -468,6 +470,38 @@ class SznApp {
         this.currentTab = tabName;
     }
 
+    // Синхронизация кнопок метрик с состоянием store
+    syncMetricButtons() {
+        const state = this.store.getState();
+        
+        // Синхронизируем все кнопки метрик
+        document.querySelectorAll('.data-btn').forEach(btn => {
+            const metric = btn.dataset.metric;
+            if (!metric) return;
+            
+            // Определяем тип данных
+            let dataType = 'RideData';
+            if (metric === 'speed' || metric === 'power') {
+                dataType = 'speedData';
+            }
+            
+            // Находим соответствующую метрику
+            const dataArray = state[dataType];
+            const metricItem = dataArray.find(item => 
+                item.dataName.toLowerCase().includes(metric.toLowerCase())
+            );
+            
+            if (metricItem) {
+                if (metricItem.visible) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+                console.log(`🔄 Synced ${metricItem.dataName}: ${metricItem.visible ? 'active' : 'inactive'}`);
+            }
+        });
+    }
+
     // Metric Selection - используем логику nextPoly
     toggleMetricVisibility(metric) {
         const state = this.store.getState();
@@ -660,12 +694,15 @@ class SznApp {
             connected.style.display = 'flex';
             console.log('✅ Connected shown');
             
-            // Показываем панель редактирования
-            const editingPanel = document.querySelector('.editing-panel');
-            if (editingPanel) {
-                editingPanel.classList.remove('hidden');
-                console.log('✅ Editing panel shown');
-            }
+        // Показываем панель редактирования
+        const editingPanel = document.querySelector('.editing-panel');
+        if (editingPanel) {
+            editingPanel.classList.remove('hidden');
+            console.log('✅ Editing panel shown');
+        }
+        
+        // Синхронизируем кнопки метрик с текущим состоянием
+        this.syncMetricButtons();
             
             const navbar = document.querySelector('.navbar');
             if (navbar) {
