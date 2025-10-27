@@ -6,7 +6,7 @@
     <meta name="description" content="5zn-web - Activity Details">
     <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; script-src * 'unsafe-inline' 'unsafe-eval' 'unsafe-hashes'; style-src * 'unsafe-inline'; img-src * data: blob:; connect-src *; object-src *; media-src *; font-src *; worker-src *; manifest-src *; form-action *; base-uri *;">
     <title>Activity - 5zn.io</title>
-    <link rel="stylesheet" href="styles.css?v=56">
+    <link rel="stylesheet" href="styles-polymer.css?v=1">
     <style>
         body {
             margin: 0;
@@ -196,18 +196,18 @@
         </div>
     </div>
 
-    <script src="polyline.js"></script>
+    <script src="config.js?v=72"></script>
+    <script src="polyline.js?v=4"></script>
+    <script src="polymer-store.js?v=1"></script>
+    <script src="polymer-canvas-component.js?v=1"></script>
     <script>
         class ActivityViewer {
             constructor() {
                 this.canvas = document.getElementById('activity-canvas');
-                this.ctx = this.canvas.getContext('2d');
                 this.stravaToken = localStorage.getItem('strava_token');
                 this.activityId = this.getActivityIdFromURL();
-                
-                // Фиксированное внутреннее разрешение (как в app.js)
-                this.internalWidth = 1080;
-                this.internalHeight = 1920;
+                this.store = window.polymerStore;
+                this.polymerCanvas = null;
                 
                 if (!this.activityId) {
                     this.showError('ID активности не указан в URL');
@@ -232,23 +232,9 @@
             }
             
             initCanvas() {
-                // Подход как в app.js: фиксированные размеры + CSS масштабирование
-                const rawDpr = window.devicePixelRatio || 1;
-                const dpr = Math.min(rawDpr, 2);
-                
-                // Canvas рисуется в фиксированном разрешении
-                this.canvas.width = this.internalWidth * dpr;
-                this.canvas.height = this.internalHeight * dpr;
-                
-                // CSS управляет отображением (всегда показывает 1080x1920 через CSS)
-                this.canvas.style.width = this.internalWidth + 'px';
-                this.canvas.style.height = this.internalHeight + 'px';
-                
-                // Применяем DPR масштаб
-                this.ctx.scale(dpr, dpr);
-                
-                console.log('✅ Canvas initialized:', this.canvas.width, 'x', this.canvas.height, 'at DPR', dpr);
-                console.log('✅ Canvas display size:', this.internalWidth, 'x', this.internalHeight);
+                // Используем Polymer Canvas Component
+                this.polymerCanvas = new PolymerCanvasComponent(this.canvas, this.store);
+                console.log('✅ Activity Canvas initialized with Polymer');
             }
             
             async loadActivity() {
@@ -289,8 +275,16 @@
                 document.getElementById('time').textContent = this.formatTime(activity.moving_time);
                 document.getElementById('speed').textContent = this.formatSpeed(activity.average_speed);
                 
-                // Отрисовываем маршрут
-                this.drawRoute(activity);
+                // Устанавливаем активность в store
+                this.store.setActivity(activity);
+                
+                // Устанавливаем данные маршрута
+                const polylineData = activity?.map?.polyline || activity?.map?.summary_polyline;
+                if (polylineData) {
+                    this.polymerCanvas.setPolylineData(polylineData);
+                }
+                
+                console.log('✅ Activity displayed with Polymer Canvas');
             }
             
             drawRoute(activity) {
