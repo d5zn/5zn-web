@@ -871,11 +871,9 @@ class SznApp {
                             </div>
                         </div>
                     </div>
-                    <a href="activity.html?activityId=${workout.id}" 
-                       style="margin-left: 10px; padding: 8px 12px; background: #fff; color: #000; text-decoration: none; border-radius: 4px; font-size: 12px; white-space: nowrap;"
-                       onclick="event.stopPropagation();">
-                        View
-                    </a>
+                    <div style="margin-left: 10px; padding: 8px 12px; background: #333; color: #fff; border-radius: 4px; font-size: 12px; white-space: nowrap; opacity: 0.7;">
+                        Click to apply
+                    </div>
                 </div>
             </div>
         `).join('');

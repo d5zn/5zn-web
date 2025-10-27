@@ -584,15 +584,20 @@ html, body {
     padding: 16px;
     border-bottom: 1px solid #333333;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: all 0.2s ease;
+    border-radius: 4px;
+    margin-bottom: 4px;
 }
 
 .workout-item:hover {
     background: #111111;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .workout-item.active {
     background: #222222;
+    border: 1px solid #444444;
 }
 
 .workout-name {
