@@ -494,45 +494,67 @@ class SznCanvasComponent {
         const centerLat = (bounds.maxLat + bounds.minLat) / 2;
         const centerLng = (bounds.maxLng + bounds.minLng) / 2;
         
-        // Рисуем маршрут с градиентом французского флага по пути маршрута
+        // Рисуем маршрут с градиентом, привязанным к расстоянию
         this.ctx.save();
         
-        // Находим начальную и конечную точки маршрута
-        const startPoint = this.decodedRoute[0];
-        const endPoint = this.decodedRoute[this.decodedRoute.length - 1];
+        // Вычисляем общую длину маршрута для привязки к расстоянию
+        let totalLength = 0;
+        const segmentLengths = [];
         
-        const startX = routeLeft + routeWidth / 2 + (startPoint[1] - centerLng) * routeScale;
-        const startY = routeTop + routeHeight / 2 - (startPoint[0] - centerLat) * routeScale;
-        const endX = routeLeft + routeWidth / 2 + (endPoint[1] - centerLng) * routeScale;
-        const endY = routeTop + routeHeight / 2 - (endPoint[0] - centerLat) * routeScale;
+        for (let i = 1; i < this.decodedRoute.length; i++) {
+            const prevPoint = this.decodedRoute[i - 1];
+            const currPoint = this.decodedRoute[i];
+            
+            const prevX = routeLeft + routeWidth / 2 + (prevPoint[1] - centerLng) * routeScale;
+            const prevY = routeTop + routeHeight / 2 - (prevPoint[0] - centerLat) * routeScale;
+            const currX = routeLeft + routeWidth / 2 + (currPoint[1] - centerLng) * routeScale;
+            const currY = routeTop + routeHeight / 2 - (currPoint[0] - centerLat) * routeScale;
+            
+            const segmentLength = Math.sqrt((currX - prevX) ** 2 + (currY - prevY) ** 2);
+            segmentLengths.push(segmentLength);
+            totalLength += segmentLength;
+        }
         
-        // Создаем градиент по пути маршрута (от начала к концу)
-        const gradient = this.ctx.createLinearGradient(startX, startY, endX, endY);
-        
-        // Цвета французского флага точно как в SVG
-        gradient.addColorStop(0, '#2A3587');           // Синий (начало)
-        gradient.addColorStop(0.495192, '#FFFFFF');    // Белый (49.5%)
-        gradient.addColorStop(1, '#CF2228');           // Красный (конец)
-        
-        this.ctx.strokeStyle = gradient;
+        // Рисуем маршрут по сегментам с цветом, привязанным к прогрессу расстояния
         this.ctx.lineWidth = 8 * scale;
         this.ctx.lineCap = 'round';
         this.ctx.lineJoin = 'round';
         
-        this.ctx.beginPath();
+        let currentLength = 0;
         
-        this.decodedRoute.forEach((point, index) => {
-            const x = routeLeft + routeWidth / 2 + (point[1] - centerLng) * routeScale;
-            const y = routeTop + routeHeight / 2 - (point[0] - centerLat) * routeScale;
+        for (let i = 1; i < this.decodedRoute.length; i++) {
+            const prevPoint = this.decodedRoute[i - 1];
+            const currPoint = this.decodedRoute[i];
             
-            if (index === 0) {
-                this.ctx.moveTo(x, y);
+            const prevX = routeLeft + routeWidth / 2 + (prevPoint[1] - centerLng) * routeScale;
+            const prevY = routeTop + routeHeight / 2 - (prevPoint[0] - centerLat) * routeScale;
+            const currX = routeLeft + routeWidth / 2 + (currPoint[1] - centerLng) * routeScale;
+            const currY = routeTop + routeHeight / 2 - (currPoint[0] - centerLat) * routeScale;
+            
+            // Определяем цвет на основе прогресса расстояния
+            const progress = currentLength / totalLength;
+            let color;
+            
+            if (progress <= 0.33) {
+                // Синий участок (первые 33% расстояния)
+                color = '#2A3587';
+            } else if (progress <= 0.66) {
+                // Белый участок (33% - 66% расстояния)
+                color = '#FFFFFF';
             } else {
-                this.ctx.lineTo(x, y);
+                // Красный участок (последние 33% расстояния)
+                color = '#CF2228';
             }
-        });
+            
+            this.ctx.strokeStyle = color;
+            this.ctx.beginPath();
+            this.ctx.moveTo(prevX, prevY);
+            this.ctx.lineTo(currX, currY);
+            this.ctx.stroke();
+            
+            currentLength += segmentLengths[i - 1];
+        }
         
-        this.ctx.stroke();
         this.ctx.restore();
         
         console.log(`🗺️ Route rendered: ${this.decodedRoute.length} points`);
