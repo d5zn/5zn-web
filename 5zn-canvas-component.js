@@ -413,25 +413,20 @@ class SznCanvasComponent {
         const visibleSpeedData = speedData.filter(item => item.visible);
         
         // Создаем массив метрик в точном порядке кнопок:
-        // Ряд 1: Distance, Elevation, Time
-        // Ряд 2: Power/Avg, Speed/Avg, Calories
+        // Distance, Elevation, Time, Speed
         const orderedMetrics = [];
         
         // Находим метрики по названиям
         const distanceMetric = visibleRideData.find(item => item.dataName.toLowerCase().includes('distance'));
         const elevationMetric = visibleRideData.find(item => item.dataName.toLowerCase().includes('elevation'));
         const timeMetric = visibleRideData.find(item => item.dataName.toLowerCase().includes('time'));
-        const powerMetric = visibleSpeedData.find(item => item.dataName.toLowerCase().includes('power'));
         const speedMetric = visibleSpeedData.find(item => item.dataName.toLowerCase().includes('speed'));
-        const caloriesMetric = visibleSpeedData.find(item => item.dataName.toLowerCase().includes('calories'));
         
         // Добавляем в порядке кнопок
         if (distanceMetric) orderedMetrics.push(distanceMetric);
         if (elevationMetric) orderedMetrics.push(elevationMetric);
         if (timeMetric) orderedMetrics.push(timeMetric);
-        if (powerMetric) orderedMetrics.push(powerMetric);
         if (speedMetric) orderedMetrics.push(speedMetric);
-        if (caloriesMetric) orderedMetrics.push(caloriesMetric);
         
         if (orderedMetrics.length === 0) return;
         
@@ -440,7 +435,7 @@ class SznCanvasComponent {
         const safeArea = this.config.safeArea;
         
         // Параметры grid
-        const columns = 3;
+        const columns = 4;
         const labelFontSize = Math.floor(32 * scale);
         const valueFontSize = Math.floor(52 * scale);
         const cellHeight = valueFontSize + labelFontSize + 20 * scale;
@@ -455,45 +450,42 @@ class SznCanvasComponent {
         this.ctx.fillStyle = state.fontColor;
         this.ctx.textAlign = 'left';
         
-        // Рендерим в grid 2 ряда x 3 колонки (снизу вверх)
-        const rows = Math.ceil(orderedMetrics.length / columns);
+        // Рендерим в одну строку: Distance, Elevation, Time, Speed
+        const y = startY;
         
-        for (let row = 0; row < rows; row++) {
-            const y = startY - (row * cellHeight) - (row * 44 * scale);
+        for (let col = 0; col < orderedMetrics.length; col++) {
+            const metric = orderedMetrics[col];
+            let x, textAlign;
             
-            for (let col = 0; col < columns; col++) {
-                const index = (rows - 1 - row) * columns + col;
-                if (index >= orderedMetrics.length) continue;
-                
-                const metric = orderedMetrics[index];
-                let x, textAlign;
-                
-                // Определяем позицию и выравнивание в зависимости от колонки
-                if (col === 0) {
-                    // Левая колонка (1, 4) - выравнивание по левому краю
-                    x = leftMargin + (col * cellWidth);
-                    textAlign = 'left';
-                } else if (col === 1) {
-                    // Средняя колонка (2, 5) - выравнивание по центру
-                    x = leftMargin + (col * cellWidth) + (cellWidth / 2);
-                    textAlign = 'center';
-                } else {
-                    // Правая колонка (3, 6) - выравнивание по правому краю
-                    x = leftMargin + (col * cellWidth) + cellWidth;
-                    textAlign = 'right';
-                }
-                
-                this.ctx.textAlign = textAlign;
-                
-                // Label (сверху) - в верхнем регистре
-                this.ctx.font = `${labelFontSize}px Inter, sans-serif`;
-                this.ctx.fillText(metric.dataName.toUpperCase(), x, y - valueFontSize - 10 * scale);
-                
-                // Value (снизу) - показываем прочерк если нет данных
-                this.ctx.font = `bold ${valueFontSize}px Inter, sans-serif`;
-                const displayValue = metric.data && metric.data !== '' && metric.data !== '0' ? metric.data : '—';
-                this.ctx.fillText(displayValue, x, y);
+            // Определяем позицию и выравнивание в зависимости от колонки
+            if (col === 0) {
+                // Distance - левое выравнивание
+                x = leftMargin + (col * cellWidth);
+                textAlign = 'left';
+            } else if (col === 1) {
+                // Elevation - левое выравнивание
+                x = leftMargin + (col * cellWidth);
+                textAlign = 'left';
+            } else if (col === 2) {
+                // Time - правое выравнивание
+                x = leftMargin + (col * cellWidth) + cellWidth;
+                textAlign = 'right';
+            } else if (col === 3) {
+                // Speed - правое выравнивание
+                x = leftMargin + (col * cellWidth) + cellWidth;
+                textAlign = 'right';
             }
+            
+            this.ctx.textAlign = textAlign;
+            
+            // Label (сверху) - в верхнем регистре
+            this.ctx.font = `${labelFontSize}px Inter, sans-serif`;
+            this.ctx.fillText(metric.dataName.toUpperCase(), x, y - valueFontSize - 10 * scale);
+            
+            // Value (снизу) - показываем прочерк если нет данных
+            this.ctx.font = `bold ${valueFontSize}px Inter, sans-serif`;
+            const displayValue = metric.data && metric.data !== '' && metric.data !== '0' ? metric.data : '—';
+            this.ctx.fillText(displayValue, x, y);
         }
         
         this.ctx.restore();

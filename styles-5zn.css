@@ -374,8 +374,7 @@ html, body {
 /* Data Buttons Container */
 .data-buttons {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr; /* 3 колонки */
-    grid-template-rows: 1fr 1fr; /* 2 ряда */
+    grid-template-columns: 1fr 1fr 1fr 1fr; /* 4 колонки */
     gap: 8px;
     width: 100%;
 }

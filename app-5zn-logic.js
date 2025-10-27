@@ -493,7 +493,7 @@ class SznApp {
             
             // Определяем тип данных
             let dataType = 'RideData';
-            if (metric === 'speed' || metric === 'power' || metric === 'calories') {
+            if (metric === 'speed') {
                 dataType = 'speedData';
             }
             
@@ -524,7 +524,7 @@ class SznApp {
         
         // Определяем тип данных
         let dataType = 'RideData';
-        if (metric === 'speed' || metric === 'power' || metric === 'calories') {
+        if (metric === 'speed') {
             dataType = 'speedData';
         }
         
