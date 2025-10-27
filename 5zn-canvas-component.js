@@ -1,7 +1,10 @@
-// Polymer Canvas Component - Exact copy of nextPoly canvas logic
+// 5zn Canvas Component - Exact copy of nextPoly canvas logic
 // Точная копия компонента canvas из nextPoly
+// Version: 2.0 - Updated branding to 5zn
 
-class PolymerCanvasComponent {
+console.log('🎨 Loading 5znCanvasComponent v2.0 - Updated branding to 5zn');
+
+class 5znCanvasComponent {
     constructor(canvasElement, store) {
         this.canvas = canvasElement;
         this.ctx = canvasElement.getContext('2d');
@@ -397,7 +400,7 @@ class PolymerCanvasComponent {
 
 // Экспорт
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = PolymerCanvasComponent;
+    module.exports = 5znCanvasComponent;
 } else {
-    window.PolymerCanvasComponent = PolymerCanvasComponent;
+    window.5znCanvasComponent = 5znCanvasComponent;
 }

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="description" content="5zn-web - Activity Details">
     <title>Activity - 5zn.io</title>
-    <link rel="stylesheet" href="styles-polymer.css?v=1">
+    <link rel="stylesheet" href="styles-5zn.css?v=2">
     <style>
         body {
             margin: 0;
@@ -195,18 +195,18 @@
         </div>
     </div>
 
-    <script src="config.js?v=72"></script>
-    <script src="polyline.js?v=4"></script>
-    <script src="polymer-store.js?v=1"></script>
-    <script src="polymer-canvas-component.js?v=1"></script>
+    <script src="config.js?v=73"></script>
+    <script src="polyline.js?v=5"></script>
+    <script src="5zn-store.js?v=2"></script>
+    <script src="5zn-canvas-component.js?v=2"></script>
     <script>
         class ActivityViewer {
             constructor() {
                 this.canvas = document.getElementById('activity-canvas');
                 this.stravaToken = localStorage.getItem('strava_token');
                 this.activityId = this.getActivityIdFromURL();
-                this.store = window.polymerStore;
-                this.polymerCanvas = null;
+                this.store = window.5znStore;
+                this.5znCanvas = null;
                 
                 if (!this.activityId) {
                     this.showError('ID активности не указан в URL');
@@ -231,9 +231,9 @@
             }
             
             initCanvas() {
-                // Используем Polymer Canvas Component
-                this.polymerCanvas = new PolymerCanvasComponent(this.canvas, this.store);
-                console.log('✅ Activity Canvas initialized with Polymer');
+                // Используем 5zn Canvas Component
+                this.5znCanvas = new 5znCanvasComponent(this.canvas, this.store);
+                console.log('✅ Activity Canvas initialized with 5zn');
             }
             
             async loadActivity() {
@@ -280,10 +280,10 @@
                 // Устанавливаем данные маршрута
                 const polylineData = activity?.map?.polyline || activity?.map?.summary_polyline;
                 if (polylineData) {
-                    this.polymerCanvas.setPolylineData(polylineData);
+                    this.5znCanvas.setPolylineData(polylineData);
                 }
                 
-                console.log('✅ Activity displayed with Polymer Canvas');
+                console.log('✅ Activity displayed with 5zn Canvas');
             }
             
             drawRoute(activity) {

@@ -1,7 +1,10 @@
-// TrinkyApp with Polymer Logic - Exact copy of nextPoly data handling
+// 5znApp with 5zn Logic - Exact copy of nextPoly data handling
 // Точная копия логики работы с данными из nextPoly
+// Version: 2.0 - Updated branding to 5zn
 
-class TrinkyApp {
+console.log('🚀 Loading 5znApp v2.0 - Updated branding to 5zn');
+
+class 5znApp {
     constructor() {
         this.stravaToken = localStorage.getItem('strava_token');
         this.currentWorkout = null;
@@ -9,14 +12,14 @@ class TrinkyApp {
         this.polymerCanvas = null;
         this.currentTab = 'photo';
         
-        // Инициализируем Polymer Store
-        this.store = window.polymerStore;
+        // Инициализируем 5zn Store
+        this.store = window.5znStore;
         
         this.init();
     }
 
     init() {
-        console.log('TrinkyApp with Polymer Logic initializing...');
+        console.log('5znApp with 5zn Logic initializing...');
         this.setupEventListeners();
         this.setupCanvas();
         this.setupTabs();
@@ -25,26 +28,26 @@ class TrinkyApp {
         this.checkAuthStatus();
         
         setTimeout(() => {
-            console.log('✅ TrinkyApp with Polymer Logic initialized');
+            console.log('✅ 5znApp with 5zn Logic initialized');
         }, 100);
     }
     
     setupCanvas() {
         const canvas = document.getElementById('route-canvas');
         if (canvas) {
-            // Инициализируем Polymer Canvas Component
-            this.polymerCanvas = new PolymerCanvasComponent(canvas, this.store);
+            // Инициализируем 5zn Canvas Component
+            this.polymerCanvas = new 5znCanvasComponent(canvas, this.store);
             
             // Настраиваем обработчики для управления изображением
             this.setupImageManipulation();
             this.setupPhotoButtons();
             
-            console.log('✅ Polymer Canvas Component setup complete');
+            console.log('✅ 5zn Canvas Component setup complete');
         }
     }
     
     updateCanvas() {
-        // Polymer Canvas автоматически обрабатывает resize
+        // 5zn Canvas автоматически обрабатывает resize
         if (this.polymerCanvas) {
             this.polymerCanvas.render();
         }
@@ -217,11 +220,11 @@ class TrinkyApp {
         }
     }
 
-    // Новый метод рендеринга с использованием Polymer Store
+    // Новый метод рендеринга с использованием 5zn Store
     renderWorkout() {
         if (!this.polymerCanvas || !this.currentWorkout) return;
         
-        console.log('🎨 Rendering workout with Polymer Store');
+        console.log('🎨 Rendering workout with 5zn Store');
         
         // Устанавливаем активность в store (как в nextPoly)
         this.store.setActivity(this.currentWorkout);
@@ -232,7 +235,7 @@ class TrinkyApp {
             this.polymerCanvas.setPolylineData(polylineData);
         }
         
-        console.log('✅ Workout rendered with Polymer Store');
+        console.log('✅ Workout rendered with 5zn Store');
     }
 
     setupEventListeners() {
@@ -1030,8 +1033,8 @@ class TrinkyApp {
 
 // Initialize app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM loaded, initializing TrinkyApp with Polymer Logic');
-    new TrinkyApp();
+    console.log('DOM loaded, initializing 5znApp with 5zn Logic');
+    new 5znApp();
 });
 
 // Force show not connected state if no token
