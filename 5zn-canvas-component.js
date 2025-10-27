@@ -610,7 +610,7 @@ class SznCanvasComponent {
         // Позиционируем логотип в правом верхнем углу с учетом безопасной зоны
         const logoSize = 180 * scale;
         const logoX = width - logoSize - (safeArea.right * scale);
-        const logoY = (safeArea.top * scale) - 64 * scale; // Подняли на 24px (40 + 24 = 64)
+        const logoY = (safeArea.top * scale) - 84 * scale; // Подняли еще на 20px (64 + 20 = 84)
         
         this.ctx.save();
         this.ctx.drawImage(this.logoImage, logoX, logoY, logoSize, logoSize);
