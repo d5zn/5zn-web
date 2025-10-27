@@ -9,7 +9,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>5zn.io</title>
-    <link rel="stylesheet" href="styles-5zn.css?v=2">
+    <link rel="stylesheet" href="styles-5zn.css?v=3">
 </head>
 <body>
     <div class="mobile-container" id="mobile-container">
@@ -58,7 +58,7 @@
                         <div class="state-card">
                             <h2>Connect to Strava</h2>
                             <p>Visualize your cycling routes and workout data.</p>
-                            <button id="connect-strava-btn" class="btn btn-primary" style="height: 40px; display: flex; align-items: center; justify-content: center;">Connect with Strava</button>
+                            <button id="connect-strava-btn" class="btn btn-primary">Connect with Strava</button>
                         </div>
                     </div>
 
@@ -91,6 +91,14 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Loading State -->
+                    <div id="loading" class="state-container hidden">
+                        <div class="state-card">
+                            <div class="spinner"></div>
+                            <h2>Loading...</h2>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -109,8 +117,8 @@
                 <div class="tab-content">
                     <!-- Photo Tab -->
                     <div id="photo-tab" class="tab-panel active">
-                        <button class="action-btn" id="upload-photo-btn" style="height: 40px; display: flex; align-items: center; justify-content: center;">Upload Photo</button>
-                        <button class="action-btn" id="mono-toggle-btn" style="height: 40px; margin-top: 8px; display: none; align-items: center; justify-content: center;">Convert to Mono</button>
+                        <button class="action-btn" id="upload-photo-btn">Upload Photo</button>
+                        <button class="action-btn" id="mono-toggle-btn" style="display: none; margin-top: 8px;">Convert to Mono</button>
                     </div>
 
                     <!-- Data Tab -->
@@ -159,15 +167,7 @@
                 </div>
             </div>
         </div>
-
-        <!-- Loading State -->
-        <div id="loading" class="state-container hidden">
-            <div class="state-card">
-                <div class="spinner"></div>
-                <h2>Loading...</h2>
-            </div>
-        </div>
-    </main>
+    </div> <!-- Close mobile-container -->
 
     <!-- Workout Selector Modal -->
     <div id="workout-selector-modal" class="modal hidden">
@@ -189,13 +189,11 @@
     <input type="file" id="photo-input" accept="image/*" style="display: none;">
     <input type="file" id="logo-input" accept="image/*" style="display: none;">
 
-    </div> <!-- Close mobile-container -->
-
 <script src="config.js?v=73"></script>
 <script src="polyline.js?v=5"></script>
-<script src="5zn-store.js?v=2"></script>
-<script src="5zn-canvas-component.js?v=2"></script>
-<script src="app-5zn-logic.js?v=2"></script>
+<script src="5zn-store.js?v=3"></script>
+<script src="5zn-canvas-component.js?v=3"></script>
+<script src="app-5zn-logic.js?v=3"></script>
     
     <!-- Debug script -->
     <script>
