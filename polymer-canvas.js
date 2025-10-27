@@ -1,47 +1,29 @@
-// Enhanced Canvas System - Inspired by nextPoly
-// Модульная система рендеринга canvas с профессиональными эффектами
+// Polymer Canvas System - Direct Integration
+// Минимальная и эффективная реализация на основе nextPoly
 
-class EnhancedCanvasSystem {
-    constructor(canvas, options = {}) {
-        this.canvas = canvas;
-        this.ctx = canvas.getContext('2d');
+class PolymerCanvas {
+    constructor(canvasElement) {
+        this.canvas = canvasElement;
+        this.ctx = canvasElement.getContext('2d');
         
-        // Конфигурация
+        // Конфигурация как в nextPoly
         this.config = {
-            // Фиксированное разрешение (как в nextPoly)
-            internalWidth: options.width || 400,
-            internalHeight: options.height || 1400,
-            // Соотношения сторон
-            aspectRatio: options.aspectRatio || '9/16',
-            // DPR ограничение для производительности
-            maxDPR: options.maxDPR || 2,
-            // Отступы и безопасные зоны
-            padding: options.padding || 0.08, // 8% отступы
-            // Шрифты
-            fontFamily: options.fontFamily || 'Inter, sans-serif',
-            fontFamilyBold: options.fontFamilyBold || 'Inter, sans-serif',
-            // Цвета
-            primaryColor: options.primaryColor || '#FFFFFF',
-            secondaryColor: options.secondaryColor || '#888888',
-            // Эффекты
-            overlayOpacity: options.overlayOpacity || 0.4,
-            ...options
+            width: 400,
+            height: 1400,
+            aspectRatio: '9/16',
+            maxDPR: 2,
+            padding: 0.08
         };
         
         // Состояние
         this.state = {
-            isInitialized: false,
-            devicePixelRatio: 1,
-            scale: 1,
-            offsetX: 0,
-            offsetY: 0,
-            // Данные для рендеринга
             backgroundImage: null,
             polylineData: null,
             title: '',
             subtitle: '',
             metrics: [],
-            logoImage: null
+            logoImage: null,
+            fontColor: 'white'
         };
         
         this.init();
@@ -49,22 +31,20 @@ class EnhancedCanvasSystem {
     
     init() {
         this.setupCanvas();
-        this.setupEventListeners();
-        this.state.isInitialized = true;
-        console.log('✅ Enhanced Canvas System initialized');
+        console.log('✅ Polymer Canvas initialized');
     }
     
     setupCanvas() {
         const rawDPR = window.devicePixelRatio || 1;
-        this.state.devicePixelRatio = Math.min(rawDPR, this.config.maxDPR);
+        const dpr = Math.min(rawDPR, this.config.maxDPR);
         
-        // Устанавливаем внутреннее разрешение canvas
-        this.canvas.width = this.config.internalWidth * this.state.devicePixelRatio;
-        this.canvas.height = this.config.internalHeight * this.state.devicePixelRatio;
+        // Устанавливаем размеры как в nextPoly
+        this.canvas.width = this.config.width * dpr;
+        this.canvas.height = this.config.height * dpr;
         
         // CSS управляет отображением
-        this.canvas.style.width = this.config.internalWidth + 'px';
-        this.canvas.style.height = this.config.internalHeight + 'px';
+        this.canvas.style.width = this.config.width + 'px';
+        this.canvas.style.height = this.config.height + 'px';
         this.canvas.style.aspectRatio = this.config.aspectRatio;
         this.canvas.style.maxWidth = '100%';
         this.canvas.style.maxHeight = '95%';
@@ -72,26 +52,20 @@ class EnhancedCanvasSystem {
         this.canvas.style.transition = 'height 0.3s ease-out, transform 0.3s ease-out';
         
         // Применяем DPR масштаб
-        this.ctx.scale(this.state.devicePixelRatio, this.state.devicePixelRatio);
+        this.ctx.scale(dpr, dpr);
         
-        console.log(`✅ Canvas setup: ${this.canvas.width}x${this.canvas.height} at DPR ${this.state.devicePixelRatio}`);
-    }
-    
-    setupEventListeners() {
+        // Обработчик resize
         window.addEventListener('resize', () => {
             this.setupCanvas();
             this.render();
         });
     }
     
-    // Основной метод рендеринга
     render() {
-        if (!this.state.isInitialized) return;
-        
-        const { internalWidth, internalHeight } = this.config;
+        const { width, height } = this.config;
         
         // Очищаем canvas
-        this.ctx.clearRect(0, 0, internalWidth, internalHeight);
+        this.ctx.clearRect(0, 0, width, height);
         
         // Рендерим слои в правильном порядке
         this.renderBackground();
@@ -100,30 +74,29 @@ class EnhancedCanvasSystem {
         this.renderContent();
         this.renderLogo();
         
-        console.log('🎨 Canvas rendered with enhanced system');
+        console.log('🎨 Polymer Canvas rendered');
     }
     
-    // Рендеринг фонового изображения
+    // Рендеринг фона (как в nextPoly)
     renderBackground() {
         if (!this.state.backgroundImage) return;
         
-        const { internalWidth, internalHeight } = this.config;
-        
-        // Создаем изображение
         const img = new Image();
         img.onload = () => {
-            this.drawBackgroundImage(img, internalWidth, internalHeight);
+            this.drawBackgroundImage(img);
         };
         img.src = this.state.backgroundImage;
     }
     
-    drawBackgroundImage(img, width, height) {
+    drawBackgroundImage(img) {
+        const { width, height } = this.config;
+        
+        // Адаптивное масштабирование как в nextPoly
         const imgAspect = img.width / img.height;
         const canvasAspect = width / height;
         
         let drawWidth, drawHeight, drawX, drawY;
         
-        // Адаптируем изображение под canvas (cover)
         if (imgAspect > canvasAspect) {
             // Изображение шире - масштабируем по высоте
             drawHeight = height;
@@ -143,55 +116,56 @@ class EnhancedCanvasSystem {
         this.ctx.restore();
     }
     
-    // Рендеринг overlay эффекта (как в nextPoly)
+    // Overlay эффект (как в nextPoly)
     renderOverlay() {
-        const { internalWidth, internalHeight, overlayOpacity } = this.config;
+        const { width, height } = this.config;
         
-        // Создаем полупрозрачный overlay для контраста
+        // Создаем полупрозрачный overlay
         const overlayCanvas = document.createElement('canvas');
-        overlayCanvas.width = internalWidth;
-        overlayCanvas.height = internalHeight;
+        overlayCanvas.width = width;
+        overlayCanvas.height = height;
         const overlayCtx = overlayCanvas.getContext('2d');
         
-        // Определяем цвет overlay в зависимости от основного цвета
-        const overlayColor = this.config.primaryColor === '#FFFFFF' 
-            ? `rgba(0, 0, 0, ${overlayOpacity})` 
-            : `rgba(255, 255, 255, ${overlayOpacity})`;
+        // Цвет overlay зависит от основного цвета
+        const overlayColor = this.state.fontColor === 'white' 
+            ? 'rgba(0, 0, 0, 0.4)' 
+            : 'rgba(255, 255, 255, 0.4)';
         
         overlayCtx.fillStyle = overlayColor;
-        overlayCtx.fillRect(0, 0, internalWidth, internalHeight);
+        overlayCtx.fillRect(0, 0, width, height);
         
-        this.ctx.drawImage(overlayCanvas, 0, 0, internalWidth, internalHeight);
+        this.ctx.drawImage(overlayCanvas, 0, 0, width, height);
     }
     
-    // Рендеринг маршрута с градиентом
+    // Рендеринг маршрута (как в nextPoly)
     renderRoute() {
         if (!this.state.polylineData) return;
         
-        const { internalWidth, internalHeight, padding } = this.config;
-        const paddingPx = internalHeight * padding;
+        const { width, height, padding } = this.config;
+        const paddingPx = height * padding;
         
-        // Рассчитываем область для маршрута
+        // Область для маршрута
         const routeArea = {
             top: paddingPx,
-            bottom: internalHeight - paddingPx,
+            bottom: height - paddingPx,
             left: paddingPx,
-            right: internalWidth - paddingPx,
-            width: internalWidth - (paddingPx * 2),
-            height: internalHeight - (paddingPx * 2)
+            right: width - paddingPx,
+            width: width - (paddingPx * 2),
+            height: height - (paddingPx * 2)
         };
         
         // Декодируем полилинию
         const points = this.decodePolyline(this.state.polylineData);
         if (!points || points.length === 0) return;
         
-        // Масштабируем точки под область маршрута
+        // Масштабируем точки
         const scaledPoints = this.scalePointsToArea(points, routeArea);
         
         // Рисуем маршрут с градиентом
         this.drawRouteWithGradient(scaledPoints, routeArea);
     }
     
+    // Декодер полилинии (упрощенная версия)
     decodePolyline(encodedPolyline) {
         if (!encodedPolyline || encodedPolyline.length < 10) return null;
         
@@ -250,7 +224,7 @@ class EnhancedCanvasSystem {
         // Рассчитываем масштаб
         const scaleX = area.width / (bounds.maxLng - bounds.minLng);
         const scaleY = area.height / (bounds.maxLat - bounds.minLat);
-        const scale = Math.min(scaleX, scaleY) * 0.9; // 0.9 для отступов
+        const scale = Math.min(scaleX, scaleY) * 0.9;
         
         // Центрируем
         const centerLat = (bounds.minLat + bounds.maxLat) / 2;
@@ -277,6 +251,7 @@ class EnhancedCanvasSystem {
         return { minLat, maxLat, minLng, maxLng };
     }
     
+    // Рисуем маршрут с градиентом (как в nextPoly)
     drawRouteWithGradient(points, area) {
         if (!points || points.length === 0) return;
         
@@ -287,7 +262,7 @@ class EnhancedCanvasSystem {
         this.ctx.lineCap = 'round';
         this.ctx.lineJoin = 'round';
         
-        // Создаем градиент (французский флаг)
+        // Градиент французского флага
         const gradient = this.ctx.createLinearGradient(area.left, 0, area.right, 0);
         gradient.addColorStop(0, '#002395');    // Синий
         gradient.addColorStop(0.4, '#FFFFFF');  // Белый
@@ -319,51 +294,49 @@ class EnhancedCanvasSystem {
         this.ctx.restore();
     }
     
-    // Рендеринг контента (заголовки, метрики)
+    // Рендеринг контента
     renderContent() {
-        const { internalWidth, internalHeight, padding } = this.config;
-        const paddingPx = internalHeight * padding;
+        const { width, height, padding } = this.config;
+        const paddingPx = height * padding;
         
-        // Рендерим заголовок
+        // Заголовок
         if (this.state.title) {
             this.renderTitle(this.state.title, this.state.subtitle, paddingPx);
         }
         
-        // Рендерим метрики
+        // Метрики
         if (this.state.metrics && this.state.metrics.length > 0) {
-            this.renderMetrics(this.state.metrics, internalWidth, internalHeight, paddingPx);
+            this.renderMetrics(this.state.metrics, width, height, paddingPx);
         }
     }
     
     renderTitle(title, subtitle, topPadding) {
-        const { internalWidth, fontFamily, fontFamilyBold, primaryColor } = this.config;
+        const { width } = this.config;
         
         this.ctx.save();
-        this.ctx.fillStyle = primaryColor;
+        this.ctx.fillStyle = this.state.fontColor;
         
         // Заголовок
-        const titleFontSize = Math.floor(internalWidth / 1000 * 35);
-        this.ctx.font = `${titleFontSize}px ${fontFamilyBold}`;
+        const titleFontSize = Math.floor(width / 1000 * 35);
+        this.ctx.font = `bold ${titleFontSize}px Inter, sans-serif`;
         this.ctx.textAlign = 'left';
         
         const titleY = topPadding + 50;
-        this.wrapText(title, 40, titleY, internalWidth - 80, titleFontSize);
+        this.wrapText(title, 40, titleY, width - 80, titleFontSize);
         
         // Подзаголовок
         if (subtitle) {
-            const subtitleFontSize = Math.floor(internalWidth / 1000 * 24);
-            this.ctx.font = `${subtitleFontSize}px ${fontFamily}`;
+            const subtitleFontSize = Math.floor(width / 1000 * 24);
+            this.ctx.font = `${subtitleFontSize}px Inter, sans-serif`;
             
             const subtitleY = titleY + titleFontSize + 10;
-            this.wrapText(subtitle, 40, subtitleY, internalWidth - 80, subtitleFontSize);
+            this.wrapText(subtitle, 40, subtitleY, width - 80, subtitleFontSize);
         }
         
         this.ctx.restore();
     }
     
     renderMetrics(metrics, width, height, padding) {
-        const { fontFamily, fontFamilyBold, primaryColor, secondaryColor } = this.config;
-        
         this.ctx.save();
         
         // Рассчитываем позиции для метрик
@@ -389,14 +362,14 @@ class EnhancedCanvasSystem {
             const y = metricsArea.top + row * rowHeight + 20;
             
             // Label
-            this.ctx.fillStyle = secondaryColor;
-            this.ctx.font = `13px ${fontFamily}`;
+            this.ctx.fillStyle = '#888888';
+            this.ctx.font = '13px Inter, sans-serif';
             this.ctx.textAlign = 'center';
             this.ctx.fillText(metric.label, x, y);
             
             // Value
-            this.ctx.fillStyle = primaryColor;
-            this.ctx.font = `bold 22px ${fontFamilyBold}`;
+            this.ctx.fillStyle = this.state.fontColor;
+            this.ctx.font = 'bold 22px Inter, sans-serif';
             this.ctx.fillText(metric.value, x, y + 30);
         });
         
@@ -407,12 +380,12 @@ class EnhancedCanvasSystem {
     renderLogo() {
         if (!this.state.logoImage) return;
         
-        const { internalWidth, internalHeight, padding } = this.config;
-        const paddingPx = internalHeight * padding;
+        const { width, height, padding } = this.config;
+        const paddingPx = height * padding;
         
         // Позиционируем логотип в правом верхнем углу
         const logoSize = 72;
-        const logoX = internalWidth - logoSize - 20;
+        const logoX = width - logoSize - 20;
         const logoY = paddingPx + 50 - logoSize / 2;
         
         const img = new Image();
@@ -474,12 +447,16 @@ class EnhancedCanvasSystem {
         this.render();
     }
     
-    // Экспорт canvas как изображение
+    setFontColor(color) {
+        this.state.fontColor = color;
+        this.render();
+    }
+    
+    // Экспорт
     exportAsImage(format = 'image/png', quality = 1.0) {
         return this.canvas.toDataURL(format, quality);
     }
     
-    // Экспорт как blob для sharing
     exportAsBlob(format = 'image/png', quality = 1.0) {
         return new Promise((resolve) => {
             this.canvas.toBlob(resolve, format, quality);
@@ -487,9 +464,9 @@ class EnhancedCanvasSystem {
     }
 }
 
-// Экспорт для использования
+// Экспорт
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = EnhancedCanvasSystem;
+    module.exports = PolymerCanvas;
 } else {
-    window.EnhancedCanvasSystem = EnhancedCanvasSystem;
+    window.PolymerCanvas = PolymerCanvas;
 }

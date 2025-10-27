@@ -1,7 +1,7 @@
-// Enhanced TrinkyApp - Using nextPoly-inspired Canvas System
-// Обновленная версия с модульной архитектурой и профессиональными эффектами
+// TrinkyApp with Polymer Canvas Integration
+// Простая интеграция с логикой nextPoly
 
-// Утилита для условного логирования (только в development)
+// Утилита для условного логирования
 const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 const log = isDev ? console.log : () => {};
 
@@ -51,12 +51,12 @@ if (typeof window.polyline === 'undefined') {
     console.log('✅ Inline polyline decoder loaded');
 }
 
-class EnhancedTrinkyApp {
+class TrinkyApp {
     constructor() {
         this.stravaToken = localStorage.getItem('strava_token');
         this.currentWorkout = null;
         this.workouts = [];
-        this.canvasSystem = null;
+        this.polymerCanvas = null;
         this.currentTab = 'photo';
         this.currentMetric = 'distance';
         this.activeMetrics = new Set(['distance']);
@@ -64,20 +64,6 @@ class EnhancedTrinkyApp {
         this.originalBackgroundImage = null;
         this.isMonochrome = false;
         this.logoImage = null;
-        
-        // Конфигурация canvas системы
-        this.canvasConfig = {
-            width: 400,
-            height: 1400,
-            aspectRatio: '9/16',
-            maxDPR: 2,
-            padding: 0.08,
-            fontFamily: 'Inter, sans-serif',
-            fontFamilyBold: 'Inter, sans-serif',
-            primaryColor: '#FFFFFF',
-            secondaryColor: '#888888',
-            overlayOpacity: 0.4
-        };
         
         // Переменные для управления фоновым изображением
         this.imageTransform = {
@@ -100,7 +86,7 @@ class EnhancedTrinkyApp {
     }
 
     init() {
-        console.log('Enhanced TrinkyApp initializing...');
+        console.log('TrinkyApp with Polymer Canvas initializing...');
         this.setupEventListeners();
         this.setupCanvas();
         this.setupTabs();
@@ -108,31 +94,30 @@ class EnhancedTrinkyApp {
         this.setupMobileOptimizations();
         this.checkAuthStatus();
         
-        // Force display after initialization
         setTimeout(() => {
-            console.log('✅ Enhanced TrinkyApp initialized');
+            console.log('✅ TrinkyApp with Polymer Canvas initialized');
         }, 100);
     }
     
     setupCanvas() {
         const canvas = document.getElementById('route-canvas');
         if (canvas) {
-            // Инициализируем новую canvas систему
-            this.canvasSystem = new EnhancedCanvasSystem(canvas, this.canvasConfig);
+            // Инициализируем Polymer Canvas
+            this.polymerCanvas = new PolymerCanvas(canvas);
             
             // Настраиваем обработчики для управления изображением
             this.setupImageManipulation();
             this.setupPhotoButtons();
             this.initializeActiveMetrics();
             
-            console.log('✅ Enhanced canvas system setup complete');
+            console.log('✅ Polymer Canvas setup complete');
         }
     }
     
     updateCanvas() {
-        // Новая система автоматически обрабатывает resize
-        if (this.canvasSystem) {
-            this.canvasSystem.render();
+        // Polymer Canvas автоматически обрабатывает resize
+        if (this.polymerCanvas) {
+            this.polymerCanvas.render();
         }
     }
 
@@ -310,41 +295,41 @@ class EnhancedTrinkyApp {
         this.renderWorkout();
     }
 
-    // Новый метод рендеринга с использованием enhanced canvas системы
+    // Новый метод рендеринга с использованием Polymer Canvas
     renderWorkout() {
-        if (!this.canvasSystem || !this.currentWorkout) return;
+        if (!this.polymerCanvas || !this.currentWorkout) return;
         
-        console.log('🎨 Rendering workout with enhanced system');
+        console.log('🎨 Rendering workout with Polymer Canvas');
         
         // Устанавливаем фоновое изображение
         if (this.backgroundImage) {
-            this.canvasSystem.setBackgroundImage(this.backgroundImage);
+            this.polymerCanvas.setBackgroundImage(this.backgroundImage);
         }
         
         // Устанавливаем данные маршрута
         const polylineData = this.currentWorkout?.map?.polyline || this.currentWorkout?.map?.summary_polyline;
         if (polylineData) {
-            this.canvasSystem.setPolylineData(polylineData);
+            this.polymerCanvas.setPolylineData(polylineData);
         }
         
         // Устанавливаем заголовок и подзаголовок
         const title = this.currentWorkout.name || 'Workout';
         const subtitle = this.formatWorkoutDate(this.currentWorkout.start_date);
-        this.canvasSystem.setTitle(title, subtitle);
+        this.polymerCanvas.setTitle(title, subtitle);
         
         // Устанавливаем метрики
         const metrics = this.getActiveMetrics();
-        this.canvasSystem.setMetrics(metrics);
+        this.polymerCanvas.setMetrics(metrics);
         
         // Устанавливаем логотип
         if (this.logoImage) {
-            this.canvasSystem.setLogo(this.logoImage);
+            this.polymerCanvas.setLogo(this.logoImage);
         } else {
             // Используем SVG логотип по умолчанию
-            this.canvasSystem.setLogo('logo_NIP.svg');
+            this.polymerCanvas.setLogo('logo_NIP.svg');
         }
         
-        console.log('✅ Workout rendered with enhanced canvas system');
+        console.log('✅ Workout rendered with Polymer Canvas');
     }
     
     getActiveMetrics() {
@@ -545,9 +530,9 @@ class EnhancedTrinkyApp {
     }
 
     setupImageManipulation() {
-        if (!this.canvasSystem) return;
+        if (!this.polymerCanvas) return;
         
-        const canvas = this.canvasSystem.canvas;
+        const canvas = this.polymerCanvas.canvas;
         
         // Обработчики для мыши
         canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e));
@@ -865,7 +850,7 @@ class EnhancedTrinkyApp {
                     previewArea.style.setProperty('width', `${viewportWidth9_16}px`, 'important');
                     previewArea.style.setProperty('height', `${viewportHeight9_16}px`, 'important');
                     previewArea.style.setProperty('max-width', `${viewportWidth9_16}px`, 'important');
-                    previewArea.style.setProperty('max-height', `${viewportHeight9_16}px`, 'important');
+                    previewArea.style.setProperty('max-height', `${viewportWidth9_16}px`, 'important');
                     
                     connectedState.style.setProperty('aspect-ratio', '9 / 16', 'important');
                     connectedState.style.setProperty('width', '100%', 'important');
@@ -886,7 +871,7 @@ class EnhancedTrinkyApp {
                     connectedState.classList.add('ratio-4-5');
                     
                     previewArea.style.setProperty('width', `${viewportWidth4_5}px`, 'important');
-                    previewArea.style.setProperty('height', `${viewportHeight4_5}px`, 'important');
+                    previewArea.style.setProperty('height', `${viewportWidth4_5}px`, 'important');
                     previewArea.style.setProperty('max-width', `${viewportWidth4_5}px`, 'important');
                     previewArea.style.setProperty('max-height', `${viewportWidth4_5}px`, 'important');
                     
@@ -979,9 +964,9 @@ class EnhancedTrinkyApp {
         background.style.backgroundImage = 'none';
         
         if (this.backgroundImage) {
-            this.canvasSystem.canvas.classList.add('has-background');
+            this.polymerCanvas.canvas.classList.add('has-background');
         } else {
-            this.canvasSystem.canvas.classList.remove('has-background');
+            this.polymerCanvas.canvas.classList.remove('has-background');
         }
         
         if (this.currentWorkout) {
@@ -1336,8 +1321,8 @@ class EnhancedTrinkyApp {
             document.getElementById('connect-strava-btn')?.addEventListener('click', () => this.connectStrava());
         }
         
-        if (this.canvasSystem && this.canvasSystem.ctx) {
-            this.canvasSystem.ctx.clearRect(0, 0, this.canvasSystem.canvas.width, this.canvasSystem.canvas.height);
+        if (this.polymerCanvas && this.polymerCanvas.ctx) {
+            this.polymerCanvas.ctx.clearRect(0, 0, this.polymerCanvas.canvas.width, this.polymerCanvas.canvas.height);
         }
         
         this.backgroundImage = null;
@@ -1350,8 +1335,8 @@ class EnhancedTrinkyApp {
 
 // Initialize app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM loaded, initializing Enhanced TrinkyApp');
-    new EnhancedTrinkyApp();
+    console.log('DOM loaded, initializing TrinkyApp with Polymer Canvas');
+    new TrinkyApp();
 });
 
 // Force show not connected state if no token
