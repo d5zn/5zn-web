@@ -164,16 +164,17 @@ class SznCanvasComponent {
     loadImages() {
         const state = this.store.getState();
         
-        // Загружаем фоновое изображение
+        // Загружаем фоновое изображение (пользовательское или дефолтное)
         this.imageLoading = true;
-        this.backgroundImage.src = state.image;
+        const imageSrc = state.image || '/bg.jpeg'; // Используем bg.jpeg как дефолт
+        this.backgroundImage.src = imageSrc;
         this.backgroundImage.crossOrigin = "anonymous";
         this.backgroundImage.onload = () => {
             this.imageLoading = false;
             this.render();
         };
         this.backgroundImage.onerror = () => {
-            console.warn('⚠️ Background image failed to load:', state.image);
+            console.warn('⚠️ Background image failed to load:', imageSrc);
             this.imageLoading = false;
             this.render();
         };
