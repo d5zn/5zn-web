@@ -1048,7 +1048,7 @@ class SznApp {
             setTimeout(() => URL.revokeObjectURL(url), 1000);
             
             // Show instructions
-            alert('Изображение скачано! Теперь вы можете:\n\n1. Открыть Instagram Stories\n2. Добавить скачанное изображение\n3. Поделиться своей тренировкой!');
+            alert('Image downloaded! Now you can:\n\n1. Open Instagram Stories\n2. Add the downloaded image\n3. Share your workout!');
             
             console.log('📱 Instagram share prepared');
         }, 'image/png', 0.9);
