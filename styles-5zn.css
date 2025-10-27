@@ -192,6 +192,7 @@ html, body {
     display: flex;
     gap: 8px;
     align-items: center;
+    margin-left: auto; /* Прижимаем иконки к правому краю */
 }
 
 .nav-btn {
