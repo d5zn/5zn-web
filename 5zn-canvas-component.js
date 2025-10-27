@@ -532,26 +532,26 @@ class SznCanvasComponent {
             const currX = routeLeft + routeWidth / 2 + (currPoint[1] - centerLng) * routeScale;
             const currY = routeTop + routeHeight / 2 - (currPoint[0] - centerLat) * routeScale;
             
-            // Определяем цвет на основе прогресса расстояния с плавными переходами
+            // Определяем цвет на основе прогресса расстояния с очень плавными переходами
             const progress = currentLength / totalLength;
             let color;
             
-            if (progress <= 0.3) {
-                // Синий участок (первые 30% расстояния)
+            if (progress <= 0.25) {
+                // Синий участок (первые 25% расстояния)
                 color = '#2A3587';
-            } else if (progress <= 0.4) {
-                // Плавный переход от синего к белому (30% - 40%)
-                const t = (progress - 0.3) / (0.4 - 0.3);
+            } else if (progress <= 0.35) {
+                // Плавный переход от синего к белому (25% - 35%)
+                const t = (progress - 0.25) / (0.35 - 0.25);
                 color = this.interpolateColor('#2A3587', '#FFFFFF', t);
-            } else if (progress <= 0.6) {
-                // Белый участок (40% - 60% расстояния)
+            } else if (progress <= 0.65) {
+                // Белый участок (35% - 65% расстояния)
                 color = '#FFFFFF';
-            } else if (progress <= 0.7) {
-                // Плавный переход от белого к красному (60% - 70%)
-                const t = (progress - 0.6) / (0.7 - 0.6);
+            } else if (progress <= 0.75) {
+                // Плавный переход от белого к красному (65% - 75%)
+                const t = (progress - 0.65) / (0.75 - 0.65);
                 color = this.interpolateColor('#FFFFFF', '#CF2228', t);
             } else {
-                // Красный участок (последние 30% расстояния)
+                // Красный участок (последние 25% расстояния)
                 color = '#CF2228';
             }
             
@@ -570,6 +570,9 @@ class SznCanvasComponent {
     }
     
     interpolateColor(color1, color2, factor) {
+        // Применяем easing функцию для более плавного перехода
+        const easedFactor = this.easeInOutCubic(factor);
+        
         // Конвертируем hex цвета в RGB
         const hex1 = color1.replace('#', '');
         const hex2 = color2.replace('#', '');
@@ -582,13 +585,18 @@ class SznCanvasComponent {
         const g2 = parseInt(hex2.substr(2, 2), 16);
         const b2 = parseInt(hex2.substr(4, 2), 16);
         
-        // Интерполируем каждый канал
-        const r = Math.round(r1 + (r2 - r1) * factor);
-        const g = Math.round(g1 + (g2 - g1) * factor);
-        const b = Math.round(b1 + (b2 - b1) * factor);
+        // Интерполируем каждый канал с плавным переходом
+        const r = Math.round(r1 + (r2 - r1) * easedFactor);
+        const g = Math.round(g1 + (g2 - g1) * easedFactor);
+        const b = Math.round(b1 + (b2 - b1) * easedFactor);
         
         // Конвертируем обратно в hex
         return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+    }
+    
+    easeInOutCubic(t) {
+        // Кубическая функция easing для более плавных переходов
+        return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
     }
     
     getRouteBounds(route) {
