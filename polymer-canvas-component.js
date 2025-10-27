@@ -16,7 +16,7 @@ class PolymerCanvasComponent {
         // Конфигурация как в nextPoly
         this.config = {
             width: 400,
-            height: 1400,
+            height: 1400, // Будет изменяться в зависимости от postStyle
             aspectRatio: '9/16',
             maxDPR: 2
         };
@@ -32,9 +32,25 @@ class PolymerCanvasComponent {
         console.log('✅ Polymer Canvas Component initialized');
     }
     
+    updateCanvasSize() {
+        const state = this.store.getState();
+        
+        // Обновляем размеры в зависимости от postStyle как в nextPoly
+        if (state.postStyle === 'square') {
+            this.config.height = 500; // 400 * 5/4 = 500 для соотношения 4:5
+            this.config.aspectRatio = '4/5';
+        } else {
+            this.config.height = 1400;
+            this.config.aspectRatio = '9/16';
+        }
+    }
+    
     setupCanvas() {
         const rawDPR = window.devicePixelRatio || 1;
         const dpr = Math.min(rawDPR, this.config.maxDPR);
+        
+        // Обновляем размеры в зависимости от postStyle
+        this.updateCanvasSize();
         
         // Точная логика как в nextPoly
         const clientWidth = this.canvas.clientWidth;
@@ -132,6 +148,9 @@ class PolymerCanvasComponent {
         if (!this.fontsLoaded) return;
         
         const state = this.store.getState();
+        
+        // Обновляем размеры в зависимости от postStyle
+        this.updateCanvasSize();
         
         // Используем размеры с учетом DPR масштабирования
         const width = this.canvas.width / this.dpr;
