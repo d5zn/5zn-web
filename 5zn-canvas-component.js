@@ -494,100 +494,42 @@ class SznCanvasComponent {
         const centerLat = (bounds.maxLat + bounds.minLat) / 2;
         const centerLng = (bounds.maxLng + bounds.minLng) / 2;
         
-        // Рисуем маршрут с градиентом французского флага по длине маршрута
+        // Рисуем маршрут с простым вертикальным градиентом французского флага
         this.ctx.save();
         
-        // Вычисляем общую длину маршрута для равномерного распределения цветов
-        let totalLength = 0;
-        const segmentLengths = [];
+        // Создаем вертикальный градиент как в SVG (сверху вниз)
+        const gradient = this.ctx.createLinearGradient(
+            routeLeft + routeWidth / 2, routeTop,
+            routeLeft + routeWidth / 2, routeBottom
+        );
         
-        for (let i = 1; i < this.decodedRoute.length; i++) {
-            const prevPoint = this.decodedRoute[i - 1];
-            const currPoint = this.decodedRoute[i];
-            
-            const prevX = routeLeft + routeWidth / 2 + (prevPoint[1] - centerLng) * routeScale;
-            const prevY = routeTop + routeHeight / 2 - (prevPoint[0] - centerLat) * routeScale;
-            const currX = routeLeft + routeWidth / 2 + (currPoint[1] - centerLng) * routeScale;
-            const currY = routeTop + routeHeight / 2 - (currPoint[0] - centerLat) * routeScale;
-            
-            const segmentLength = Math.sqrt((currX - prevX) ** 2 + (currY - prevY) ** 2);
-            segmentLengths.push(segmentLength);
-            totalLength += segmentLength;
-        }
+        // Цвета французского флага точно как в SVG
+        gradient.addColorStop(0, '#2A3587');           // Синий (начало)
+        gradient.addColorStop(0.495192, '#FFFFFF');    // Белый (49.5%)
+        gradient.addColorStop(1, '#CF2228');           // Красный (конец)
         
-        // Рисуем маршрут по сегментам с соответствующими цветами
+        this.ctx.strokeStyle = gradient;
         this.ctx.lineWidth = 8 * scale;
         this.ctx.lineCap = 'round';
         this.ctx.lineJoin = 'round';
         
-        let currentLength = 0;
+        this.ctx.beginPath();
         
-        for (let i = 1; i < this.decodedRoute.length; i++) {
-            const prevPoint = this.decodedRoute[i - 1];
-            const currPoint = this.decodedRoute[i];
+        this.decodedRoute.forEach((point, index) => {
+            const x = routeLeft + routeWidth / 2 + (point[1] - centerLng) * routeScale;
+            const y = routeTop + routeHeight / 2 - (point[0] - centerLat) * routeScale;
             
-            const prevX = routeLeft + routeWidth / 2 + (prevPoint[1] - centerLng) * routeScale;
-            const prevY = routeTop + routeHeight / 2 - (prevPoint[0] - centerLat) * routeScale;
-            const currX = routeLeft + routeWidth / 2 + (currPoint[1] - centerLng) * routeScale;
-            const currY = routeTop + routeHeight / 2 - (currPoint[0] - centerLat) * routeScale;
-            
-            // Определяем цвет на основе позиции в маршруте с плавными переходами
-            const progress = currentLength / totalLength;
-            let color;
-            
-            if (progress <= 0.33) {
-                // Синий участок (0% - 33%)
-                color = '#2A3587';
-            } else if (progress <= 0.4) {
-                // Плавный переход от синего к белому (33% - 40%)
-                const t = (progress - 0.33) / (0.4 - 0.33);
-                color = this.interpolateColor('#2A3587', '#FFFFFF', t);
-            } else if (progress <= 0.6) {
-                // Белый участок (40% - 60%)
-                color = '#FFFFFF';
-            } else if (progress <= 0.67) {
-                // Плавный переход от белого к красному (60% - 67%)
-                const t = (progress - 0.6) / (0.67 - 0.6);
-                color = this.interpolateColor('#FFFFFF', '#CF2228', t);
+            if (index === 0) {
+                this.ctx.moveTo(x, y);
             } else {
-                // Красный участок (67% - 100%)
-                color = '#CF2228';
+                this.ctx.lineTo(x, y);
             }
-            
-            this.ctx.strokeStyle = color;
-            this.ctx.beginPath();
-            this.ctx.moveTo(prevX, prevY);
-            this.ctx.lineTo(currX, currY);
-            this.ctx.stroke();
-            
-            currentLength += segmentLengths[i - 1];
-        }
+        });
         
+        this.ctx.stroke();
         this.ctx.restore();
         
         console.log(`🗺️ Route rendered: ${this.decodedRoute.length} points`);
-    }
-    
-    interpolateColor(color1, color2, factor) {
-        // Конвертируем hex цвета в RGB
-        const hex1 = color1.replace('#', '');
-        const hex2 = color2.replace('#', '');
-        
-        const r1 = parseInt(hex1.substr(0, 2), 16);
-        const g1 = parseInt(hex1.substr(2, 2), 16);
-        const b1 = parseInt(hex1.substr(4, 2), 16);
-        
-        const r2 = parseInt(hex2.substr(0, 2), 16);
-        const g2 = parseInt(hex2.substr(2, 2), 16);
-        const b2 = parseInt(hex2.substr(4, 2), 16);
-        
-        // Интерполируем каждый канал
-        const r = Math.round(r1 + (r2 - r1) * factor);
-        const g = Math.round(g1 + (g2 - g1) * factor);
-        const b = Math.round(b1 + (b2 - b1) * factor);
-        
-        // Конвертируем обратно в hex
-        return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
     }
     
     getRouteBounds(route) {
