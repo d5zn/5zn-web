@@ -419,7 +419,7 @@ html, body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px; /* Уменьшили отступ между заголовком и подписью */
+    gap: 20px; /* Увеличили отступ между элементами до 20px */
     padding: 40px;
     text-align: center;
 }
