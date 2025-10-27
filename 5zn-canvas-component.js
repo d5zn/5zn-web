@@ -402,23 +402,32 @@ class SznCanvasComponent {
     renderMetrics(state, width, height) {
         const { RideData, speedData } = state;
         
-        // Фильтруем только видимые метрики и объединяем в нужном порядке
+        // Фильтруем только видимые метрики
         const visibleRideData = RideData.filter(item => item.visible);
         const visibleSpeedData = speedData.filter(item => item.visible);
         
-        // Сортируем speedData для правильного порядка: power, speed, calories
-        const sortedSpeedData = [];
+        // Создаем массив метрик в точном порядке кнопок:
+        // Ряд 1: Distance, Elevation, Time
+        // Ряд 2: Power/Avg, Speed/Avg, Calories
+        const orderedMetrics = [];
+        
+        // Находим метрики по названиям
+        const distanceMetric = visibleRideData.find(item => item.dataName.toLowerCase().includes('distance'));
+        const elevationMetric = visibleRideData.find(item => item.dataName.toLowerCase().includes('elevation'));
+        const timeMetric = visibleRideData.find(item => item.dataName.toLowerCase().includes('time'));
         const powerMetric = visibleSpeedData.find(item => item.dataName.toLowerCase().includes('power'));
         const speedMetric = visibleSpeedData.find(item => item.dataName.toLowerCase().includes('speed'));
         const caloriesMetric = visibleSpeedData.find(item => item.dataName.toLowerCase().includes('calories'));
         
-        if (powerMetric) sortedSpeedData.push(powerMetric);
-        if (speedMetric) sortedSpeedData.push(speedMetric);
-        if (caloriesMetric) sortedSpeedData.push(caloriesMetric);
+        // Добавляем в порядке кнопок
+        if (distanceMetric) orderedMetrics.push(distanceMetric);
+        if (elevationMetric) orderedMetrics.push(elevationMetric);
+        if (timeMetric) orderedMetrics.push(timeMetric);
+        if (powerMetric) orderedMetrics.push(powerMetric);
+        if (speedMetric) orderedMetrics.push(speedMetric);
+        if (caloriesMetric) orderedMetrics.push(caloriesMetric);
         
-        const allMetrics = [...visibleRideData, ...sortedSpeedData];
-        
-        if (allMetrics.length === 0) return;
+        if (orderedMetrics.length === 0) return;
         
         // Масштабируем размеры для 1080x1920
         const scale = width / 1080;
@@ -441,16 +450,16 @@ class SznCanvasComponent {
         this.ctx.textAlign = 'left';
         
         // Рендерим в grid 2 ряда x 3 колонки (снизу вверх)
-        const rows = Math.ceil(allMetrics.length / columns);
+        const rows = Math.ceil(orderedMetrics.length / columns);
         
         for (let row = 0; row < rows; row++) {
             const y = startY - (row * cellHeight) - (row * 44 * scale);
             
             for (let col = 0; col < columns; col++) {
                 const index = (rows - 1 - row) * columns + col;
-                if (index >= allMetrics.length) continue;
+                if (index >= orderedMetrics.length) continue;
                 
-                const metric = allMetrics[index];
+                const metric = orderedMetrics[index];
                 let x, textAlign;
                 
                 // Определяем позицию и выравнивание в зависимости от колонки
