@@ -433,7 +433,7 @@ class SznCanvasComponent {
         const rows = Math.ceil(allMetrics.length / columns);
         
         for (let row = 0; row < rows; row++) {
-            const y = startY - (row * cellHeight) - (row * 30 * scale);
+            const y = startY - (row * cellHeight) - (row * 44 * scale);
             
             for (let col = 0; col < columns; col++) {
                 const index = (rows - 1 - row) * columns + col;
