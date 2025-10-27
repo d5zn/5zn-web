@@ -41,12 +41,12 @@ html, body {
 /* Preview area - как в VSCO */
 .preview-area {
     position: fixed;
-    top: 48px;
+    top: 64px; /* Обновлено с 48px до 64px */
     left: 0;
     right: 0;
     bottom: 180px;
     width: 100%;
-    height: calc(100vh - 48px - 180px);
+    height: calc(100vh - 64px - 180px); /* Обновлено с 48px до 64px */
     display: flex;
     align-items: center;
     justify-content: center;
