@@ -881,21 +881,42 @@ class SznApp {
         `).join('');
 
         workoutList.querySelectorAll('.workout-item').forEach(item => {
-            item.addEventListener('click', () => {
+            item.addEventListener('click', (e) => {
+                console.log('🖱️ Workout item clicked:', e.target);
                 const workoutId = parseInt(item.dataset.workoutId);
+                console.log('🆔 Workout ID:', workoutId);
                 this.selectWorkout(workoutId);
+            });
+            
+            // Добавляем визуальную обратную связь
+            item.addEventListener('mousedown', () => {
+                item.style.backgroundColor = '#333333';
+            });
+            
+            item.addEventListener('mouseup', () => {
+                item.style.backgroundColor = '';
+            });
+            
+            item.addEventListener('mouseleave', () => {
+                item.style.backgroundColor = '';
             });
         });
     }
 
     selectWorkout(workoutId) {
+        console.log('🎯 selectWorkout called with ID:', workoutId);
+        console.log('📋 Available workouts:', this.workouts.map(w => ({ id: w.id, name: w.name })));
+        
         const workout = this.workouts.find(w => w.id === workoutId);
         if (workout) {
+            console.log('✅ Found workout:', workout.name);
             this.currentWorkout = workout;
             this.updateWorkoutDisplay();
             this.renderWorkout();
             this.closeWorkoutSelector();
             console.log('🏃 Selected workout:', workout.name);
+        } else {
+            console.error('❌ Workout not found with ID:', workoutId);
         }
     }
 
