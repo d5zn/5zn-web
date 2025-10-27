@@ -10,7 +10,7 @@
     <meta http-equiv="Expires" content="0">
     <title>5zn.io</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <link rel="stylesheet" href="styles-5zn.css?v=7">
+    <link rel="stylesheet" href="styles-5zn.css?v=8">
 </head>
 <body>
     <div class="mobile-container" id="mobile-container">
@@ -49,6 +49,26 @@
                 </div>
             </div>
         </nav>
+
+        <!-- Share Context Menu -->
+        <div id="share-context-menu" class="context-menu hidden">
+            <div class="context-menu-item" id="download-share-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7,10 12,15 17,10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                <span>Скачать</span>
+            </div>
+            <div class="context-menu-item" id="instagram-share-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+                </svg>
+                <span>Instagram Stories</span>
+            </div>
+        </div>
 
         <!-- Preview Area -->
         <div class="preview-area ratio-9-16">
@@ -185,7 +205,7 @@
 <script src="polyline.js?v=5"></script>
 <script src="5zn-store.js?v=4"></script>
 <script src="5zn-canvas-component.js?v=4"></script>
-    <script src="app-5zn-logic.js?v=7"></script>
+    <script src="app-5zn-logic.js?v=8"></script>
     
     <!-- Debug script -->
     <script>
