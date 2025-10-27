@@ -503,9 +503,12 @@ class SznCanvasComponent {
             routeLeft + routeWidth / 2, routeBottom
         );
         
-        // Цвета французского флага по точному SVG градиенту
+        // Цвета французского флага с новыми позициями
         gradient.addColorStop(0, '#2A3587');       // Синий (начало)
-        gradient.addColorStop(0.495192, '#FFFFFF'); // Белый (49.5%)
+        gradient.addColorStop(0.13, '#2A3587');    // Синий до 13%
+        gradient.addColorStop(0.13, '#FFFFFF');    // Белый с 13%
+        gradient.addColorStop(0.87, '#FFFFFF');    // Белый до 87%
+        gradient.addColorStop(0.87, '#CF2228');   // Красный с 87%
         gradient.addColorStop(1, '#CF2228');      // Красный (конец)
         
         this.ctx.strokeStyle = gradient;
