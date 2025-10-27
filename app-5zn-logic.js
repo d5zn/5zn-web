@@ -533,7 +533,17 @@ class SznApp {
     // Color Setting - используем логику nextPoly
     setColor(color) {
         console.log('Setting color:', color);
-        this.store.setFontColor(color);
+        
+        // Обновляем активную кнопку
+        document.querySelectorAll('.color-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.querySelector(`[data-color="${color}"]`)?.classList.add('active');
+        
+        // Устанавливаем режим фона
+        this.store.setBackgroundMode(color);
+        
+        console.log(`✅ Background mode set to: ${color}`);
     }
 
     // Ratio Setting

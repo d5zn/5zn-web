@@ -10,6 +10,7 @@ class SznStore {
             postStyle: "portrait",
             canvasWidth: "desktop", 
             fontColor: "white",
+            backgroundMode: "image", // 'image', 'french', 'gradient', 'solid'
             title: "TITLE",
             eyeSlash: "/assets/eye-slash.svg",
             titleVisible: {
@@ -63,6 +64,11 @@ class SznStore {
     
     setFontColor(fontColor) {
         this.state.fontColor = fontColor;
+        this.notifyListeners();
+    }
+    
+    setBackgroundMode(mode) {
+        this.state.backgroundMode = mode || 'image';
         this.notifyListeners();
     }
     

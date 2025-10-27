@@ -236,6 +236,23 @@ class SznCanvasComponent {
     }
     
     renderBackground(state, width, height) {
+        // Проверяем режим фона
+        if (state.backgroundMode === 'french') {
+            this.drawFrenchFlag(width, height);
+            return;
+        }
+        
+        if (state.backgroundMode === 'gradient') {
+            this.drawGradient(width, height);
+            return;
+        }
+        
+        if (state.backgroundMode === 'solid') {
+            this.drawSolidColor(width, height, state.fontColor === 'white' ? '#000000' : '#ffffff');
+            return;
+        }
+        
+        // По умолчанию рисуем изображение
         if (this.imageLoading || !this.backgroundImage.complete || this.backgroundImage.naturalWidth === 0) return;
         
         // Адаптивное масштабирование как в nextPoly
@@ -266,6 +283,47 @@ class SznCanvasComponent {
         
         this.ctx.save();
         this.ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+        this.ctx.restore();
+    }
+    
+    drawFrenchFlag(width, height) {
+        // Французский флаг: синий, белый, красный (вертикальные полосы)
+        const stripeWidth = width / 3;
+        
+        this.ctx.save();
+        
+        // Синий (Bleu)
+        this.ctx.fillStyle = '#0055A4';
+        this.ctx.fillRect(0, 0, stripeWidth, height);
+        
+        // Белый (Blanc)
+        this.ctx.fillStyle = '#FFFFFF';
+        this.ctx.fillRect(stripeWidth, 0, stripeWidth, height);
+        
+        // Красный (Rouge)
+        this.ctx.fillStyle = '#EF4135';
+        this.ctx.fillRect(stripeWidth * 2, 0, stripeWidth, height);
+        
+        this.ctx.restore();
+    }
+    
+    drawGradient(width, height) {
+        // Красивый градиент
+        const gradient = this.ctx.createLinearGradient(0, 0, 0, height);
+        gradient.addColorStop(0, '#667eea');
+        gradient.addColorStop(1, '#764ba2');
+        
+        this.ctx.save();
+        this.ctx.fillStyle = gradient;
+        this.ctx.fillRect(0, 0, width, height);
+        this.ctx.restore();
+    }
+    
+    drawSolidColor(width, height, color) {
+        // Однотонный фон
+        this.ctx.save();
+        this.ctx.fillStyle = color;
+        this.ctx.fillRect(0, 0, width, height);
         this.ctx.restore();
     }
     
