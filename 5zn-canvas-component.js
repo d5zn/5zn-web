@@ -494,42 +494,64 @@ class SznCanvasComponent {
         const centerLat = (bounds.maxLat + bounds.minLat) / 2;
         const centerLng = (bounds.maxLng + bounds.minLng) / 2;
         
-        // Рисуем маршрут с градиентом французского флага
+        // Рисуем маршрут с градиентом французского флага по длине маршрута
         this.ctx.save();
         
-        // Создаем градиент по всей области маршрута (сверху вниз)
-        const gradient = this.ctx.createLinearGradient(
-            routeLeft + routeWidth / 2, routeTop,
-            routeLeft + routeWidth / 2, routeBottom
-        );
+        // Вычисляем общую длину маршрута для равномерного распределения цветов
+        let totalLength = 0;
+        const segmentLengths = [];
         
-        // Цвета французского флага с новыми позициями
-        gradient.addColorStop(0, '#2A3587');       // Синий (начало)
-        gradient.addColorStop(0.13, '#2A3587');    // Синий до 13%
-        gradient.addColorStop(0.13, '#FFFFFF');    // Белый с 13%
-        gradient.addColorStop(0.87, '#FFFFFF');    // Белый до 87%
-        gradient.addColorStop(0.87, '#CF2228');   // Красный с 87%
-        gradient.addColorStop(1, '#CF2228');      // Красный (конец)
+        for (let i = 1; i < this.decodedRoute.length; i++) {
+            const prevPoint = this.decodedRoute[i - 1];
+            const currPoint = this.decodedRoute[i];
+            
+            const prevX = routeLeft + routeWidth / 2 + (prevPoint[1] - centerLng) * routeScale;
+            const prevY = routeTop + routeHeight / 2 - (prevPoint[0] - centerLat) * routeScale;
+            const currX = routeLeft + routeWidth / 2 + (currPoint[1] - centerLng) * routeScale;
+            const currY = routeTop + routeHeight / 2 - (currPoint[0] - centerLat) * routeScale;
+            
+            const segmentLength = Math.sqrt((currX - prevX) ** 2 + (currY - prevY) ** 2);
+            segmentLengths.push(segmentLength);
+            totalLength += segmentLength;
+        }
         
-        this.ctx.strokeStyle = gradient;
+        // Рисуем маршрут по сегментам с соответствующими цветами
         this.ctx.lineWidth = 8 * scale;
         this.ctx.lineCap = 'round';
         this.ctx.lineJoin = 'round';
         
-        this.ctx.beginPath();
+        let currentLength = 0;
         
-        this.decodedRoute.forEach((point, index) => {
-            const x = routeLeft + routeWidth / 2 + (point[1] - centerLng) * routeScale;
-            const y = routeTop + routeHeight / 2 - (point[0] - centerLat) * routeScale;
+        for (let i = 1; i < this.decodedRoute.length; i++) {
+            const prevPoint = this.decodedRoute[i - 1];
+            const currPoint = this.decodedRoute[i];
             
-            if (index === 0) {
-                this.ctx.moveTo(x, y);
+            const prevX = routeLeft + routeWidth / 2 + (prevPoint[1] - centerLng) * routeScale;
+            const prevY = routeTop + routeHeight / 2 - (prevPoint[0] - centerLat) * routeScale;
+            const currX = routeLeft + routeWidth / 2 + (currPoint[1] - centerLng) * routeScale;
+            const currY = routeTop + routeHeight / 2 - (currPoint[0] - centerLat) * routeScale;
+            
+            // Определяем цвет на основе позиции в маршруте
+            const progress = currentLength / totalLength;
+            let color;
+            
+            if (progress <= 0.13) {
+                color = '#2A3587'; // Синий
+            } else if (progress <= 0.87) {
+                color = '#FFFFFF'; // Белый
             } else {
-                this.ctx.lineTo(x, y);
+                color = '#CF2228'; // Красный
             }
-        });
+            
+            this.ctx.strokeStyle = color;
+            this.ctx.beginPath();
+            this.ctx.moveTo(prevX, prevY);
+            this.ctx.lineTo(currX, currY);
+            this.ctx.stroke();
+            
+            currentLength += segmentLengths[i - 1];
+        }
         
-        this.ctx.stroke();
         this.ctx.restore();
         
         console.log(`🗺️ Route rendered: ${this.decodedRoute.length} points`);
