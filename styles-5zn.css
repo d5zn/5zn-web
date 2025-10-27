@@ -169,9 +169,10 @@ html, body {
 .nav-container {
     display: flex;
     align-items: center;
-    width: 100%; /* Растягиваем на всю ширину */
+    width: 100% !important; /* Растягиваем на всю ширину */
     max-width: 100%;
     height: 100%;
+    margin: 0 !important; /* Убираем margin принудительно */
     padding: 0 16px; /* Внутренние отступы по 16px */
 }
 
