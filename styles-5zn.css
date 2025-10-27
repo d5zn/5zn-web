@@ -256,6 +256,15 @@ html, body {
     display: flex; /* Показываем когда пользователь авторизован */
 }
 
+/* Hide logout button by default, show only when logged in */
+#logout-btn {
+    display: none;
+}
+
+#logout-btn.visible {
+    display: flex;
+}
+
 .nav-actions {
     display: flex;
     align-items: center;

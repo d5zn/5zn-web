@@ -271,26 +271,8 @@ class SznApp {
             this.openWorkoutSelector();
         });
         
-        document.getElementById('share-btn')?.addEventListener('click', (e) => {
-            this.showShareContextMenu(e);
-        });
-        
-        // Context menu items
-        document.getElementById('download-share-btn')?.addEventListener('click', () => {
+        document.getElementById('share-btn')?.addEventListener('click', () => {
             this.downloadCanvas();
-            this.hideShareContextMenu();
-        });
-        
-        document.getElementById('instagram-share-btn')?.addEventListener('click', () => {
-            this.shareToInstagram();
-            this.hideShareContextMenu();
-        });
-        
-        // Close context menu when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('#share-btn') && !e.target.closest('#share-context-menu')) {
-                this.hideShareContextMenu();
-            }
         });
         
         // Logout button
@@ -694,6 +676,13 @@ class SznApp {
             console.log('✅ Nav center icons hidden');
         }
         
+        // Скрываем кнопку logout
+        const logoutBtn = document.getElementById('logout-btn');
+        if (logoutBtn) {
+            logoutBtn.classList.remove('visible');
+            console.log('✅ Logout button hidden');
+        }
+        
         // Кнопка теперь в HTML, не создаем её динамически
     }
 
@@ -745,6 +734,13 @@ class SznApp {
         if (navCenter) {
             navCenter.classList.add('visible');
             console.log('✅ Nav center icons shown');
+        }
+        
+        // Показываем кнопку logout
+        const logoutBtn = document.getElementById('logout-btn');
+        if (logoutBtn) {
+            logoutBtn.classList.add('visible');
+            console.log('✅ Logout button shown');
         }
             
         const navbar = document.querySelector('.navbar');
@@ -962,45 +958,6 @@ class SznApp {
         }
     }
 
-    // Share Context Menu Functions
-    showShareContextMenu(event) {
-        const contextMenu = document.getElementById('share-context-menu');
-        if (!contextMenu) return;
-        
-        // Hide any existing context menu
-        this.hideShareContextMenu();
-        
-        // Position the menu near the button
-        const buttonRect = event.target.closest('#share-btn').getBoundingClientRect();
-        const menuWidth = 200;
-        const menuHeight = 100;
-        
-        let left = buttonRect.left + (buttonRect.width / 2) - (menuWidth / 2);
-        let top = buttonRect.bottom + 8;
-        
-        // Adjust if menu goes off screen
-        if (left < 8) left = 8;
-        if (left + menuWidth > window.innerWidth - 8) {
-            left = window.innerWidth - menuWidth - 8;
-        }
-        if (top + menuHeight > window.innerHeight - 8) {
-            top = buttonRect.top - menuHeight - 8;
-        }
-        
-        contextMenu.style.left = `${left}px`;
-        contextMenu.style.top = `${top}px`;
-        contextMenu.classList.remove('hidden');
-        
-        console.log('📋 Share context menu shown');
-    }
-    
-    hideShareContextMenu() {
-        const contextMenu = document.getElementById('share-context-menu');
-        if (contextMenu) {
-            contextMenu.classList.add('hidden');
-        }
-    }
-    
     downloadCanvas() {
         if (!this.polymerCanvas) {
             this.showError('Canvas not available');
