@@ -215,51 +215,9 @@
         console.log('Viewport:', window.innerWidth, 'x', window.innerHeight);
         console.log('User agent:', navigator.userAgent);
         
-        // Force VSCO-style display on load с правильной формулой
+        // Layout is now handled by CSS with fixed navbar (48px) and editing panel (180px)
         window.addEventListener('load', () => {
-            console.log('📱 Page loaded, applying VSCO-style layout with correct formula');
-            const container = document.getElementById('mobile-container');
-            const previewArea = document.querySelector('.preview-area');
-            const connectedState = document.getElementById('connected');
-            
-            if (container && previewArea) {
-                // Правильная формула расчета viewport
-                const screenHeight = window.innerHeight;
-                const navBarHeight = 60;
-                const tabBarHeight = 180;
-                const safeAreaInsets = 0; // для веб-версии
-                
-                const viewportHeight = screenHeight - navBarHeight - tabBarHeight - safeAreaInsets;
-                const viewportWidth = viewportHeight * 9 / 16;
-                
-                // Простая структура как в VSCO
-                container.style.setProperty('width', '100vw', 'important');
-                container.style.setProperty('height', '100vh', 'important');
-                container.style.setProperty('display', 'flex', 'important');
-                container.style.setProperty('flex-direction', 'column', 'important');
-                container.style.setProperty('margin', '0', 'important');
-                container.style.setProperty('padding', '0', 'important');
-                container.style.setProperty('overflow', 'hidden', 'important');
-                
-                // Preview area с правильными размерами
-                previewArea.style.setProperty('width', `${viewportWidth}px`, 'important');
-                previewArea.style.setProperty('height', `${viewportHeight}px`, 'important');
-                previewArea.style.setProperty('max-width', `${viewportWidth}px`, 'important');
-                previewArea.style.setProperty('max-height', `${viewportHeight}px`, 'important');
-                previewArea.style.setProperty('display', 'flex', 'important');
-                previewArea.style.setProperty('align-items', 'center', 'important');
-                previewArea.style.setProperty('justify-content', 'center', 'important');
-                previewArea.style.setProperty('margin', '0 auto', 'important');
-                
-                // Connected state заполняет preview area
-                if (connectedState) {
-                    connectedState.style.setProperty('width', '100%', 'important');
-                    connectedState.style.setProperty('height', '100%', 'important');
-                    connectedState.style.setProperty('aspect-ratio', '9 / 16', 'important');
-                }
-                
-                console.log('📱 Viewport calculated:', viewportWidth, 'x', viewportHeight, 'from screen height:', screenHeight);
-            }
+            console.log('📱 Page loaded, layout managed by CSS');
         });
     </script>
 </body>
