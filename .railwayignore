@@ -1,0 +1,51 @@
+# Railway ignore file - files to exclude from deployment
+
+# Development files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Node modules (if any)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files
+.env
+.env.local
+server_config.py
+
+# Local data
+data/
+*.sqlite
+*.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+
+# Documentation (not needed for runtime)
+*.md
+!README.md
+
+# MacOS
+.DS_Store
+
+# Testing
+test/
+tests/
+*.test.js
+
+# Logs
+logs/
+*.log
+

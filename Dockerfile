@@ -29,4 +29,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:$PORT/ || exit 1
 
 # Start production server
-CMD ["python3", "server.prod.py"]
+CMD ["python3", "server.py"]

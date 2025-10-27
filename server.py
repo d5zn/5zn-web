@@ -459,6 +459,7 @@ class ProductionHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
 def main():
     # Check if we're in production mode
     is_production = os.environ.get('ENVIRONMENT') == 'production'
+    is_railway = os.environ.get('RAILWAY_ENVIRONMENT') is not None
     
     PORT = int(os.environ.get('PORT', 8000))
     
@@ -471,19 +472,27 @@ def main():
     
     Handler = ProductionHTTPRequestHandler
     
+    # Use reusable address to avoid "Address already in use" errors
+    socketserver.TCPServer.allow_reuse_address = True
+    
     with socketserver.TCPServer(("", PORT), Handler) as httpd:
-        env = "PRODUCTION" if is_production else "DEVELOPMENT"
-        print(f"🚀 5zn Web Server ({env}) running at http://localhost:{PORT}")
-        print(f"📱 Open your browser and navigate to http://localhost:{PORT}")
+        env = "RAILWAY" if is_railway else ("PRODUCTION" if is_production else "DEVELOPMENT")
+        print(f"🚀 5zn Web Server ({env}) running on port {PORT}")
+        print(f"📱 Server listening on 0.0.0.0:{PORT}")
+        
+        if is_railway:
+            print("☁️ Running on Railway Cloud")
+            print("✅ Database:", "Connected" if get_db_connection() else "Fallback to JSON")
+        elif not is_production:
+            print(f"🌐 Open your browser: http://localhost:{PORT}")
+            print("⚠️  IMPORTANT: Update CLIENT_ID and CLIENT_SECRET in server_config.py before using OAuth!")
+        
+        print("🔒 Security features: Rate limiting, CSP, CORS")
         print("🛑 Press Ctrl+C to stop the server")
         print("")
         
-        if not is_production:
-            print("⚠️  IMPORTANT: Update CLIENT_ID and CLIENT_SECRET in server_config.py before using OAuth!")
-            print("🔒 Security features: Rate limiting, CSP, CORS")
-        
         try:
-            if not is_production:
+            if not is_production and not is_railway:
                 webbrowser.open(f'http://localhost:{PORT}')
         except:
             pass
