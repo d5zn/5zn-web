@@ -315,8 +315,8 @@ class SznCanvasComponent {
         // Позиция заголовка с учетом безопасной зоны сверху
         const titleTop = safeArea.top * scale;
         
-        // Заголовок
-        const titleFontSize = Math.floor(48 * scale);
+        // Заголовок - 64px
+        const titleFontSize = Math.floor(64 * scale);
         this.ctx.save();
         this.ctx.fillStyle = state.fontColor;
         this.ctx.font = `bold ${titleFontSize}px Inter, sans-serif`;
@@ -328,11 +328,11 @@ class SznCanvasComponent {
         
         this.wrapText(state.title, leftMargin, titleTop, maxWidth, titleFontSize);
         
-        // Подзаголовок (дата)
+        // Подзаголовок (дата) - 32px
         const subtitleFontSize = Math.floor(32 * scale);
         this.ctx.font = `${subtitleFontSize}px Inter, sans-serif`;
         
-        const subtitleY = titleTop + titleFontSize + 15;
+        const subtitleY = titleTop + titleFontSize + 20;
         this.wrapText(state.date, leftMargin, subtitleY, maxWidth, subtitleFontSize);
         
         this.ctx.restore();
@@ -341,55 +341,63 @@ class SznCanvasComponent {
     renderMetrics(state, width, height) {
         const { RideData, speedData } = state;
         
-        // Фильтруем только видимые метрики
+        // Фильтруем только видимые метрики и объединяем
         const visibleRideData = RideData.filter(item => item.visible);
         const visibleSpeedData = speedData.filter(item => item.visible);
+        const allMetrics = [...visibleRideData, ...visibleSpeedData];
+        
+        if (allMetrics.length === 0) return;
         
         // Масштабируем размеры для 1080x1920
         const scale = width / 1080;
         const safeArea = this.config.safeArea;
         
-        // Рендерим RideData снизу с учетом безопасной зоны
-        let currentY = height - (safeArea.bottom * scale);
-        currentY = this.renderMetricGroup(visibleRideData, width, height, currentY, scale);
+        // Параметры grid
+        const columns = 3;
+        const labelFontSize = Math.floor(32 * scale);
+        const valueFontSize = Math.floor(64 * scale);
+        const cellHeight = valueFontSize + labelFontSize + 20 * scale;
+        const leftMargin = safeArea.left * scale;
+        const availableWidth = width - (safeArea.left + safeArea.right) * scale;
+        const cellWidth = availableWidth / columns;
         
-        // Рендерим SpeedData
-        currentY = this.renderMetricGroup(visibleSpeedData, width, height, currentY - 20 * scale, scale);
-    }
-    
-    renderMetricGroup(metrics, width, height, bottomY, scale) {
-        if (metrics.length === 0) return bottomY;
-        
-        const fontSize = Math.floor(28 * scale);
-        const lineHeight = fontSize + 8;
-        const safeArea = this.config.safeArea;
-        const leftPadding = safeArea.left * scale;
+        // Начальная позиция снизу с учетом безопасной зоны
+        const startY = height - (safeArea.bottom * scale);
         
         this.ctx.save();
-        this.ctx.fillStyle = this.store.getState().fontColor;
-        this.ctx.font = `${fontSize}px Inter, sans-serif`;
+        this.ctx.fillStyle = state.fontColor;
         this.ctx.textAlign = 'left';
         
-        let currentY = bottomY;
+        // Рендерим в grid 2 ряда x 3 колонки (снизу вверх)
+        const rows = Math.ceil(allMetrics.length / columns);
         
-        // Рендерим в обратном порядке (снизу вверх)
-        for (let i = metrics.length - 1; i >= 0; i--) {
-            const metric = metrics[i];
+        for (let row = 0; row < rows; row++) {
+            const y = startY - (row * cellHeight) - (row * 30 * scale);
             
-            // Value (рисуем первым, так как идем снизу вверх)
-            this.ctx.font = `bold ${fontSize}px Inter, sans-serif`;
-            this.ctx.fillText(metric.data, leftPadding, currentY);
-            
-            // Label (выше value)
-            this.ctx.font = `${fontSize}px Inter, sans-serif`;
-            this.ctx.fillText(metric.dataName, leftPadding, currentY - lineHeight);
-            
-            // Двигаемся вверх для следующей метрики
-            currentY -= (lineHeight * 2 + 12);
+            for (let col = 0; col < columns; col++) {
+                const index = (rows - 1 - row) * columns + col;
+                if (index >= allMetrics.length) continue;
+                
+                const metric = allMetrics[index];
+                const x = leftMargin + (col * cellWidth);
+                
+                // Label (сверху)
+                this.ctx.font = `${labelFontSize}px Inter, sans-serif`;
+                this.ctx.fillText(metric.dataName, x, y - valueFontSize - 10 * scale);
+                
+                // Value (снизу)
+                this.ctx.font = `bold ${valueFontSize}px Inter, sans-serif`;
+                this.ctx.fillText(metric.data, x, y);
+            }
         }
         
         this.ctx.restore();
-        return currentY;
+    }
+    
+    // Этот метод больше не используется - renderMetrics() теперь рендерит в grid
+    renderMetricGroup(metrics, width, height, bottomY, scale) {
+        // Deprecated - используется новый grid layout в renderMetrics()
+        return bottomY;
     }
     
     renderRoute(state, width, height) {
