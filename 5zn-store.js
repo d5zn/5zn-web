@@ -1,10 +1,10 @@
-// 5zn Store - Exact copy of nextPoly Zustand store
+// SznStore - Exact copy of nextPoly Zustand store
 // Точная копия логики управления состоянием из nextPoly
 // Version: 2.0 - Updated branding to 5zn
 
-console.log('🏪 Loading 5znStore v2.0 - Updated branding to 5zn');
+console.log('🏪 Loading SznStore v2.0 - Updated branding to 5zn');
 
-class 5znStore {
+class SznStore {
     constructor() {
         this.state = {
             postStyle: "portrait",
@@ -194,11 +194,11 @@ class 5znStore {
 }
 
 // Глобальный store
-window.5znStore = new 5znStore();
+window.sznStore = new SznStore();
 
 // Экспорт
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = 5znStore;
+    module.exports = SznStore;
 } else {
-    window.5znStore = 5znStore;
+    window.SznStore = SznStore;
 }

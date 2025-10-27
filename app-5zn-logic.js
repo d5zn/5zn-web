@@ -1,10 +1,10 @@
-// 5znApp with 5zn Logic - Exact copy of nextPoly data handling
+// SznApp with 5zn Logic - Exact copy of nextPoly data handling
 // Точная копия логики работы с данными из nextPoly
 // Version: 2.0 - Updated branding to 5zn
 
-console.log('🚀 Loading 5znApp v2.0 - Updated branding to 5zn');
+console.log('🚀 Loading SznApp v2.0 - Updated branding to 5zn');
 
-class 5znApp {
+class SznApp {
     constructor() {
         this.stravaToken = localStorage.getItem('strava_token');
         this.currentWorkout = null;
@@ -13,13 +13,13 @@ class 5znApp {
         this.currentTab = 'photo';
         
         // Инициализируем 5zn Store
-        this.store = window.5znStore;
+        this.store = window.sznStore;
         
         this.init();
     }
 
     init() {
-        console.log('5znApp with 5zn Logic initializing...');
+        console.log('SznApp with 5zn Logic initializing...');
         this.setupEventListeners();
         this.setupCanvas();
         this.setupTabs();
@@ -28,7 +28,7 @@ class 5znApp {
         this.checkAuthStatus();
         
         setTimeout(() => {
-            console.log('✅ 5znApp with 5zn Logic initialized');
+            console.log('✅ SznApp with 5zn Logic initialized');
         }, 100);
     }
     
@@ -36,7 +36,7 @@ class 5znApp {
         const canvas = document.getElementById('route-canvas');
         if (canvas) {
             // Инициализируем 5zn Canvas Component
-            this.polymerCanvas = new 5znCanvasComponent(canvas, this.store);
+            this.polymerCanvas = new SznCanvasComponent(canvas, this.store);
             
             // Настраиваем обработчики для управления изображением
             this.setupImageManipulation();
@@ -1033,8 +1033,8 @@ class 5znApp {
 
 // Initialize app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM loaded, initializing 5znApp with 5zn Logic');
-    new 5znApp();
+    console.log('DOM loaded, initializing SznApp with 5zn Logic');
+    new SznApp();
 });
 
 // Force show not connected state if no token

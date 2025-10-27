@@ -205,8 +205,8 @@
                 this.canvas = document.getElementById('activity-canvas');
                 this.stravaToken = localStorage.getItem('strava_token');
                 this.activityId = this.getActivityIdFromURL();
-                this.store = window.5znStore;
-                this.5znCanvas = null;
+                this.store = window.sznStore;
+                this.sznCanvas = null;
                 
                 if (!this.activityId) {
                     this.showError('ID активности не указан в URL');
@@ -232,7 +232,7 @@
             
             initCanvas() {
                 // Используем 5zn Canvas Component
-                this.5znCanvas = new 5znCanvasComponent(this.canvas, this.store);
+                this.sznCanvas = new SznCanvasComponent(this.canvas, this.store);
                 console.log('✅ Activity Canvas initialized with 5zn');
             }
             
@@ -280,7 +280,7 @@
                 // Устанавливаем данные маршрута
                 const polylineData = activity?.map?.polyline || activity?.map?.summary_polyline;
                 if (polylineData) {
-                    this.5znCanvas.setPolylineData(polylineData);
+                    this.sznCanvas.setPolylineData(polylineData);
                 }
                 
                 console.log('✅ Activity displayed with 5zn Canvas');
