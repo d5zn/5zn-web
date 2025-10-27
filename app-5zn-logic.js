@@ -617,10 +617,12 @@ class SznApp {
         const loading = document.getElementById('loading');
         const notConnected = document.getElementById('not-connected');
         const connected = document.getElementById('connected');
+        const editingPanel = document.querySelector('.editing-panel');
         
         if (loading) loading.classList.add('hidden');
         if (notConnected) notConnected.classList.remove('hidden');
         if (connected) connected.classList.add('hidden');
+        if (editingPanel) editingPanel.classList.add('hidden'); // Скрываем панель редактирования
         
         const navActions = document.querySelector('.nav-actions');
         if (navActions) {
@@ -664,6 +666,13 @@ class SznApp {
             connected.classList.remove('hidden');
             connected.style.display = 'flex';
             console.log('✅ Connected shown');
+            
+            // Показываем панель редактирования
+            const editingPanel = document.querySelector('.editing-panel');
+            if (editingPanel) {
+                editingPanel.classList.remove('hidden');
+                console.log('✅ Editing panel shown');
+            }
             
             const navbar = document.querySelector('.navbar');
             if (navbar) {
