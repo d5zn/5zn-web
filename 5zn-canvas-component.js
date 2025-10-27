@@ -376,8 +376,8 @@ class SznCanvasComponent {
         // Позиция заголовка с учетом безопасной зоны сверху
         const titleTop = safeArea.top * scale;
         
-        // Заголовок - 48px
-        const titleFontSize = Math.floor(48 * scale);
+        // Заголовок - 52px
+        const titleFontSize = Math.floor(52 * scale);
         this.ctx.save();
         this.ctx.fillStyle = state.fontColor;
         this.ctx.font = `bold ${titleFontSize}px Inter, sans-serif`;
@@ -416,7 +416,7 @@ class SznCanvasComponent {
         // Параметры grid
         const columns = 3;
         const labelFontSize = Math.floor(32 * scale);
-        const valueFontSize = Math.floor(48 * scale);
+        const valueFontSize = Math.floor(52 * scale);
         const cellHeight = valueFontSize + labelFontSize + 20 * scale;
         const leftMargin = safeArea.left * scale;
         const availableWidth = width - (safeArea.left + safeArea.right) * scale;
