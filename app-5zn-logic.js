@@ -315,14 +315,6 @@ class SznApp {
             });
         });
 
-        // Color buttons - используем логику nextPoly
-        document.querySelectorAll('.color-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const color = e.target.dataset.color;
-                this.setColor(color);
-            });
-        });
-
         // Ratio buttons
         document.querySelectorAll('.ratio-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -528,22 +520,6 @@ class SznApp {
     // Position Setting
     setPosition(position) {
         console.log('Setting position:', position);
-    }
-
-    // Color Setting - используем логику nextPoly
-    setColor(color) {
-        console.log('Setting color:', color);
-        
-        // Обновляем активную кнопку
-        document.querySelectorAll('.color-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        document.querySelector(`[data-color="${color}"]`)?.classList.add('active');
-        
-        // Устанавливаем режим фона
-        this.store.setBackgroundMode(color);
-        
-        console.log(`✅ Background mode set to: ${color}`);
     }
 
     // Ratio Setting

@@ -344,41 +344,6 @@ html, body {
     color: #000000;
 }
 
-/* Color Controls */
-.color-controls {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-}
-
-/* Color Buttons */
-.color-btn {
-    height: 36px;
-    padding: 0 16px;
-    background: transparent;
-    border: 1px solid #ffffff;
-    color: #ffffff;
-    cursor: pointer;
-    font-size: 11px;
-    font-weight: 300;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    transition: all 0.2s ease;
-    border-radius: 4px;
-    white-space: nowrap;
-}
-
-.color-btn.active {
-    background: #ffffff;
-    color: #000000;
-}
-
-.color-btn:hover {
-    background: #ffffff;
-    color: #000000;
-}
-
 /* Position Controls */
 .position-controls {
     display: grid;

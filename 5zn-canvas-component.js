@@ -494,9 +494,21 @@ class SznCanvasComponent {
         const centerLat = (bounds.maxLat + bounds.minLat) / 2;
         const centerLng = (bounds.maxLng + bounds.minLng) / 2;
         
-        // Рисуем маршрут
+        // Рисуем маршрут с градиентом французского флага
         this.ctx.save();
-        this.ctx.strokeStyle = state.fontColor || '#FFFFFF';
+        
+        // Создаем градиент французского флага (синий-белый-красный)
+        const gradient = this.ctx.createLinearGradient(
+            routeLeft, routeTop,
+            routeRight, routeBottom
+        );
+        
+        // Цвета французского флага
+        gradient.addColorStop(0, '#002395');    // Синий
+        gradient.addColorStop(0.5, '#FFFFFF'); // Белый
+        gradient.addColorStop(1, '#ED2939');  // Красный
+        
+        this.ctx.strokeStyle = gradient;
         this.ctx.lineWidth = 8 * scale;
         this.ctx.lineCap = 'round';
         this.ctx.lineJoin = 'round';
