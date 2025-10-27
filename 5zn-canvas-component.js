@@ -29,11 +29,12 @@ class SznCanvasComponent {
     }
     
     init() {
+        console.log('🎯 Initializing SznCanvasComponent...');
         this.setupCanvas();
         this.loadFonts();
         this.loadImages();
         this.subscribeToStore();
-        console.log('✅ Polymer Canvas Component initialized');
+        console.log('✅ SznCanvasComponent initialized');
     }
     
     updateCanvasSize() {
@@ -56,9 +57,9 @@ class SznCanvasComponent {
         // Обновляем размеры в зависимости от postStyle
         this.updateCanvasSize();
         
-        // Точная логика как в nextPoly
-        const clientWidth = this.canvas.clientWidth;
-        const clientHeight = this.canvas.clientHeight;
+        // ПРИНУДИТЕЛЬНО устанавливаем размеры canvas
+        const clientWidth = this.canvas.clientWidth || 400;
+        const clientHeight = this.canvas.clientHeight || 1400;
         
         // Рассчитываем размеры canvas
         let canvasWidth = Math.floor(clientWidth * dpr);
@@ -74,7 +75,7 @@ class SznCanvasComponent {
         this.canvas.width = canvasWidth;
         this.canvas.height = canvasHeight;
         
-        // CSS управляет отображением - фиксированные размеры
+        // ПРИНУДИТЕЛЬНО устанавливаем CSS размеры
         this.canvas.style.width = this.config.width + 'px';
         this.canvas.style.height = this.config.height + 'px';
         this.canvas.style.aspectRatio = this.config.aspectRatio;
@@ -88,6 +89,8 @@ class SznCanvasComponent {
         
         // Сохраняем DPR для использования в рендеринге
         this.dpr = dpr;
+        
+        console.log(`🎯 Canvas setup: ${canvasWidth}x${canvasHeight} (CSS: ${this.config.width}x${this.config.height})`);
         
         // Обработчик resize как в nextPoly
         window.addEventListener('resize', () => {
@@ -174,7 +177,8 @@ class SznCanvasComponent {
         
         // Проверяем, что canvas имеет валидные размеры
         if (width <= 0 || height <= 0) {
-            console.warn('⚠️ Canvas has invalid dimensions, skipping render:', width, 'x', height);
+            console.warn('⚠️ Canvas has invalid dimensions, forcing setup:', width, 'x', height);
+            this.setupCanvas();
             return;
         }
         
@@ -187,7 +191,7 @@ class SznCanvasComponent {
         this.renderContent(state, width, height);
         this.renderLogo(state, width, height);
         
-        console.log('🎨 Polymer Canvas rendered');
+        console.log('🎨 Szn Canvas rendered');
     }
     
     renderBackground(state, width, height) {
