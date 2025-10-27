@@ -129,6 +129,7 @@ class PolymerCanvasComponent {
             this.render();
         };
         this.backgroundImage.onerror = () => {
+            console.warn('⚠️ Background image failed to load:', state.image);
             this.imageLoading = false;
             this.render();
         };
@@ -136,6 +137,14 @@ class PolymerCanvasComponent {
         // Загружаем логотип
         this.logoImage.src = "/assets/polymer-symbol.svg";
         this.logoImage.crossOrigin = "anonymous";
+        this.logoImage.onload = () => {
+            this.render();
+        };
+        this.logoImage.onerror = () => {
+            console.warn('⚠️ Logo image failed to load: /assets/polymer-symbol.svg');
+            // Используем fallback логотип
+            this.logoImage.src = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNzIiIGhlaWdodD0iNzIiIHZpZXdCb3g9IjAgMCA3MiA3MiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iNzIiIGhlaWdodD0iNzIiIHJ4PSI4IiBmaWxsPSIjZmZmZmZmIi8+CiAgPHRleHQgeD0iMzYiIHk9IjQ1IiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjQiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMDAwMDAwIj41Wk48L3RleHQ+Cjwvc3ZnPg==";
+        };
     }
     
     subscribeToStore() {
@@ -169,7 +178,7 @@ class PolymerCanvasComponent {
     }
     
     renderBackground(state, width, height) {
-        if (this.imageLoading || !this.backgroundImage.complete) return;
+        if (this.imageLoading || !this.backgroundImage.complete || this.backgroundImage.naturalWidth === 0) return;
         
         // Адаптивное масштабирование как в nextPoly
         this.drawBackgroundImage(this.backgroundImage, state, width, height);
@@ -315,7 +324,7 @@ class PolymerCanvasComponent {
     }
     
     renderLogo(state, width, height) {
-        if (!this.logoImage.complete) return;
+        if (!this.logoImage.complete || this.logoImage.naturalWidth === 0) return;
         
         // Масштабируем размеры как в nextPoly
         const scale = width / 1000;
