@@ -45,6 +45,8 @@ html, body {
     left: 0;
     right: 0;
     bottom: 180px;
+    width: 100%;
+    height: calc(100vh - 48px - 180px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -73,11 +75,7 @@ html, body {
 
 /* Подход как в polymer-workshop: обертка + canvas */
 #viewport {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    position: relative;
     width: 100%;
     height: 100%;
     display: flex;
@@ -88,11 +86,7 @@ html, body {
 
 /* Stage для масштабирования */
 #stage {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    position: relative;
     width: 100%;
     height: 100%;
     display: flex;
@@ -103,11 +97,7 @@ html, body {
 /* Обертка как в polymer-workshop */
 #connected,
 .connected-state {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    position: relative;
     width: 100%;
     height: 100%;
     display: flex;
