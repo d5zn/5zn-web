@@ -222,6 +222,25 @@ class ProductionHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.handle_admin_users()
             return
         
+        # Support page endpoint
+        if self.path == '/support':
+            try:
+                with open('support.html', 'r', encoding='utf-8') as f:
+                    html_content = f.read()
+                
+                # Send response
+                self.send_response(200)
+                self.send_header('Content-Type', 'text/html; charset=utf-8')
+                self.send_header('Content-Length', len(html_content.encode('utf-8')))
+                self.end_headers()
+                self.wfile.write(html_content.encode('utf-8'))
+                print(f"✅ Served support page via /support endpoint")
+                return
+            except Exception as e:
+                print(f"❌ Error serving support page: {e}")
+                self.send_error(404, 'Support page not found')
+                return
+        
         # Inject config for HTML files
         if self.path == '/' or self.path == '/index.html':
             try:
