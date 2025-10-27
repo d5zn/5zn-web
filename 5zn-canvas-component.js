@@ -450,52 +450,56 @@ class SznCanvasComponent {
         this.ctx.fillStyle = state.fontColor;
         this.ctx.textAlign = 'left';
         
-        // Рендерим в grid: 3 метрики в первом ряду, 1 во втором по центру
-        const rows = Math.ceil(orderedMetrics.length / columns);
+        // Рендерим метрики в правильном порядке: Distance, Elevation, Time, Speed
+        // Первый ряд: Distance (col=0), Elevation (col=1), Time (col=2)
+        // Второй ряд: Speed (col=1, по центру)
         
-        for (let row = 0; row < rows; row++) {
-            const y = startY - (row * cellHeight) - (row * 44 * scale);
-            
-            for (let col = 0; col < columns; col++) {
-                const index = (rows - 1 - row) * columns + col;
-                if (index >= orderedMetrics.length) continue;
-                
-                const metric = orderedMetrics[index];
-                let x, textAlign;
-                
-                // Определяем позицию и выравнивание в зависимости от колонки и ряда
-                if (row === 0) {
-                    // Первый ряд: Distance, Elevation, Time
-                    if (col === 0) {
-                        // Distance - левое выравнивание
-                        x = leftMargin + (col * cellWidth);
-                        textAlign = 'left';
-                    } else if (col === 1) {
-                        // Elevation - центральное выравнивание
-                        x = leftMargin + (col * cellWidth) + (cellWidth / 2);
-                        textAlign = 'center';
-                    } else {
-                        // Time - правое выравнивание
-                        x = leftMargin + (col * cellWidth) + cellWidth;
-                        textAlign = 'right';
-                    }
-                } else {
-                    // Второй ряд: только Speed по центру
-                    x = leftMargin + (cellWidth / 2) + cellWidth; // Центр средней колонки
-                    textAlign = 'center';
-                }
-                
-                this.ctx.textAlign = textAlign;
-                
-                // Label (сверху) - в верхнем регистре
-                this.ctx.font = `${labelFontSize}px Inter, sans-serif`;
-                this.ctx.fillText(metric.dataName.toUpperCase(), x, y - valueFontSize - 10 * scale);
-                
-                // Value (снизу) - показываем прочерк если нет данных
-                this.ctx.font = `bold ${valueFontSize}px Inter, sans-serif`;
-                const displayValue = metric.data && metric.data !== '' && metric.data !== '0' ? metric.data : '—';
-                this.ctx.fillText(displayValue, x, y);
-            }
+        // Первый ряд
+        const firstRowY = startY;
+        const secondRowY = startY - cellHeight - 44 * scale;
+        
+        // Distance (col=0, левое выравнивание)
+        if (orderedMetrics[0]) {
+            const x = leftMargin;
+            this.ctx.textAlign = 'left';
+            this.ctx.font = `${labelFontSize}px Inter, sans-serif`;
+            this.ctx.fillText(orderedMetrics[0].dataName.toUpperCase(), x, firstRowY - valueFontSize - 10 * scale);
+            this.ctx.font = `bold ${valueFontSize}px Inter, sans-serif`;
+            const displayValue = orderedMetrics[0].data && orderedMetrics[0].data !== '' && orderedMetrics[0].data !== '0' ? orderedMetrics[0].data : '—';
+            this.ctx.fillText(displayValue, x, firstRowY);
+        }
+        
+        // Elevation (col=1, центральное выравнивание)
+        if (orderedMetrics[1]) {
+            const x = leftMargin + cellWidth + (cellWidth / 2);
+            this.ctx.textAlign = 'center';
+            this.ctx.font = `${labelFontSize}px Inter, sans-serif`;
+            this.ctx.fillText(orderedMetrics[1].dataName.toUpperCase(), x, firstRowY - valueFontSize - 10 * scale);
+            this.ctx.font = `bold ${valueFontSize}px Inter, sans-serif`;
+            const displayValue = orderedMetrics[1].data && orderedMetrics[1].data !== '' && orderedMetrics[1].data !== '0' ? orderedMetrics[1].data : '—';
+            this.ctx.fillText(displayValue, x, firstRowY);
+        }
+        
+        // Time (col=2, правое выравнивание)
+        if (orderedMetrics[2]) {
+            const x = leftMargin + (2 * cellWidth) + cellWidth;
+            this.ctx.textAlign = 'right';
+            this.ctx.font = `${labelFontSize}px Inter, sans-serif`;
+            this.ctx.fillText(orderedMetrics[2].dataName.toUpperCase(), x, firstRowY - valueFontSize - 10 * scale);
+            this.ctx.font = `bold ${valueFontSize}px Inter, sans-serif`;
+            const displayValue = orderedMetrics[2].data && orderedMetrics[2].data !== '' && orderedMetrics[2].data !== '0' ? orderedMetrics[2].data : '—';
+            this.ctx.fillText(displayValue, x, firstRowY);
+        }
+        
+        // Speed (второй ряд, по центру)
+        if (orderedMetrics[3]) {
+            const x = leftMargin + cellWidth + (cellWidth / 2);
+            this.ctx.textAlign = 'center';
+            this.ctx.font = `${labelFontSize}px Inter, sans-serif`;
+            this.ctx.fillText(orderedMetrics[3].dataName.toUpperCase(), x, secondRowY - valueFontSize - 10 * scale);
+            this.ctx.font = `bold ${valueFontSize}px Inter, sans-serif`;
+            const displayValue = orderedMetrics[3].data && orderedMetrics[3].data !== '' && orderedMetrics[3].data !== '0' ? orderedMetrics[3].data : '—';
+            this.ctx.fillText(displayValue, x, secondRowY);
         }
         
         this.ctx.restore();
