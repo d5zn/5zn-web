@@ -249,6 +249,10 @@ class SznApp {
             document.getElementById('photo-input').click();
         });
         
+        document.getElementById('mono-toggle-btn')?.addEventListener('click', () => {
+            this.toggleMonoMode();
+        });
+        
         document.getElementById('upload-logo-btn')?.addEventListener('click', () => {
             document.getElementById('logo-input').click();
         });
@@ -624,12 +628,38 @@ class SznApp {
             // Устанавливаем изображение в store
             this.store.setImage(e.target.result);
             
+            // Показываем кнопку mono toggle
+            const monoBtn = document.getElementById('mono-toggle-btn');
+            if (monoBtn) {
+                monoBtn.style.display = 'block';
+                monoBtn.textContent = 'MAKE MONO';
+                monoBtn.classList.remove('active');
+            }
+            
             console.log('🖼️ Background image updated in store');
         };
         reader.onerror = () => {
             this.showError('Ошибка при чтении файла');
         };
         reader.readAsDataURL(file);
+    }
+
+    toggleMonoMode() {
+        this.store.toggleMono();
+        const state = this.store.getState();
+        
+        const monoBtn = document.getElementById('mono-toggle-btn');
+        if (monoBtn) {
+            if (state.isMono) {
+                monoBtn.textContent = 'ORIGINAL';
+                monoBtn.classList.add('active');
+            } else {
+                monoBtn.textContent = 'MAKE MONO';
+                monoBtn.classList.remove('active');
+            }
+        }
+        
+        console.log(`🎨 Mono mode ${state.isMono ? 'enabled' : 'disabled'}`);
     }
 
     handleLogoUpload(file) {

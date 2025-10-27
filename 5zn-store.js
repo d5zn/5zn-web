@@ -11,6 +11,7 @@ class SznStore {
             canvasWidth: "desktop", 
             fontColor: "white",
             backgroundMode: "image", // 'image', 'french', 'gradient', 'solid'
+            isMono: false, // черно-белый режим
             title: "TITLE",
             eyeSlash: "/assets/eye-slash.svg",
             titleVisible: {
@@ -69,6 +70,11 @@ class SznStore {
     
     setBackgroundMode(mode) {
         this.state.backgroundMode = mode || 'image';
+        this.notifyListeners();
+    }
+    
+    toggleMono() {
+        this.state.isMono = !this.state.isMono;
         this.notifyListeners();
     }
     

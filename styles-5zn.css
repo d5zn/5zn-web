@@ -623,6 +623,16 @@ html, body {
     color: #000000;
 }
 
+/* Mono toggle button specific styles */
+#mono-toggle-btn {
+    margin-top: 8px;
+}
+
+#mono-toggle-btn.active {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: #ffffff;
+}
+
 /* Stats Overlay - скрываем, так как статистики рисуются в canvas */
 .stats-overlay {
     display: none;
