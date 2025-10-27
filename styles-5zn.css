@@ -171,9 +171,8 @@ html, body {
     align-items: center;
     width: 100%; /* Растягиваем на всю ширину */
     max-width: 100%;
-    margin: 0; /* Убираем все отступы */
+    margin: 0 16px; /* Боковые отступы по 16px */
     height: 100%;
-    padding: 0 16px; /* Боковые отступы по 16px */
 }
 
 .nav-brand h1 {
