@@ -393,7 +393,7 @@ class SznCanvasComponent {
         const subtitleFontSize = Math.floor(32 * scale);
         this.ctx.font = `${subtitleFontSize}px Inter, sans-serif`;
         
-        const subtitleY = titleTop + titleFontSize + 40 * scale; // Увеличили отступ до 40px (примерно 4 символа)
+        const subtitleY = titleTop + titleFontSize; // Убрали отступ между названием и датой
         this.wrapText(state.date.toUpperCase(), leftMargin, subtitleY, maxWidth, subtitleFontSize);
         
         this.ctx.restore();
