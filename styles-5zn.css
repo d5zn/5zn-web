@@ -183,7 +183,7 @@ html, body {
 }
 
 .nav-logo {
-    height: 24px;
+    height: 40px;
     width: auto;
     filter: brightness(0) invert(1); /* Делает логотип белым */
 }
