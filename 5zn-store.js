@@ -127,15 +127,6 @@ class SznStore {
             visible: true
         }];
         
-        // Добавляем Calories если есть данные
-        if (activity.kilojoules || activity.calories) {
-            rideData.push({
-                dataName: "Calories",
-                data: `${activity.kilojoules || activity.calories || 0} kJ`,
-                visible: true
-            });
-        }
-        
         return rideData;
     }
     
@@ -144,17 +135,26 @@ class SznStore {
         
         if (activity.average_watts) {
             speedData.push({
-                dataName: "Power/avg",
+                dataName: "Power",
                 data: `${activity.average_watts.toFixed(1)} W`,
                 visible: true
             });
         }
         
         speedData.push({
-            dataName: "Speed/avg", 
+            dataName: "Speed", 
             data: `${(3.6 * activity.average_speed).toFixed(1)} km/h`,
             visible: true
         });
+        
+        // Добавляем Calories в speedData для кнопок
+        if (activity.kilojoules || activity.calories) {
+            speedData.push({
+                dataName: "Calories",
+                data: `${activity.kilojoules || activity.calories || 0} kJ`,
+                visible: true
+            });
+        }
         
         return speedData;
     }
