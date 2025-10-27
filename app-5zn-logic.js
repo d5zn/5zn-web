@@ -239,13 +239,6 @@ class SznApp {
     }
 
     setupEventListeners() {
-        // Connect Strava button
-        document.getElementById('connect-strava-btn')?.addEventListener('click', () => this.connectStrava());
-        document.getElementById('connect-strava-btn')?.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            this.connectStrava();
-        });
-        
         // File uploads
         document.getElementById('upload-photo-btn')?.addEventListener('click', () => {
             document.getElementById('photo-input').click();
