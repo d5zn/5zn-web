@@ -440,7 +440,24 @@ class SznCanvasComponent {
                 if (index >= allMetrics.length) continue;
                 
                 const metric = allMetrics[index];
-                const x = leftMargin + (col * cellWidth);
+                let x, textAlign;
+                
+                // Определяем позицию и выравнивание в зависимости от колонки
+                if (col === 0) {
+                    // Левая колонка (1, 4) - выравнивание по левому краю
+                    x = leftMargin + (col * cellWidth);
+                    textAlign = 'left';
+                } else if (col === 1) {
+                    // Средняя колонка (2, 5) - выравнивание по центру
+                    x = leftMargin + (col * cellWidth) + (cellWidth / 2);
+                    textAlign = 'center';
+                } else {
+                    // Правая колонка (3, 6) - выравнивание по правому краю
+                    x = leftMargin + (col * cellWidth) + cellWidth;
+                    textAlign = 'right';
+                }
+                
+                this.ctx.textAlign = textAlign;
                 
                 // Label (сверху) - в верхнем регистре
                 this.ctx.font = `${labelFontSize}px Inter, sans-serif`;
