@@ -183,8 +183,17 @@ class SznCanvasComponent {
     }
     
     subscribeToStore() {
+        let previousImage = this.store.getState().image;
+        
         this.store.subscribe((state) => {
-            this.render();
+            // Проверяем, изменилось ли фоновое изображение
+            if (state.image !== previousImage) {
+                console.log('🖼️ Background image changed, reloading...');
+                previousImage = state.image;
+                this.loadImages();
+            } else {
+                this.render();
+            }
         });
     }
     
