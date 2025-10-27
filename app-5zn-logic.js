@@ -489,7 +489,7 @@ class SznApp {
             
             // Определяем тип данных
             let dataType = 'RideData';
-            if (metric === 'speed' || metric === 'power') {
+            if (metric === 'speed' || metric === 'power' || metric === 'calories') {
                 dataType = 'speedData';
             }
             
@@ -506,6 +506,10 @@ class SznApp {
                     btn.classList.remove('active');
                 }
                 console.log(`🔄 Synced ${metricItem.dataName}: ${metricItem.visible ? 'active' : 'inactive'}`);
+            } else {
+                // Если метрика не найдена в данных, оставляем кнопку неактивной
+                btn.classList.remove('active');
+                console.log(`⚠️ Metric ${metric} not found in data, button set to inactive`);
             }
         });
     }
@@ -516,7 +520,7 @@ class SznApp {
         
         // Определяем тип данных
         let dataType = 'RideData';
-        if (metric === 'speed' || metric === 'power') {
+        if (metric === 'speed' || metric === 'power' || metric === 'calories') {
             dataType = 'speedData';
         }
         
@@ -549,6 +553,12 @@ class SznApp {
             }
         } else {
             console.warn(`⚠️ Metric not found: ${metric}`);
+            // Если метрика не найдена, просто переключаем состояние кнопки
+            const button = document.querySelector(`[data-metric="${metric}"]`);
+            if (button) {
+                button.classList.toggle('active');
+                console.log(`🔄 Button ${metric} toggled (metric not in data)`);
+            }
         }
     }
 
