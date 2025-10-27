@@ -22,7 +22,14 @@ class SznCanvasComponent {
             canvasWidth: 1080,  // Внутренний размер canvas для рендеринга
             canvasHeight: 1920, // Внутренний размер canvas для рендеринга
             aspectRatio: '9/16',
-            maxDPR: 1 // Используем фиксированный размер, не нужно DPR scaling
+            maxDPR: 1, // Используем фиксированный размер, не нужно DPR scaling
+            // Безопасные зоны для контента
+            safeArea: {
+                top: 250,
+                bottom: 100,
+                left: 80,
+                right: 80
+            }
         };
         
         this.init();
@@ -303,9 +310,10 @@ class SznCanvasComponent {
     renderTitle(state, width, height) {
         // Масштабируем размеры для 1080x1920
         const scale = width / 1080;
-        const titleTop = state.postStyle === 'portrait' 
-            ? height * 0.05 
-            : height * 0.15;
+        const safeArea = this.config.safeArea;
+        
+        // Позиция заголовка с учетом безопасной зоны сверху
+        const titleTop = safeArea.top * scale;
         
         // Заголовок
         const titleFontSize = Math.floor(48 * scale);
@@ -314,14 +322,18 @@ class SznCanvasComponent {
         this.ctx.font = `bold ${titleFontSize}px Inter, sans-serif`;
         this.ctx.textAlign = 'left';
         
-        this.wrapText(state.title, 60 * scale, titleTop, width - 120 * scale, titleFontSize);
+        // Используем безопасные зоны слева и справа
+        const leftMargin = safeArea.left * scale;
+        const maxWidth = width - (safeArea.left + safeArea.right) * scale;
+        
+        this.wrapText(state.title, leftMargin, titleTop, maxWidth, titleFontSize);
         
         // Подзаголовок (дата)
         const subtitleFontSize = Math.floor(32 * scale);
         this.ctx.font = `${subtitleFontSize}px Inter, sans-serif`;
         
         const subtitleY = titleTop + titleFontSize + 15;
-        this.wrapText(state.date, 60 * scale, subtitleY, width - 120 * scale, subtitleFontSize);
+        this.wrapText(state.date, leftMargin, subtitleY, maxWidth, subtitleFontSize);
         
         this.ctx.restore();
     }
@@ -335,13 +347,14 @@ class SznCanvasComponent {
         
         // Масштабируем размеры для 1080x1920
         const scale = width / 1080;
+        const safeArea = this.config.safeArea;
         
-        // Рендерим RideData
-        let currentY = height - height * 0.05;
+        // Рендерим RideData снизу с учетом безопасной зоны
+        let currentY = height - (safeArea.bottom * scale);
         currentY = this.renderMetricGroup(visibleRideData, width, height, currentY, scale);
         
         // Рендерим SpeedData
-        currentY = this.renderMetricGroup(visibleSpeedData, width, height, currentY - height * 0.01, scale);
+        currentY = this.renderMetricGroup(visibleSpeedData, width, height, currentY - 20 * scale, scale);
     }
     
     renderMetricGroup(metrics, width, height, bottomY, scale) {
@@ -349,7 +362,8 @@ class SznCanvasComponent {
         
         const fontSize = Math.floor(28 * scale);
         const lineHeight = fontSize + 8;
-        const padding = 60 * scale;
+        const safeArea = this.config.safeArea;
+        const leftPadding = safeArea.left * scale;
         
         this.ctx.save();
         this.ctx.fillStyle = this.store.getState().fontColor;
@@ -360,11 +374,11 @@ class SznCanvasComponent {
         
         metrics.forEach(metric => {
             // Label
-            this.ctx.fillText(metric.dataName, padding, currentY);
+            this.ctx.fillText(metric.dataName, leftPadding, currentY);
             
             // Value
             this.ctx.font = `bold ${fontSize}px Inter, sans-serif`;
-            this.ctx.fillText(metric.data, padding, currentY + lineHeight);
+            this.ctx.fillText(metric.data, leftPadding, currentY + lineHeight);
             
             currentY += lineHeight * 2 + 12;
         });
@@ -384,11 +398,12 @@ class SznCanvasComponent {
         
         // Масштабируем размеры для 1080x1920
         const scale = width / 1080;
+        const safeArea = this.config.safeArea;
         
-        // Позиционируем логотип в правом верхнем углу
+        // Позиционируем логотип в правом верхнем углу с учетом безопасной зоны
         const logoSize = 96 * scale;
-        const logoX = width - logoSize - 30 * scale;
-        const logoY = height * 0.05 + 70 * scale - logoSize / 2;
+        const logoX = width - logoSize - (safeArea.right * scale);
+        const logoY = (safeArea.top * scale) - 20 * scale;
         
         this.ctx.save();
         this.ctx.drawImage(this.logoImage, logoX, logoY, logoSize, logoSize);
