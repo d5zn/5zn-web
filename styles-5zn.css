@@ -503,17 +503,17 @@ html, body {
     left: 0;
     right: 0;
     bottom: 0;
-    z-index: 1000;
+    z-index: 1000 !important;
     display: none;
 }
 
 .modal:not(.hidden) {
-    display: block;
+    display: flex !important;
 }
 
 /* Workout Selector Modal */
 .modal-backdrop {
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 0;
     right: 0;
