@@ -168,7 +168,6 @@ html, body {
 
 .nav-container {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     max-width: 100%;
     margin: 0 20px;
@@ -192,7 +191,7 @@ html, body {
     display: flex;
     gap: 8px;
     align-items: center;
-    margin-left: auto; /* Прижимаем иконки к правому краю */
+    margin-left: auto !important; /* Прижимаем иконки к правому краю */
 }
 
 .nav-btn {
