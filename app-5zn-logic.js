@@ -261,6 +261,11 @@ class SznApp {
             this.handleLogoUpload(e.target.files[0]);
         });
         
+        // Logo click handler
+        document.querySelector('.nav-logo')?.addEventListener('click', () => {
+            window.open('/landing.html', '_blank');
+        });
+        
         // Nav buttons
         document.getElementById('workout-selector-btn')?.addEventListener('click', () => {
             this.openWorkoutSelector();

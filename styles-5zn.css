@@ -187,6 +187,12 @@ html, body {
     height: 40px;
     width: auto;
     filter: brightness(0) invert(1); /* Делает логотип белым */
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+.nav-logo:hover {
+    opacity: 0.8;
 }
 
 .nav-center {
