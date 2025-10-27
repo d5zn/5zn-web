@@ -79,9 +79,11 @@ def inject_config(html_content):
     """Inject configuration from environment variables into HTML"""
     try:
         from server_config import STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET
+        print(f"✅ Loaded config from server_config.py")
     except ImportError:
         STRAVA_CLIENT_ID = os.environ.get('STRAVA_CLIENT_ID', 'YOUR_STRAVA_CLIENT_ID')
         STRAVA_CLIENT_SECRET = os.environ.get('STRAVA_CLIENT_SECRET', 'YOUR_STRAVA_CLIENT_SECRET')
+        print(f"⚠️ Using env vars: CLIENT_ID={STRAVA_CLIENT_ID[:10]}..." if STRAVA_CLIENT_ID != 'YOUR_STRAVA_CLIENT_ID' else "❌ No Strava credentials found!")
     
     is_production = os.environ.get('ENVIRONMENT') == 'production'
     is_railway = os.environ.get('RAILWAY_ENVIRONMENT') is not None
@@ -112,15 +114,32 @@ window.CONFIG = {{
 if (CONFIG.ENV.DEBUG) {{
     console.log('🔧 5zn Web Configuration:', CONFIG);
 }}
+
+console.log('🔑 Config injected - CLIENT_ID:', window.CONFIG.STRAVA.CLIENT_ID.substring(0, 10) + '...');
 </script>
 """
     
-    # Replace config.js script tag with inline config
-    html_content = html_content.replace(
-        '<script src="config.js?v=3"></script>',
-        config_script
-    )
+    # Replace config.js script tag with inline config (try multiple versions)
+    if '<script src="config.js?v=4"></script>' in html_content:
+        html_content = html_content.replace(
+            '<script src="config.js?v=4"></script>',
+            config_script
+        )
+    elif '<script src="config.js?v=3"></script>' in html_content:
+        html_content = html_content.replace(
+            '<script src="config.js?v=3"></script>',
+            config_script
+        )
+    else:
+        # Fallback - replace any config.js
+        import re
+        html_content = re.sub(
+            r'<script src="config\.js\?v=\d+"></script>',
+            config_script,
+            html_content
+        )
     
+    print(f"✅ Config injected into HTML")
     return html_content
 
 class ProductionHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
