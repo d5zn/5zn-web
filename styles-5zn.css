@@ -170,8 +170,9 @@ html, body {
     display: flex;
     align-items: center;
     max-width: 100%;
-    margin: 0 20px 0 20px; /* Отступ только слева */
+    margin: 0; /* Убираем все отступы */
     height: 100%;
+    padding: 0 20px; /* Добавляем внутренние отступы */
 }
 
 .nav-brand h1 {
