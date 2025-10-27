@@ -1065,6 +1065,11 @@ class SznApp {
         document.getElementById('connected')?.classList.add('hidden');
         document.getElementById('not-connected')?.classList.remove('hidden');
         
+        // Автоматически обновляем страницу для возврата к экрану входа
+        setTimeout(() => {
+            window.location.reload();
+        }, 100);
+        
         // Кнопка теперь в HTML, не создаем её динамически
         
         if (this.polymerCanvas && this.polymerCanvas.ctx) {
