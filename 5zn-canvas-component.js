@@ -497,19 +497,25 @@ class SznCanvasComponent {
         // Рисуем маршрут с градиентом французского флага
         this.ctx.save();
         
-        // Создаем градиент французского флага (синий-белый-красный)
-        const gradient = this.ctx.createLinearGradient(
-            routeLeft, routeTop,
-            routeRight, routeBottom
-        );
+        // Находим начальную и конечную точки маршрута для создания градиента по длине линии
+        const startPoint = this.decodedRoute[0];
+        const endPoint = this.decodedRoute[this.decodedRoute.length - 1];
         
-        // Цвета французского флага - каждый по 1/3
-        gradient.addColorStop(0, '#002395');      // Синий (0-33%)
+        const startX = routeLeft + routeWidth / 2 + (startPoint[1] - centerLng) * routeScale;
+        const startY = routeTop + routeHeight / 2 - (startPoint[0] - centerLat) * routeScale;
+        const endX = routeLeft + routeWidth / 2 + (endPoint[1] - centerLng) * routeScale;
+        const endY = routeTop + routeHeight / 2 - (endPoint[0] - centerLat) * routeScale;
+        
+        // Создаем градиент по длине маршрута
+        const gradient = this.ctx.createLinearGradient(startX, startY, endX, endY);
+        
+        // Цвета французского флага с плавными переходами
+        gradient.addColorStop(0, '#002395');      // Синий (начало)
         gradient.addColorStop(0.33, '#002395');   // Синий до 33%
-        gradient.addColorStop(0.33, '#FFFFFF');   // Белый с 33%
-        gradient.addColorStop(0.66, '#FFFFFF');   // Белый до 66%
-        gradient.addColorStop(0.66, '#ED2939');  // Красный с 66%
-        gradient.addColorStop(1, '#ED2939');     // Красный до конца
+        gradient.addColorStop(0.4, '#FFFFFF');    // Плавный переход к белому
+        gradient.addColorStop(0.6, '#FFFFFF');     // Белый в середине
+        gradient.addColorStop(0.66, '#ED2939');   // Плавный переход к красному
+        gradient.addColorStop(1, '#ED2939');     // Красный (конец)
         
         this.ctx.strokeStyle = gradient;
         this.ctx.lineWidth = 8 * scale;
