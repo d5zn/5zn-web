@@ -241,6 +241,9 @@ class SznApp {
     }
 
     setupEventListeners() {
+        // Connect Strava button (теперь в HTML)
+        document.getElementById('connect-strava-btn')?.addEventListener('click', () => this.connectStrava());
+        
         // File uploads
         document.getElementById('upload-photo-btn')?.addEventListener('click', () => {
             document.getElementById('photo-input').click();
@@ -651,14 +654,7 @@ class SznApp {
         if (connected) connected.classList.add('hidden');
         if (editingPanel) editingPanel.classList.add('hidden'); // Скрываем панель редактирования
         
-        const navActions = document.querySelector('.nav-actions');
-        if (navActions) {
-            navActions.innerHTML = `
-                <button id="connect-strava-btn" class="btn btn-primary" style="height: 40px; display: flex; align-items: center; justify-content: center;">Connect Strava</button>
-            `;
-            
-            document.getElementById('connect-strava-btn')?.addEventListener('click', () => this.connectStrava());
-        }
+        // Кнопка теперь в HTML, не создаем её динамически
     }
 
     showConnectedState() {
@@ -1004,14 +1000,7 @@ class SznApp {
         document.getElementById('connected')?.classList.add('hidden');
         document.getElementById('not-connected')?.classList.remove('hidden');
         
-        const navActions = document.querySelector('.nav-actions');
-        if (navActions) {
-            navActions.innerHTML = `
-                <button id="connect-strava-btn" class="btn btn-primary" style="height: 40px; display: flex; align-items: center; justify-content: center;">Connect Strava</button>
-            `;
-            
-            document.getElementById('connect-strava-btn')?.addEventListener('click', () => this.connectStrava());
-        }
+        // Кнопка теперь в HTML, не создаем её динамически
         
         if (this.polymerCanvas && this.polymerCanvas.ctx) {
             this.polymerCanvas.ctx.clearRect(0, 0, this.polymerCanvas.canvas.width, this.polymerCanvas.canvas.height);
