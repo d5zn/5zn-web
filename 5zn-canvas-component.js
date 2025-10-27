@@ -402,10 +402,21 @@ class SznCanvasComponent {
     renderMetrics(state, width, height) {
         const { RideData, speedData } = state;
         
-        // Фильтруем только видимые метрики и объединяем
+        // Фильтруем только видимые метрики и объединяем в нужном порядке
         const visibleRideData = RideData.filter(item => item.visible);
         const visibleSpeedData = speedData.filter(item => item.visible);
-        const allMetrics = [...visibleRideData, ...visibleSpeedData];
+        
+        // Сортируем speedData для правильного порядка: power, speed, calories
+        const sortedSpeedData = [];
+        const powerMetric = visibleSpeedData.find(item => item.dataName.toLowerCase().includes('power'));
+        const speedMetric = visibleSpeedData.find(item => item.dataName.toLowerCase().includes('speed'));
+        const caloriesMetric = visibleSpeedData.find(item => item.dataName.toLowerCase().includes('calories'));
+        
+        if (powerMetric) sortedSpeedData.push(powerMetric);
+        if (speedMetric) sortedSpeedData.push(speedMetric);
+        if (caloriesMetric) sortedSpeedData.push(caloriesMetric);
+        
+        const allMetrics = [...visibleRideData, ...sortedSpeedData];
         
         if (allMetrics.length === 0) return;
         
