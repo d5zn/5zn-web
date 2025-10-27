@@ -576,7 +576,7 @@ html, body {
 }
 
 .modal-body {
-    padding: 20px;
+    padding: 20px 20px 40px 20px; /* Добавляем больше отступа снизу */
     overflow-y: auto;
     flex: 1;
 }
