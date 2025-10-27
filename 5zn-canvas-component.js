@@ -17,12 +17,12 @@ class SznCanvasComponent {
         this.logoImage = new Image();
         this.dpr = 1; // Инициализируем DPR по умолчанию
         
-        // Конфигурация как в nextPoly
+        // Конфигурация - фиксированный размер canvas 1080x1920
         this.config = {
-            width: 400,
-            height: 1400, // Будет изменяться в зависимости от postStyle
+            canvasWidth: 1080,  // Внутренний размер canvas для рендеринга
+            canvasHeight: 1920, // Внутренний размер canvas для рендеринга
             aspectRatio: '9/16',
-            maxDPR: 2
+            maxDPR: 1 // Используем фиксированный размер, не нужно DPR scaling
         };
         
         this.init();
@@ -40,63 +40,66 @@ class SznCanvasComponent {
     updateCanvasSize() {
         const state = this.store.getState();
         
-        // Обновляем размеры в зависимости от postStyle как в nextPoly
+        // Обновляем размеры в зависимости от postStyle
         if (state.postStyle === 'square') {
-            this.config.height = 500; // 400 * 5/4 = 500 для соотношения 4:5
+            this.config.canvasWidth = 1080;
+            this.config.canvasHeight = 1350; // 1080 * 5/4 = 1350 для соотношения 4:5
             this.config.aspectRatio = '4/5';
         } else {
-            this.config.height = 1400;
+            this.config.canvasWidth = 1080;
+            this.config.canvasHeight = 1920; // Стандартное разрешение 9:16
             this.config.aspectRatio = '9/16';
         }
     }
     
     setupCanvas() {
-        const rawDPR = window.devicePixelRatio || 1;
-        const dpr = Math.min(rawDPR, this.config.maxDPR);
-        
         // Обновляем размеры в зависимости от postStyle
         this.updateCanvasSize();
         
-        // ПРИНУДИТЕЛЬНО устанавливаем размеры canvas
-        const clientWidth = this.canvas.clientWidth || 400;
-        const clientHeight = this.canvas.clientHeight || 1400;
+        // Получаем размеры контейнера для CSS масштабирования
+        const container = this.canvas.parentElement;
+        const containerWidth = container.clientWidth;
+        const containerHeight = container.clientHeight;
         
-        // Рассчитываем размеры canvas
-        let canvasWidth = Math.floor(clientWidth * dpr);
-        let canvasHeight = Math.floor(clientHeight * dpr);
+        // Рассчитываем CSS размеры для отображения (масштабируем под контейнер)
+        let displayWidth, displayHeight;
+        const canvasAspect = this.config.canvasWidth / this.config.canvasHeight;
+        const containerAspect = containerWidth / containerHeight;
         
-        // Минимальная ширина как в nextPoly
-        if (canvasWidth < 800) {
-            canvasHeight = 800 * canvasHeight / canvasWidth;
-            canvasWidth = 800;
+        if (containerAspect > canvasAspect) {
+            // Контейнер шире - ограничены по высоте
+            displayHeight = containerHeight;
+            displayWidth = displayHeight * canvasAspect;
+        } else {
+            // Контейнер уже - ограничены по ширине
+            displayWidth = containerWidth;
+            displayHeight = displayWidth / canvasAspect;
         }
         
-        // Устанавливаем размеры canvas
-        this.canvas.width = canvasWidth;
-        this.canvas.height = canvasHeight;
+        // Устанавливаем CSS размеры для отображения
+        this.canvas.style.width = Math.floor(displayWidth) + 'px';
+        this.canvas.style.height = Math.floor(displayHeight) + 'px';
         
-        // ПРИНУДИТЕЛЬНО устанавливаем CSS размеры
-        this.canvas.style.width = this.config.width + 'px';
-        this.canvas.style.height = this.config.height + 'px';
-        this.canvas.style.aspectRatio = this.config.aspectRatio;
-        this.canvas.style.maxWidth = '100%';
-        this.canvas.style.maxHeight = '95%';
-        this.canvas.style.margin = 'auto';
-        this.canvas.style.transition = 'height 0.3s ease-out, transform 0.3s ease-out';
+        // Устанавливаем фиксированные размеры canvas для рендеринга (1080x1920)
+        // Применяем размеры только если они изменились
+        if (this.canvas.width !== this.config.canvasWidth || this.canvas.height !== this.config.canvasHeight) {
+            this.canvas.width = this.config.canvasWidth;
+            this.canvas.height = this.config.canvasHeight;
+        }
         
-        // Применяем DPR масштаб только один раз
-        this.ctx.scale(dpr, dpr);
+        // DPR = 1 так как используем фиксированный размер
+        this.dpr = 1;
         
-        // Сохраняем DPR для использования в рендеринге
-        this.dpr = dpr;
+        console.log(`🎯 Canvas setup: ${this.config.canvasWidth}x${this.config.canvasHeight} (Display: ${Math.floor(displayWidth)}x${Math.floor(displayHeight)}, Container: ${containerWidth}x${containerHeight})`);
         
-        console.log(`🎯 Canvas setup: ${canvasWidth}x${canvasHeight} (CSS: ${this.config.width}x${this.config.height})`);
-        
-        // Обработчик resize как в nextPoly
-        window.addEventListener('resize', () => {
-            this.setupCanvas();
-            this.render();
-        });
+        // Обработчик resize (добавляем только один раз)
+        if (!this._resizeHandlerAdded) {
+            this._resizeHandlerAdded = true;
+            window.addEventListener('resize', () => {
+                this.setupCanvas();
+                this.render();
+            });
+        }
     }
     
     loadFonts() {
@@ -171,9 +174,9 @@ class SznCanvasComponent {
         // Обновляем размеры в зависимости от postStyle
         this.updateCanvasSize();
         
-        // Используем размеры с учетом DPR масштабирования
-        const width = this.canvas.width / this.dpr;
-        const height = this.canvas.height / this.dpr;
+        // Используем фиксированные размеры canvas (1080x1920)
+        const width = this.canvas.width;
+        const height = this.canvas.height;
         
         // Проверяем, что canvas имеет валидные размеры
         if (width <= 0 || height <= 0) {
@@ -185,13 +188,13 @@ class SznCanvasComponent {
         // Очищаем canvas
         this.ctx.clearRect(0, 0, width, height);
         
-        // Рендерим как в nextPoly
+        // Рендерим
         this.renderBackground(state, width, height);
         this.renderOverlay(state, width, height);
         this.renderContent(state, width, height);
         this.renderLogo(state, width, height);
         
-        console.log('🎨 Szn Canvas rendered');
+        console.log(`🎨 Canvas rendered at ${width}x${height}`);
     }
     
     renderBackground(state, width, height) {
@@ -267,27 +270,27 @@ class SznCanvasComponent {
     }
     
     renderTitle(state, width, height) {
-        // Масштабируем размеры как в nextPoly
-        const scale = width / 1000;
+        // Масштабируем размеры для 1080x1920
+        const scale = width / 1080;
         const titleTop = state.postStyle === 'portrait' 
             ? height * 0.05 
             : height * 0.15;
         
         // Заголовок
-        const titleFontSize = Math.floor(35 * scale);
+        const titleFontSize = Math.floor(48 * scale);
         this.ctx.save();
         this.ctx.fillStyle = state.fontColor;
         this.ctx.font = `bold ${titleFontSize}px Inter, sans-serif`;
         this.ctx.textAlign = 'left';
         
-        this.wrapText(state.title, 40 * scale, titleTop, width - 80 * scale, titleFontSize);
+        this.wrapText(state.title, 60 * scale, titleTop, width - 120 * scale, titleFontSize);
         
         // Подзаголовок (дата)
-        const subtitleFontSize = Math.floor(24 * scale);
+        const subtitleFontSize = Math.floor(32 * scale);
         this.ctx.font = `${subtitleFontSize}px Inter, sans-serif`;
         
-        const subtitleY = titleTop + titleFontSize + 10;
-        this.wrapText(state.date, 40 * scale, subtitleY, width - 80 * scale, subtitleFontSize);
+        const subtitleY = titleTop + titleFontSize + 15;
+        this.wrapText(state.date, 60 * scale, subtitleY, width - 120 * scale, subtitleFontSize);
         
         this.ctx.restore();
     }
@@ -299,8 +302,8 @@ class SznCanvasComponent {
         const visibleRideData = RideData.filter(item => item.visible);
         const visibleSpeedData = speedData.filter(item => item.visible);
         
-        // Масштабируем размеры как в nextPoly
-        const scale = width / 1000;
+        // Масштабируем размеры для 1080x1920
+        const scale = width / 1080;
         
         // Рендерим RideData
         let currentY = height - height * 0.05;
@@ -313,9 +316,9 @@ class SznCanvasComponent {
     renderMetricGroup(metrics, width, height, bottomY, scale) {
         if (metrics.length === 0) return bottomY;
         
-        const fontSize = Math.floor(20 * scale);
-        const lineHeight = fontSize + 5;
-        const padding = 40 * scale;
+        const fontSize = Math.floor(28 * scale);
+        const lineHeight = fontSize + 8;
+        const padding = 60 * scale;
         
         this.ctx.save();
         this.ctx.fillStyle = this.store.getState().fontColor;
@@ -332,7 +335,7 @@ class SznCanvasComponent {
             this.ctx.font = `bold ${fontSize}px Inter, sans-serif`;
             this.ctx.fillText(metric.data, padding, currentY + lineHeight);
             
-            currentY += lineHeight * 2 + 10;
+            currentY += lineHeight * 2 + 12;
         });
         
         this.ctx.restore();
@@ -348,13 +351,13 @@ class SznCanvasComponent {
     renderLogo(state, width, height) {
         if (!this.logoImage.complete || this.logoImage.naturalWidth === 0) return;
         
-        // Масштабируем размеры как в nextPoly
-        const scale = width / 1000;
+        // Масштабируем размеры для 1080x1920
+        const scale = width / 1080;
         
         // Позиционируем логотип в правом верхнем углу
-        const logoSize = 72 * scale;
-        const logoX = width - logoSize - 20 * scale;
-        const logoY = height * 0.05 + 50 * scale - logoSize / 2;
+        const logoSize = 96 * scale;
+        const logoX = width - logoSize - 30 * scale;
+        const logoY = height * 0.05 + 70 * scale - logoSize / 2;
         
         this.ctx.save();
         this.ctx.drawImage(this.logoImage, logoX, logoY, logoSize, logoSize);

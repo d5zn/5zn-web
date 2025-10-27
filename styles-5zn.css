@@ -83,35 +83,33 @@ html, body {
 
 /* Обертка как в polymer-workshop */
 #connected {
-    flex: 1;
+    position: relative;
+    width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    max-width: 500px;
-    width: 90%;
-    height: 100%;
-    max-height: 100%;
-    margin: auto;
     overflow: hidden;
 }
 
 /* Canvas стили управляются JavaScript - убираем конфликтующие CSS */
 #connected canvas {
-    /* Базовые размеры для инициализации */
-    width: 400px !important;
-    height: 1400px !important;
+    /* Размеры управляются JavaScript */
+    width: 100% !important;
+    height: 100% !important;
     max-width: 100%;
-    max-height: 95%;
+    max-height: 100%;
     margin: auto;
     border-radius: 24px;
     transition: height 0.3s ease-out, transform 0.3s ease-out;
+    object-fit: contain;
 }
 
 /* Canvas для превью - размеры управляются JavaScript */
 #route-canvas {
-    /* Базовые размеры для инициализации */
-    width: 400px !important;
-    height: 1400px !important;
+    /* Размеры управляются JavaScript */
+    width: 100% !important;
+    height: 100% !important;
     display: block;
     margin: 0 auto;
     padding: 0;
