@@ -374,7 +374,8 @@ html, body {
 /* Data Buttons Container */
 .data-buttons {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr; /* 4 колонки */
+    grid-template-columns: 1fr 1fr 1fr; /* 3 колонки */
+    grid-template-rows: 1fr 1fr; /* 2 ряда */
     gap: 8px;
     width: 100%;
 }
@@ -399,6 +400,11 @@ html, body {
 .data-btn.active {
     background: #ffffff;
     color: #000000;
+}
+
+/* Center the Speed button in the second row */
+.data-btn[data-metric="speed"] {
+    grid-column: 2; /* Center in the middle column */
 }
 
 .data-btn:hover {
