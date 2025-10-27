@@ -529,7 +529,6 @@ html, body {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px; /* Внешние отступы 24px от края экрана */
     z-index: 1000;
 }
 
@@ -544,6 +543,8 @@ html, body {
     flex-direction: column;
     position: relative;
     z-index: 1001;
+    margin: 24px; /* Отступы 24px с каждой стороны */
+    box-sizing: border-box; /* Включаем margin в расчет размеров */
 }
 
 .modal-header {
