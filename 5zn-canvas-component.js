@@ -288,7 +288,7 @@ class SznCanvasComponent {
         
         // Применяем монохромный фильтр если включен
         if (state.isMono) {
-            this.ctx.filter = 'grayscale(100%)';
+            this.ctx.filter = 'grayscale(100%) contrast(150%) brightness(110%)';
         }
         
         this.ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
