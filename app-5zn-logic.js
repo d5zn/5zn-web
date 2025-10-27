@@ -721,16 +721,10 @@ class SznApp {
                 
                 console.log('🔍 Navigation structure:', {
                     navbar: !!navbar,
-                    navContainer: !!navContainer,
-                    navActions: !!navActions
+                    navContainer: !!navContainer
                 });
                 
-                if (navActions) {
-                    navActions.style.display = 'flex';
-                    navActions.style.visibility = 'visible';
-                    navActions.style.opacity = '1';
-                    console.log('✅ Navigation container shown');
-                }
+                // Кнопки теперь в HTML, не требуют динамического управления
             }, 500);
             
             connected.style.setProperty('aspect-ratio', '9 / 16', 'important');
