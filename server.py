@@ -246,7 +246,9 @@ class ProductionHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         if self.path.endswith('.html'):
             try:
                 filename = self.path[1:]  # Remove leading slash
+                print(f"🔍 Looking for HTML file: {filename}")
                 if os.path.exists(filename):
+                    print(f"✅ Found HTML file: {filename}")
                     with open(filename, 'r', encoding='utf-8') as f:
                         html_content = f.read()
                     
@@ -256,7 +258,10 @@ class ProductionHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                     self.send_header('Content-Length', len(html_content.encode('utf-8')))
                     self.end_headers()
                     self.wfile.write(html_content.encode('utf-8'))
+                    print(f"✅ Served HTML file: {filename}")
                     return
+                else:
+                    print(f"❌ HTML file not found: {filename}")
             except Exception as e:
                 print(f"❌ Error serving HTML file {self.path}: {e}")
                 self.send_error(404, 'File Not Found')
