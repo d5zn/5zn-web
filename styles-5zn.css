@@ -494,15 +494,37 @@ html, body {
     margin-bottom: 20px; /* Отступ между подписью и кнопкой 20px */
 }
 
-.strava-powered {
+.support-info {
     position: absolute;
     bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.strava-powered {
     font-size: 13px;
     color: #666666;
     font-weight: 400;
-    text-align: center;
+}
+
+.support-link {
+    font-size: 13px;
+    color: #666666;
+    font-weight: 400;
+}
+
+.support-link a {
+    color: #999999;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.support-link a:hover {
+    color: #cccccc;
 }
 
 /* Loading States */
