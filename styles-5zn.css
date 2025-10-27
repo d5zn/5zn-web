@@ -244,12 +244,16 @@ html, body {
 }
 
 .nav-center {
-    display: flex;
+    display: none; /* Скрываем по умолчанию, показываем только когда авторизован */
     align-items: center;
     gap: 8px;
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
+}
+
+.nav-center.visible {
+    display: flex; /* Показываем когда пользователь авторизован */
 }
 
 .nav-actions {

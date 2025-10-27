@@ -687,6 +687,13 @@ class SznApp {
         if (connected) connected.classList.add('hidden');
         if (editingPanel) editingPanel.classList.add('hidden'); // Скрываем панель редактирования
         
+        // Скрываем иконки в навбаре
+        const navCenter = document.querySelector('.nav-center');
+        if (navCenter) {
+            navCenter.classList.remove('visible');
+            console.log('✅ Nav center icons hidden');
+        }
+        
         // Кнопка теперь в HTML, не создаем её динамически
     }
 
@@ -732,8 +739,15 @@ class SznApp {
         
         // Синхронизируем кнопки метрик с текущим состоянием
         this.syncMetricButtons();
+        
+        // Показываем иконки в навбаре
+        const navCenter = document.querySelector('.nav-center');
+        if (navCenter) {
+            navCenter.classList.add('visible');
+            console.log('✅ Nav center icons shown');
+        }
             
-            const navbar = document.querySelector('.navbar');
+        const navbar = document.querySelector('.navbar');
             if (navbar) {
                 navbar.style.display = 'flex';
                 navbar.style.visibility = 'visible';
