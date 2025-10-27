@@ -1,113 +1,381 @@
-# 5zn Web 🌐
+# 5zn.io - Cycling Activity Visualization
 
-A web application for the 5zn project, featuring modern web technologies and responsive design.
+Modern web application for visualizing Strava cycling routes and workout data with beautiful graphics.
 
-## Features
+## 🏗️ Architecture
 
-- 🌐 **Modern Web Application** - Built with vanilla JavaScript, HTML5, and CSS3
-- 📱 **Responsive Design** - Works on desktop and mobile devices
-- 🎨 **Interactive Interface** - Clean and intuitive user experience
-- ⚡ **Fast Performance** - Optimized for speed and efficiency
-- 🔧 **Easy Setup** - Simple installation and configuration
+### Overview
+```
+┌─────────────────────────────────────────────────────────┐
+│                     Railway Cloud                        │
+│  ┌────────────────┐              ┌──────────────────┐   │
+│  │  Web Service   │◄────────────►│   PostgreSQL     │   │
+│  │  (Python HTTP) │              │   Database       │   │
+│  │  Port: 8000    │              │                  │   │
+│  └────────────────┘              └──────────────────┘   │
+│         │                                                │
+│         │ Serves Static Files + API                     │
+│         ▼                                                │
+│  ┌────────────────────────────────────────────────┐     │
+│  │  Frontend (Single Page Application)            │     │
+│  │  • index.html                                   │     │
+│  │  • styles-5zn.css                               │     │
+│  │  • 5zn-canvas-component.js (Canvas 1080x1920)  │     │
+│  │  • 5zn-store.js (State Management)             │     │
+│  │  • app-5zn-logic.js (Business Logic)           │     │
+│  └────────────────────────────────────────────────┘     │
+└─────────────────────────────────────────────────────────┘
+                           │
+                           ▼
+              ┌────────────────────────┐
+              │    Strava OAuth API    │
+              │  (Activity Data)       │
+              └────────────────────────┘
+```
 
-## Getting Started
+## 🎯 Core Components
 
-### Prerequisites
+### Frontend Architecture
 
-- A modern web browser
-- Node.js (for development server)
+#### Layout Structure (Fixed Panels)
+```
+┌──────────────────────────────────────┐
+│  Navbar (48px) - Fixed Top           │ z-index: 100
+├──────────────────────────────────────┤
+│                                      │
+│  Preview Area (Flexible Height)      │ z-index: 1
+│  • Canvas: 1080x1920px (9:16)        │
+│  • Auto-scales to fit container      │
+│  • States: not-connected, connected, │
+│           loading                    │
+│                                      │
+├──────────────────────────────────────┤
+│  Editing Panel (180px) - Fixed Bot   │ z-index: 90
+│  • Photo Tab: Upload background      │
+│  • Data Tab: Select metrics          │
+└──────────────────────────────────────┘
+```
 
-### Installation
+#### Canvas System
+- **Resolution**: 1080x1920 pixels (internal rendering)
+- **Aspect Ratios**: 
+  - 9:16 (Portrait, default)
+  - 4:5 (Square, 1080x1350)
+- **Display**: Auto-scales to fit available space
+- **Rendering**: Uses DPR=1 for consistent quality
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/d5zn/5zn-web.git
-   cd 5zn-web
-   ```
+### Backend (Python HTTP Server)
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+**File**: `server.py`
 
-3. Start the development server:
-   ```bash
-   npm run dev
-   ```
+Features:
+- ✅ Static file serving
+- ✅ Strava OAuth token exchange
+- ✅ PostgreSQL database integration
+- ✅ Rate limiting (100 req/60s per IP)
+- ✅ Security headers (CSP, CORS, XSS protection)
+- ✅ Admin API for user management
 
-4. Open your browser and navigate to `http://localhost:8000`
+**Endpoints**:
+- `GET /` - Serves index.html
+- `POST /api/strava/token` - OAuth token exchange
+- `GET /api/admin/users` - List connected users
 
-## Usage
+### Database (PostgreSQL on Railway)
 
-### Development
+**Connection**:
+```
+postgresql://postgres:mkuEzDfDJnCePKiizLumEMTuwRqFVJqY@postgres.railway.internal:5432/railway
+```
 
-- Use `npm run dev` to start the development server with live reload
-- Use `npm run serve` to start a simple static server
-- Use `npm start` to start the Python server
+**Schema**: `database_schema.sql`
 
-### Production
+**Tables**:
+- `athletes` - Strava user data
+  - athlete_id (PK)
+  - username, firstname, lastname, email
+  - city, country
+  - profile_picture
+  - access_token_hash (hashed for security)
+  - timestamps (connected_at, last_seen_at)
 
-- Build the project for production deployment
-- Configure your web server to serve the static files
-- Ensure all dependencies are properly installed
-
-## Technical Details
-
-### Architecture
-
-- **Vanilla JavaScript** - No frameworks, pure JS for maximum compatibility
-- **HTML5 & CSS3** - Modern web standards
-- **Responsive Design** - Mobile-first approach
-- **Modular Structure** - Clean and maintainable code
-
-### File Structure
+## 📁 Project Structure
 
 ```
 5zn-web/
-├── index.html          # Main application
-├── styles.css          # Styling and animations
-├── app.js             # Application logic
-├── server.py          # Python development server
-├── config.js          # Configuration settings
-└── README.md          # Documentation
+├── index.html                  # Main HTML (production)
+├── styles-5zn.css             # Main stylesheet
+├── server.py                  # Production HTTP server
+├── config.js                  # Configuration (Strava API keys)
+├── server_config.py          # Server configuration
+│
+├── JavaScript Components
+│   ├── 5zn-store.js          # State management
+│   ├── 5zn-canvas-component.js # Canvas rendering (1080x1920)
+│   ├── app-5zn-logic.js      # Business logic & Strava integration
+│   └── polyline.js           # Polyline encoding/decoding
+│
+├── Database
+│   ├── database_schema.sql   # PostgreSQL schema
+│   └── data/                 # JSON fallback (if DB unavailable)
+│
+├── OAuth
+│   └── oauth/index.html      # OAuth callback handler
+│
+├── Assets
+│   └── assets/
+│       └── polymer-symbol.svg # Logo
+│
+└── Documentation
+    ├── README.md             # This file
+    ├── RAILWAY_DEPLOY.md     # Railway deployment guide
+    └── OAUTH_SETUP.md        # Strava OAuth setup
 ```
 
-## Browser Support
+## 🚀 Deployment (Railway)
 
-- Chrome 60+
-- Firefox 55+
-- Safari 12+
-- Edge 79+
+### Current Deployment
 
-## Development
+**Service URL**: https://5zn-web.up.railway.app (or custom domain)
+**Database**: PostgreSQL (internal Railway network)
 
-### Key Components
+### Environment Variables
 
-- **Main Application** - Core application logic in `app.js`
-- **Styling** - CSS animations and responsive design in `styles.css`
-- **Configuration** - Settings and environment variables in `config.js`
-- **Server** - Python development server in `server.py`
+Required on Railway:
+```bash
+# Strava OAuth
+STRAVA_CLIENT_ID=your_client_id
+STRAVA_CLIENT_SECRET=your_client_secret
 
-## Contributing
+# Database (Auto-configured by Railway)
+DATABASE_URL=postgresql://...
+
+# Server
+PORT=8000
+ENVIRONMENT=production
+
+# Security
+ALLOWED_ORIGINS=https://yourdomain.com,https://www.yourdomain.com
+DEBUG=False
+```
+
+### Deploy Commands
+
+Railway automatically detects Python and runs:
+```bash
+python3 server.py
+```
+
+Configured in `railway.json`:
+```json
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "NIXPACKS"
+  },
+  "deploy": {
+    "startCommand": "python3 server.py",
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 10
+  }
+}
+```
+
+## 💻 Local Development
+
+### Prerequisites
+```bash
+# Python 3.8+
+python3 --version
+
+# PostgreSQL (optional - uses JSON fallback)
+psycopg2-binary
+```
+
+### Setup
+
+1. **Clone & Install**
+```bash
+git clone <repository>
+cd 5zn-web
+pip3 install psycopg2-binary  # Optional
+```
+
+2. **Configure Strava OAuth**
+
+Edit `config.js`:
+```javascript
+STRAVA: {
+    CLIENT_ID: 'YOUR_STRAVA_CLIENT_ID',
+    CLIENT_SECRET: 'YOUR_STRAVA_CLIENT_SECRET',
+    REDIRECT_URI: 'http://localhost:8000/oauth/',
+    SCOPE: 'read,activity:read_all'
+}
+```
+
+Create `server_config.py`:
+```python
+# Strava OAuth
+STRAVA_CLIENT_ID = 'your_client_id'
+STRAVA_CLIENT_SECRET = 'your_client_secret'
+
+# CORS
+ALLOWED_ORIGINS = ['http://localhost:8000']
+DEBUG = True
+```
+
+3. **Run Server**
+```bash
+python3 server.py
+```
+
+Server starts at: http://localhost:8000
+
+### Development Mode Features
+- Auto-opens browser
+- Debug logging enabled
+- Relaxed CSP headers
+- No HTTPS requirement
+
+## 🎨 Canvas System
+
+### Resolution & Scaling
+
+**Internal Canvas**: 1080x1920 pixels
+- High-quality rendering
+- Consistent export resolution
+- Professional output
+
+**Display Scaling**:
+```javascript
+// Automatically fits between navbar (48px) and editing panel (180px)
+availableHeight = window.innerHeight - 48 - 180
+canvasDisplayHeight = availableHeight
+canvasDisplayWidth = canvasDisplayHeight * (9/16)
+```
+
+### Aspect Ratios
+
+**9:16 Portrait (Default)**
+- Canvas: 1080x1920px
+- Instagram Stories, TikTok format
+
+**4:5 Square**
+- Canvas: 1080x1350px
+- Instagram Feed format
+
+### Rendering Pipeline
+
+1. **Load Activity Data** from Strava API
+2. **Decode Polyline** to coordinates
+3. **Upload Background Image** (optional)
+4. **Render to Canvas** at 1080x1920
+5. **Scale Display** to fit screen
+6. **Export** as high-res image
+
+## 🔐 Security
+
+### Implemented Features
+- ✅ Rate limiting (100 req/60s per IP)
+- ✅ Content Security Policy (CSP)
+- ✅ CORS with whitelist
+- ✅ XSS Protection headers
+- ✅ Token hashing (SHA-256)
+- ✅ HTTPS-only in production (HSTS)
+- ✅ No sensitive data logging
+
+### Security Headers
+```
+Content-Security-Policy: default-src 'self'; ...
+X-Content-Type-Options: nosniff
+X-Frame-Options: DENY
+X-XSS-Protection: 1; mode=block
+Strict-Transport-Security: max-age=31536000
+```
+
+## 📊 State Management
+
+**File**: `5zn-store.js`
+
+Simple store pattern with observers:
+```javascript
+const store = new SznStore({
+    image: '',
+    title: '',
+    date: '',
+    fontColor: 'white',
+    postStyle: 'portrait', // 9:16 or square 4:5
+    RideData: [...],
+    speedData: [...]
+});
+
+store.subscribe((state) => {
+    // React to state changes
+});
+```
+
+## 🎯 Key Features
+
+### User Features
+- 🔗 **Strava Integration** - Connect via OAuth
+- 📊 **Activity Selection** - Choose from recent workouts
+- 🖼️ **Background Upload** - Custom background images
+- 🎨 **Metric Selection** - Show/hide data points
+- 📱 **Multiple Formats** - 9:16 (Stories) or 4:5 (Feed)
+- 💾 **High-res Export** - 1080x1920px images
+
+### Technical Features
+- ⚡ **Fast Rendering** - Canvas-based graphics
+- 🎯 **Responsive Layout** - Fixed panels + flexible canvas
+- 💾 **Database Storage** - PostgreSQL user tracking
+- 🔒 **Secure OAuth** - No token storage in frontend
+- 📈 **Scalable** - Railway auto-scaling
+
+## 🐛 Troubleshooting
+
+### Canvas Not Displaying
+Check console for errors:
+```javascript
+console.log('Canvas size:', canvas.width, canvas.height);
+```
+
+### OAuth Errors
+1. Verify `STRAVA_CLIENT_ID` and `STRAVA_CLIENT_SECRET`
+2. Check redirect URI matches Strava app settings
+3. Ensure `ALLOWED_ORIGINS` includes your domain
+
+### Database Connection Issues
+Server falls back to JSON files if PostgreSQL unavailable:
+```
+⚠️ No database connection, using JSON fallback
+💾 Saved athlete data (JSON): data/athlete_12345.json
+```
+
+## 📚 Additional Documentation
+
+- `RAILWAY_DEPLOY.md` - Detailed Railway deployment guide
+- `OAUTH_SETUP.md` - Strava OAuth configuration
+- `DATABASE_LOCATION.md` - Database setup instructions
+- `SECURITY_SETUP.md` - Security best practices
+
+## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+2. Create feature branch: `git checkout -b feature/amazing-feature`
+3. Commit changes: `git commit -m 'Add amazing feature'`
+4. Push to branch: `git push origin feature/amazing-feature`
+5. Open Pull Request
 
-## License
+## 📝 License
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+Private project - All rights reserved
 
-## Support
+## 👨‍💻 Development Team
 
-For issues and questions:
-- Check the browser console for errors
-- Ensure all dependencies are properly installed
-- Verify network connectivity
-- Open an issue on GitHub: https://github.com/d5zn/5zn-web/issues
+Built with ❤️ for cyclists
 
 ---
 
-**Note**: This is a web application for the 5zn project. For production use, ensure proper configuration and security measures.
+**Version**: 1.0.0  
+**Last Updated**: October 2025  
+**Status**: ✅ Production (Railway)

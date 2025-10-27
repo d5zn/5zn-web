@@ -1,5 +1,5 @@
-// Trinky Web - Configuration
-// Update these values for your development environment
+// 5zn Web - Configuration
+// Update these values for your environment
 
 const CONFIG = {
     // Strava API Configuration
@@ -11,32 +11,28 @@ const CONFIG = {
         API_BASE_URL: 'https://www.strava.com/api/v3'
     },
     
-    // Development Settings
-    DEV: {
-        MOCK_DATA: true, // Set to false for real Strava API calls
-        DEBUG: true, // Enable console logging
-        AUTO_CONNECT: false // Automatically connect with mock data in dev mode
+    // Environment Settings
+    ENV: {
+        PRODUCTION: window.location.hostname !== 'localhost',
+        DEBUG: window.location.hostname === 'localhost', // Enable console logging in dev only
+        MOCK_DATA: false // Set to true for testing without real Strava API calls
     },
     
     // App Settings
     APP: {
-        NAME: 'Trinky Web',
+        NAME: '5zn.io',
         VERSION: '1.0.0',
         DEFAULT_WORKOUTS_COUNT: 10
     }
 };
 
 // Development helpers
-if (CONFIG.DEV.DEBUG) {
-    console.log('🔧 Trinky Web - Development Mode');
+if (CONFIG.ENV.DEBUG) {
+    console.log('🔧 5zn Web - Development Mode');
     console.log('📋 Configuration:', CONFIG);
 }
 
-// Auto-connect with mock data in development
-if (CONFIG.DEV.AUTO_CONNECT && window.location.hostname === 'localhost') {
-    console.log('🚀 Auto-connecting with mock data...');
-    localStorage.setItem('strava_token', 'mock_token_' + Date.now());
-}
+// No auto-connect - user must explicitly connect via Strava
 
 // Export for use in app.js
 if (typeof module !== 'undefined' && module.exports) {

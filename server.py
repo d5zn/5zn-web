@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Simple HTTP server for Trinky Web
-Run with: python3 server.py
+Production HTTP server for 5zn Web
+Enhanced security features: CSP, CORS, Rate Limiting
 """
 
 import http.server
@@ -9,146 +9,354 @@ import socketserver
 import webbrowser
 import os
 import json
+import time
 from datetime import datetime
+from collections import defaultdict
 from urllib.parse import urlparse, parse_qs
 
-class TrinkyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
+# PostgreSQL support
+try:
+    import psycopg2
+    from psycopg2.extras import RealDictCursor
+    POSTGRES_AVAILABLE = True
+except ImportError:
+    POSTGRES_AVAILABLE = False
+    print("⚠️ PostgreSQL not available. Install psycopg2-binary for database support.")
+
+def get_db_connection():
+    """Get PostgreSQL connection from DATABASE_URL"""
+    if not POSTGRES_AVAILABLE:
+        return None
+    
+    database_url = os.environ.get('DATABASE_URL')
+    
+    if not database_url:
+        return None
+    
+    # Railway использует postgresql://, но psycopg2 хочет postgres://
+    if database_url.startswith('postgresql://'):
+        database_url = database_url.replace('postgresql://', 'postgres://', 1)
+    
+    try:
+        conn = psycopg2.connect(database_url)
+        return conn
+    except Exception as e:
+        print(f"❌ Database connection error: {e}")
+        return None
+
+def init_database():
+    """Initialize database with schema"""
+    conn = get_db_connection()
+    if not conn:
+        print("⚠️ No database connection, skipping DB init")
+        return
+    
+    try:
+        cursor = conn.cursor()
+        
+        # Read schema from file
+        schema_file = 'database_schema.sql'
+        if os.path.exists(schema_file):
+            with open(schema_file, 'r') as f:
+                schema_sql = f.read()
+                # Split by semicolon and execute each statement
+                for statement in schema_sql.split(';'):
+                    statement = statement.strip()
+                    if statement and not statement.startswith('--'):
+                        cursor.execute(statement)
+            
+            conn.commit()
+            print("✅ Database initialized successfully")
+        else:
+            print("⚠️ database_schema.sql not found, skipping DB init")
+    except Exception as e:
+        print(f"⚠️ Database init error: {e}")
+        conn.rollback()
+    finally:
+        conn.close()
+
+class ProductionHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
+    # Rate limiting storage
+    rate_limit_store = defaultdict(list)
+    RATE_LIMIT_WINDOW = 60  # seconds
+    RATE_LIMIT_MAX_REQUESTS = 100  # max requests per window
+    
     def end_headers(self):
-        # Add CORS headers for development
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        # Get origin for CORS
+        origin = self.headers.get('Origin', '')
         
-        # CSP for development - allow everything
-        self.send_header('Content-Security-Policy', "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline'; img-src * data: blob:; connect-src *;")
+        # Получаем конфигурацию
+        try:
+            from server_config import ALLOWED_ORIGINS, DEBUG
+        except ImportError:
+            DEBUG = True
+            ALLOWED_ORIGINS = ['http://localhost:8000']
         
-        # Prevent caching for development
-        self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0')
+        # CORS headers - только разрешенные домены
+        if origin in ALLOWED_ORIGINS or DEBUG:
+            self.send_header('Access-Control-Allow-Origin', origin)
+            self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+            self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+            self.send_header('Access-Control-Allow-Credentials', 'true')
+        
+        # Strict Content Security Policy для production
+        if not DEBUG:
+            csp = (
+                "default-src 'self'; "
+                "script-src 'self' 'unsafe-inline'; "  # Removed unsafe-eval for security
+                "style-src 'self' 'unsafe-inline'; "
+                "img-src 'self' data: https:; "
+                "connect-src 'self' https://www.strava.com; "
+                "font-src 'self'; "
+                "object-src 'none'; "
+                "base-uri 'self'; "
+                "form-action 'self'; "
+                "frame-ancestors 'none';"
+            )
+        else:
+            # Более мягкая CSP для development
+            csp = (
+                "default-src 'self' * 'unsafe-inline' 'unsafe-eval'; "
+                "script-src * 'unsafe-inline' 'unsafe-eval'; "
+                "style-src * 'unsafe-inline'; "
+                "img-src * data: blob:; "
+                "connect-src *;"
+            )
+        
+        self.send_header('Content-Security-Policy', csp)
+        
+        # Security headers
+        self.send_header('X-Content-Type-Options', 'nosniff')
+        self.send_header('X-Frame-Options', 'DENY')
+        self.send_header('X-XSS-Protection', '1; mode=block')
+        self.send_header('Referrer-Policy', 'strict-origin-when-cross-origin')
+        self.send_header('Permissions-Policy', 'geolocation=(), microphone=(), camera=()')
+        
+        # HTTPS only для production
+        if not DEBUG:
+            self.send_header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
+        
+        # Cache control
+        self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
         self.send_header('Pragma', 'no-cache')
         self.send_header('Expires', '0')
-        self.send_header('Last-Modified', 'Thu, 01 Jan 1970 00:00:00 GMT')
-        self.send_header('ETag', '')
         
         super().end_headers()
 
-    def do_OPTIONS(self):
-        # Handle preflight requests
-        self.send_response(200)
-        self.end_headers()
+    def do_GET(self):
+        """Handle GET requests with rate limiting"""
+        # Rate limiting check
+        if not self.check_rate_limit():
+            self.send_error(429, 'Too Many Requests')
+            return
+        
+        # Admin API endpoint
+        if self.path == '/api/admin/users':
+            self.handle_admin_users()
+            return
+        
+        # Продолжаем как обычно
+        super().do_GET()
     
     def do_POST(self):
-        """Handle POST requests for OAuth token exchange"""
+        """Handle POST requests with rate limiting"""
+        # Rate limiting check
+        if not self.check_rate_limit():
+            self.send_error(429, 'Too Many Requests')
+            return
+        
+        # OAuth token exchange
         if self.path == '/api/strava/token':
-            try:
-                # Read request body
-                content_length = int(self.headers['Content-Length'])
-                post_data = self.rfile.read(content_length)
-                data = json.loads(post_data.decode('utf-8'))
-                
-                code = data.get('code')
-                if not code:
-                    self.send_error(400, 'Missing authorization code')
-                    return
-                
-                # Exchange code for token with Strava API
-                import urllib.request
-                import urllib.parse
-                
-                # Get configuration from server_config.py or environment
-                try:
-                    from server_config import STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET
-                except ImportError:
-                    # Fallback to environment variables or default
-                    import os
-                    STRAVA_CLIENT_ID = os.environ.get('STRAVA_CLIENT_ID', 'YOUR_STRAVA_CLIENT_ID')
-                    STRAVA_CLIENT_SECRET = os.environ.get('STRAVA_CLIENT_SECRET', 'YOUR_STRAVA_CLIENT_SECRET')
-                
-                client_id = STRAVA_CLIENT_ID
-                client_secret = STRAVA_CLIENT_SECRET
-                
-                # Prepare token exchange request
-                token_data = {
-                    'client_id': client_id,
-                    'client_secret': client_secret,
-                    'code': code,
-                    'grant_type': 'authorization_code'
-                }
-                
-                # Make request to Strava token endpoint
-                data = urllib.parse.urlencode(token_data).encode()
-                req = urllib.request.Request(
-                    'https://www.strava.com/oauth/token',
-                    data=data,
-                    method='POST'
-                )
-                
-                try:
-                    with urllib.request.urlopen(req) as response:
-                        token_response = json.loads(response.read().decode())
-                        
-                        # Сохраняем данные пользователя
-                        athlete_data = token_response.get('athlete', {})
-                        if athlete_data:
-                            self.save_athlete_data(athlete_data, token_response.get('access_token'))
-                        
-                        # Send success response
-                        self.send_response(200)
-                        self.send_header('Content-Type', 'application/json')
-                        self.end_headers()
-                        
-                        response_data = {
-                            'access_token': token_response.get('access_token'),
-                            'refresh_token': token_response.get('refresh_token'),
-                            'expires_at': token_response.get('expires_at'),
-                            'athlete': athlete_data
-                        }
-                        
-                        self.wfile.write(json.dumps(response_data).encode())
-                        print(f"✅ Token exchange successful for athlete: {athlete_data.get('firstname', 'Unknown')}")
-                        
-                except urllib.error.HTTPError as e:
-                    error_body = e.read().decode()
-                    print(f"❌ Strava API error: {e.code} - {error_body}")
-                    
-                    self.send_response(400)
-                    self.send_header('Content-Type', 'application/json')
-                    self.end_headers()
-                    self.wfile.write(json.dumps({'error': 'Token exchange failed'}).encode())
-                    
-            except Exception as e:
-                print(f"❌ Error handling token exchange: {e}")
-                self.send_error(500, f'Internal server error: {str(e)}')
+            self.handle_token_exchange()
         else:
             self.send_error(404, 'Not Found')
 
-    def save_athlete_data(self, athlete_data, access_token):
-        """Save athlete data to JSON file"""
+    def do_OPTIONS(self):
+        """Handle preflight requests"""
+        self.send_response(200)
+        self.end_headers()
+
+    def check_rate_limit(self):
+        """Check if request is within rate limit"""
+        # Получаем IP клиента
+        client_ip = self.client_address[0]
+        
+        # Получаем текущее время
+        now = time.time()
+        
+        # Очищаем старые записи
+        self.rate_limit_store[client_ip] = [
+            req_time for req_time in self.rate_limit_store[client_ip]
+            if now - req_time < self.RATE_LIMIT_WINDOW
+        ]
+        
+        # Проверяем лимит
+        if len(self.rate_limit_store[client_ip]) >= self.RATE_LIMIT_MAX_REQUESTS:
+            print(f"⚠️ Rate limit exceeded for {client_ip}")
+            return False
+        
+        # Добавляем текущий запрос
+        self.rate_limit_store[client_ip].append(now)
+        return True
+
+    def handle_token_exchange(self):
+        """Handle OAuth token exchange"""
         try:
-            # Подготовка данных для сохранения
+            # Read request body
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length)
+            data = json.loads(post_data.decode('utf-8'))
+            
+            code = data.get('code')
+            if not code:
+                self.send_error(400, 'Missing authorization code')
+                return
+            
+            # Exchange code for token with Strava API
+            import urllib.request
+            import urllib.parse
+            
+            # Get configuration
+            try:
+                from server_config import STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET
+            except ImportError:
+                import os
+                STRAVA_CLIENT_ID = os.environ.get('STRAVA_CLIENT_ID', 'YOUR_STRAVA_CLIENT_ID')
+                STRAVA_CLIENT_SECRET = os.environ.get('STRAVA_CLIENT_SECRET', 'YOUR_STRAVA_CLIENT_SECRET')
+            
+            client_id = STRAVA_CLIENT_ID
+            client_secret = STRAVA_CLIENT_SECRET
+            
+            # Prepare token exchange request
+            token_data = {
+                'client_id': client_id,
+                'client_secret': client_secret,
+                'code': code,
+                'grant_type': 'authorization_code'
+            }
+            
+            # Make request to Strava token endpoint
+            data = urllib.parse.urlencode(token_data).encode()
+            req = urllib.request.Request(
+                'https://www.strava.com/oauth/token',
+                data=data,
+                method='POST'
+            )
+            
+            try:
+                with urllib.request.urlopen(req) as response:
+                    token_response = json.loads(response.read().decode())
+                    
+                    # Сохраняем данные пользователя
+                    athlete_data = token_response.get('athlete', {})
+                    if athlete_data:
+                        self.save_athlete_data(athlete_data, token_response.get('access_token'))
+                    
+                    # Send success response
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'application/json')
+                    self.end_headers()
+                    
+                    response_data = {
+                        'access_token': token_response.get('access_token'),
+                        'refresh_token': token_response.get('refresh_token'),
+                        'expires_at': token_response.get('expires_at'),
+                        'athlete': athlete_data
+                    }
+                    
+                    self.wfile.write(json.dumps(response_data).encode())
+                    print(f"✅ Token exchange successful for athlete: {athlete_data.get('firstname', 'Unknown')}")
+                    
+            except urllib.error.HTTPError as e:
+                error_body = e.read().decode()
+                print(f"❌ Strava API error: {e.code} - {error_body}")
+                
+                self.send_response(400)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({'error': 'Token exchange failed'}).encode())
+                
+        except Exception as e:
+            print(f"❌ Error handling token exchange: {e}")
+            self.send_error(500, f'Internal server error: {str(e)}')
+
+    def save_athlete_data(self, athlete_data, access_token):
+        """Save athlete data to PostgreSQL or fallback to JSON"""
+        # Try database first
+        conn = get_db_connection()
+        
+        if conn:
+            try:
+                cursor = conn.cursor()
+                
+                # Insert or update athlete
+                cursor.execute("""
+                    INSERT INTO athletes (
+                        athlete_id, username, firstname, lastname, email,
+                        city, country, profile_picture, access_token_hash,
+                        strava_created_at, strava_updated_at
+                    )
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (athlete_id) 
+                    DO UPDATE SET
+                        username = EXCLUDED.username,
+                        firstname = EXCLUDED.firstname,
+                        lastname = EXCLUDED.lastname,
+                        email = EXCLUDED.email,
+                        city = EXCLUDED.city,
+                        country = EXCLUDED.country,
+                        profile_picture = EXCLUDED.profile_picture,
+                        access_token_hash = EXCLUDED.access_token_hash,
+                        strava_updated_at = EXCLUDED.strava_updated_at,
+                        last_seen_at = CURRENT_TIMESTAMP
+                """, (
+                    athlete_data.get('id'),
+                    athlete_data.get('username'),
+                    athlete_data.get('firstname'),
+                    athlete_data.get('lastname'),
+                    athlete_data.get('email', 'not_provided'),
+                    athlete_data.get('city'),
+                    athlete_data.get('country'),
+                    athlete_data.get('profile'),
+                    self.hash_token(access_token),
+                    athlete_data.get('created_at'),
+                    athlete_data.get('updated_at')
+                ))
+                
+                conn.commit()
+                print(f"✅ Saved athlete to DB: {athlete_data.get('firstname')} {athlete_data.get('lastname')}")
+                conn.close()
+                return
+                
+            except Exception as e:
+                print(f"⚠️ Error saving to database: {e}")
+                conn.rollback()
+                conn.close()
+                # Fallthrough to JSON fallback
+        
+        # Fallback to JSON
+        try:
             athlete_info = {
                 'athlete_id': athlete_data.get('id'),
                 'username': athlete_data.get('username'),
                 'firstname': athlete_data.get('firstname'),
                 'lastname': athlete_data.get('lastname'),
-                'email': athlete_data.get('email', 'not_provided'),  # Email может быть недоступен
+                'email': athlete_data.get('email', 'not_provided'),
                 'city': athlete_data.get('city'),
                 'country': athlete_data.get('country'),
                 'profile_picture': athlete_data.get('profile'),
                 'created_at': athlete_data.get('created_at'),
                 'updated_at': athlete_data.get('updated_at'),
                 'connected_at': datetime.now().isoformat(),
-                'access_token_hash': self.hash_token(access_token)  # Не сохраняем токен напрямую!
+                'access_token_hash': self.hash_token(access_token)
             }
             
-            # Создаем директорию для данных
             data_dir = 'data'
             if not os.path.exists(data_dir):
                 os.makedirs(data_dir)
             
-            # Сохраняем в файл (один файл на пользователя)
             filename = os.path.join(data_dir, f'athlete_{athlete_info["athlete_id"]}.json')
             
-            # Если файл уже существует, обновляем данные
             if os.path.exists(filename):
                 with open(filename, 'r', encoding='utf-8') as f:
                     existing_data = json.load(f)
@@ -158,39 +366,125 @@ class TrinkyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             with open(filename, 'w', encoding='utf-8') as f:
                 json.dump(athlete_info, f, indent=2, ensure_ascii=False)
             
-            print(f"💾 Saved athlete data: {athlete_info.get('firstname')} {athlete_info.get('lastname')} (ID: {athlete_info.get('athlete_id')})")
+            print(f"💾 Saved athlete data (JSON): {athlete_info.get('firstname')} {athlete_info.get('lastname')} (ID: {athlete_info.get('athlete_id')})")
             
         except Exception as e:
             print(f"⚠️ Error saving athlete data: {e}")
     
+    def handle_admin_users(self):
+        """Handle admin users API endpoint from database or JSON fallback"""
+        try:
+            # Try database first
+            conn = get_db_connection()
+            
+            if conn:
+                try:
+                    cursor = conn.cursor(cursor_factory=RealDictCursor)
+                    cursor.execute("""
+                        SELECT 
+                            athlete_id, username, firstname, lastname, email,
+                            city, country, connected_at, last_seen_at
+                        FROM athletes 
+                        WHERE is_active = TRUE 
+                        ORDER BY connected_at DESC
+                    """)
+                    
+                    users = cursor.fetchall()
+                    # Convert datetime to string for JSON
+                    for user in users:
+                        if user.get('connected_at'):
+                            user['connected_at'] = user['connected_at'].isoformat()
+                        if user.get('last_seen_at'):
+                            user['last_seen_at'] = user['last_seen_at'].isoformat()
+                    
+                    conn.close()
+                    
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({'users': users}).encode())
+                    return
+                    
+                except Exception as e:
+                    print(f"⚠️ Error querying database: {e}")
+                    conn.close()
+                    # Fallthrough to JSON
+            
+            # Fallback to JSON files
+            data_dir = 'data'
+            
+            if not os.path.exists(data_dir):
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({'users': []}).encode())
+                return
+            
+            users = []
+            for filename in os.listdir(data_dir):
+                if filename.startswith('athlete_') and filename.endswith('.json'):
+                    filepath = os.path.join(data_dir, filename)
+                    try:
+                        with open(filepath, 'r', encoding='utf-8') as f:
+                            user_data = json.load(f)
+                            users.append(user_data)
+                    except Exception as e:
+                        print(f"⚠️ Error reading {filename}: {e}")
+            
+            # Sort by connected_at descending
+            users.sort(key=lambda x: x.get('connected_at', ''), reverse=True)
+            
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({'users': users}).encode())
+            
+        except Exception as e:
+            print(f"❌ Error in admin users endpoint: {e}")
+            self.send_error(500, 'Internal server error')
+    
     def hash_token(self, token):
-        """Create a hash of the token for logging purposes (not reversible)"""
+        """Create a hash of the token for logging purposes"""
         try:
             import hashlib
-            return hashlib.sha256(token.encode()).hexdigest()[:16]  # Первые 16 символов хеша
+            return hashlib.sha256(token.encode()).hexdigest()[:16]
         except:
             return 'not_available'
 
     def log_message(self, format, *args):
-        """Override to customize logging"""
-        print(f"📡 {format % args}")
+        """Override to customize logging with timestamp"""
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        print(f"📡 [{timestamp}] {format % args}")
 
 def main():
-    PORT = 8000
+    # Check if we're in production mode
+    is_production = os.environ.get('ENVIRONMENT') == 'production'
+    
+    PORT = int(os.environ.get('PORT', 8000))
     
     # Change to the directory containing the web files
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     
-    with socketserver.TCPServer(("", PORT), TrinkyHTTPRequestHandler) as httpd:
-        print(f"🚀 Trinky Web Server running at http://localhost:{PORT}")
+    # Initialize database
+    print("🔧 Initializing database...")
+    init_database()
+    
+    Handler = ProductionHTTPRequestHandler
+    
+    with socketserver.TCPServer(("", PORT), Handler) as httpd:
+        env = "PRODUCTION" if is_production else "DEVELOPMENT"
+        print(f"🚀 5zn Web Server ({env}) running at http://localhost:{PORT}")
         print(f"📱 Open your browser and navigate to http://localhost:{PORT}")
         print("🛑 Press Ctrl+C to stop the server")
         print("")
-        print("⚠️  IMPORTANT: Update CLIENT_ID and CLIENT_SECRET in server.py before using OAuth!")
+        
+        if not is_production:
+            print("⚠️  IMPORTANT: Update CLIENT_ID and CLIENT_SECRET in server_config.py before using OAuth!")
+            print("🔒 Security features: Rate limiting, CSP, CORS")
         
         try:
-            # Try to open browser automatically
-            webbrowser.open(f'http://localhost:{PORT}')
+            if not is_production:
+                webbrowser.open(f'http://localhost:{PORT}')
         except:
             pass
         
@@ -201,3 +495,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

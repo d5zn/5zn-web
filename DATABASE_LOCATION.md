@@ -1,10 +1,85 @@
-# 🗄️ Где находится база данных?
+# 🗄️ База данных 5zn.io
 
-## 📁 Текущее состояние
+## ✅ Production (Railway)
 
-### Development (JSON файлы)
+**Status**: Активна и работает  
+**Type**: PostgreSQL  
+**Host**: Railway Internal Network  
+**Connection**:
+```
+postgresql://postgres:mkuEzDfDJnCePKiizLumEMTuwRqFVJqY@postgres.railway.internal:5432/railway
+```
+
+### Информация о БД
+
+- **Provider**: Railway PostgreSQL
+- **Version**: Latest (auto-managed)
+- **Network**: Internal Railway network (приватная)
+- **Backups**: Автоматические через Railway
+- **SSL**: Включен по умолчанию
+
+### Доступ к данным
+
+#### 1. Railway Dashboard
+```
+1. Зайти на railway.app
+2. Выбрать проект 5zn-web
+3. Открыть PostgreSQL service
+4. Использовать встроенный Query Editor
+```
+
+#### 2. Админ панель (через API)
+```
+https://5zn-web.up.railway.app/admin_panel.html
+
+Показывает:
+- Список пользователей
+- Статистику подключений
+- Последние активности
+```
+
+#### 3. Локальное подключение (для разработки)
+```bash
+# Установить psql клиент
+brew install postgresql  # macOS
+sudo apt install postgresql-client  # Linux
+
+# Подключиться (используйте внешний URL из Railway Dashboard)
+psql postgresql://postgres:password@external-host.railway.app:port/railway
+```
+
+### Схема базы данных
+
+**File**: `database_schema.sql`
+
+**Таблица athletes**:
+```sql
+CREATE TABLE athletes (
+    id SERIAL PRIMARY KEY,
+    athlete_id BIGINT UNIQUE NOT NULL,
+    username VARCHAR(255),
+    firstname VARCHAR(255),
+    lastname VARCHAR(255),
+    email VARCHAR(255) NOT NULL DEFAULT 'not_provided',
+    city VARCHAR(255),
+    country VARCHAR(255),
+    profile_picture TEXT,
+    access_token_hash VARCHAR(255),
+    strava_created_at TIMESTAMP,
+    strava_updated_at TIMESTAMP,
+    connected_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_seen_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+## 💻 Local Development (JSON Fallback)
+
+Для локальной разработки без подключения к Railway DB:
+
 **Расположение**: `data/` папка в корне проекта
-
 ```
 5zn-web/
 └── data/
@@ -13,76 +88,15 @@
     └── athlete_456789123.json
 ```
 
-**Формат**: JSON файлы  
-**Доступ**: Через `server_prod.py` автоматически  
-**Просмотр**: Админ панель `admin_panel.html`
+### Автоматический fallback
 
----
-
-## 🚀 Production (настоящая БД)
-
-### Вариант 1: PostgreSQL (рекомендуется для production)
-
-```bash
-# Установка
-sudo apt install postgresql
-
-# Создание БД
-createdb trinky_db
-
-# Применение схемы
-psql trinky_db < database_schema.sql
+Сервер автоматически использует JSON если PostgreSQL недоступен:
+```
+⚠️ No database connection, using JSON fallback
+💾 Saved athlete data (JSON): data/athlete_12345.json
 ```
 
-**Расположение**: Сервер где установлен PostgreSQL  
-**Обычно**: `/var/lib/postgresql/` (Linux) или `/usr/local/var/postgres` (macOS)
-
-### Вариант 2: MySQL
-
-```bash
-# Установка
-sudo apt install mysql-server
-
-# Создание БД
-mysql -u root -p
-CREATE DATABASE trinky_db;
-USE trinky_db;
-SOURCE database_schema.sql;
-```
-
-**Расположение**: Сервер где установлен MySQL  
-**Обычно**: `/var/lib/mysql/` (Linux) или `/usr/local/var/mysql` (macOS)
-
-### Вариант 3: SQLite (для маленьких проектов)
-
-```bash
-# Создание БД
-sqlite3 trinky.db < database_schema.sql
-```
-
-**Расположение**: Файл `trinky.db` в корне проекта
-
----
-
-## 📊 Как посмотреть данные СЕЙЧАС
-
-### Способ 1: Админ панель (GUI)
-
-```bash
-# Запустите сервер
-python3 server_prod.py
-
-# Откройте в браузере
-http://localhost:8000/admin_panel.html
-```
-
-**Возможности:**
-- 👥 Список всех пользователей
-- 📊 Статистика (всего, активных, за неделю)
-- 🔄 Автообновление каждые 30 секунд
-- 🎨 Красивый интерфейс
-
-### Способ 2: Командная строка
+### Просмотр JSON данных
 
 ```bash
 # Посмотреть всех пользователей
@@ -90,109 +104,188 @@ ls data/
 
 # Посмотреть данные пользователя
 cat data/athlete_123456789.json | python -m json.tool
-
-# Красивый вывод
-cat data/athlete_123456789.json
 ```
 
-### Способ 3: Python скрипт
+## 🔄 Environment Variables
 
-```python
-import json
-import os
-
-# Список всех пользователей
-for filename in os.listdir('data/'):
-    with open(f'data/{filename}', 'r') as f:
-        user = json.load(f)
-        print(f"{user['firstname']} {user['lastname']}")
-        print(f"  Email: {user.get('email', 'not provided')}")
-        print(f"  Connected: {user.get('connected_at')}")
-        print()
-```
-
----
-
-## 🔄 Миграция с JSON в БД
-
-Когда будете готовы перейти на настоящую БД:
-
-### 1. Создайте БД
-
+### Railway (Production)
 ```bash
-createdb trinky_db
-psql trinky_db < database_schema.sql
+DATABASE_URL=postgresql://postgres:...@postgres.railway.internal:5432/railway
+ENVIRONMENT=production
 ```
 
-### 2. Мигрируйте данные
+### Local (Development)
+```bash
+# Оставьте пустым для JSON fallback
+# DATABASE_URL=  
+
+# Или укажите локальную БД
+DATABASE_URL=postgresql://localhost/5zn_dev
+```
+
+## 🔧 Database Management
+
+### Инициализация (автоматическая)
+
+Сервер автоматически применяет схему при запуске:
+```python
+def init_database():
+    """Initialize database with schema"""
+    # Читает database_schema.sql
+    # Применяет к PostgreSQL
+```
+
+### Ручная миграция
+
+Если нужно применить схему вручную:
+```bash
+# На Railway через CLI
+railway connect postgresql
+\i database_schema.sql
+
+# Локально
+psql 5zn_dev < database_schema.sql
+```
+
+### Backup & Restore
+
+Railway автоматически создает backups, но можно сделать вручную:
+```bash
+# Экспорт
+railway connect postgresql -- pg_dump > backup.sql
+
+# Импорт
+railway connect postgresql < backup.sql
+```
+
+## 📊 Monitoring
+
+### Railway Dashboard
+- Real-time metrics
+- Query performance
+- Connection count
+- Storage usage
+
+### Application Logs
+```bash
+# Смотреть логи
+railway logs
+
+# Фильтр по БД операциям
+railway logs | grep "Database"
+```
+
+## 🔒 Security
+
+### Implemented
+- ✅ Токены хешируются (SHA-256)
+- ✅ Никакие access tokens не хранятся в plain text
+- ✅ SSL/TLS шифрование
+- ✅ Приватная сеть Railway
+- ✅ Rate limiting на API endpoints
+
+### Best Practices
+- ⚠️ Не коммитить `DATABASE_URL` в git
+- ⚠️ Использовать environment variables
+- ⚠️ Регулярно проверять Railway security advisories
+- ✅ `data/` папка в `.gitignore`
+
+## 🐛 Troubleshooting
+
+### Connection Errors
+
+**Problem**: `No database connection`
+```bash
+# Проверить environment variable
+echo $DATABASE_URL
+
+# Проверить сеть
+railway status
+```
+
+**Solution**: 
+1. Проверить Railway dashboard
+2. Убедиться что PostgreSQL service запущен
+3. Проверить DATABASE_URL в environment variables
+
+### Migration Issues
+
+**Problem**: Schema not applied
+```bash
+# Применить схему вручную
+railway connect postgresql
+\i database_schema.sql
+```
+
+### JSON Fallback Active
+
+**Normal**: В dev режиме без PostgreSQL
+**Warning**: В production - проверить DATABASE_URL
+
+## 📝 Migration from JSON to PostgreSQL
+
+Если нужно перенести данные из JSON в PostgreSQL:
 
 ```python
-# migrate_to_db.py
+# migrate_json_to_db.py
 import json
 import os
 import psycopg2
 
-# Подключение к БД
-conn = psycopg2.connect(
-    host="localhost",
-    database="trinky_db",
-    user="your_user",
-    password="your_password"
-)
+# Подключение
+conn = psycopg2.connect(os.environ['DATABASE_URL'])
 cursor = conn.cursor()
 
 # Миграция
 for filename in os.listdir('data/'):
-    with open(f'data/{filename}', 'r') as f:
-        user = json.load(f)
-        
-        # Вставка в БД
-        cursor.execute("""
-            INSERT INTO athletes (athlete_id, firstname, lastname, email, ...)
-            VALUES (%s, %s, %s, %s, ...)
-        """, (user['athlete_id'], user['firstname'], ...))
-        
+    if filename.startswith('athlete_'):
+        with open(f'data/{filename}', 'r') as f:
+            user = json.load(f)
+            
+            cursor.execute("""
+                INSERT INTO athletes (
+                    athlete_id, username, firstname, lastname, 
+                    email, city, country, profile_picture,
+                    connected_at
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                ON CONFLICT (athlete_id) DO NOTHING
+            """, (
+                user['athlete_id'],
+                user.get('username'),
+                user.get('firstname'),
+                user.get('lastname'),
+                user.get('email', 'not_provided'),
+                user.get('city'),
+                user.get('country'),
+                user.get('profile_picture'),
+                user.get('connected_at')
+            ))
+
 conn.commit()
-conn.close()
-```
-
-### 3. Обновите код сервера
-
-Измените `save_athlete_data()` чтобы писать в БД вместо JSON.
-
----
-
-## 📍 Где данные сейчас
-
-### ✅ СЕЙЧАС (Development):
-```
-5zn-web/data/athlete_*.json
-```
-
-### 🔜 БУДУЩЕЕ (Production):
-```
-PostgreSQL: /var/lib/postgresql/14/main/base/
-MySQL: /var/lib/mysql/trinky_db/
+print("✅ Migration complete")
 ```
 
 ---
 
-## 🔒 Безопасность
+## 📍 Summary
 
-- ✅ `data/` папка в `.gitignore` - не коммитится
-- ✅ Токены только хешируются
-- ✅ Персональные данные защищены
-- ⚠️ В production: настройте backups БД
+### Production (Railway)
+```
+✅ PostgreSQL на Railway
+✅ Автоматические backups
+✅ SSL/TLS шифрование
+✅ Приватная сеть
+```
+
+### Development (Local)
+```
+📁 JSON файлы в data/
+🔄 Автоматический fallback
+✅ Легкая разработка без БД
+```
 
 ---
 
-## 📊 Просмотр данных
-
-**Проще всего**: Откройте `admin_panel.html` в браузере!
-- Автоматически показывает всех пользователей
-- Красивая статистика
-- Автообновление
-
----
-
-**Ответ**: Сейчас данные в папке `data/`, в будущем будут в PostgreSQL/MySQL на сервере.
+**Last Updated**: October 2025  
+**Status**: ✅ Production Ready
