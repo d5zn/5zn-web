@@ -509,13 +509,10 @@ class SznCanvasComponent {
         // Создаем градиент по длине маршрута
         const gradient = this.ctx.createLinearGradient(startX, startY, endX, endY);
         
-        // Цвета французского флага с плавными переходами
-        gradient.addColorStop(0, '#002395');      // Синий (начало)
-        gradient.addColorStop(0.33, '#002395');   // Синий до 33%
-        gradient.addColorStop(0.4, '#FFFFFF');    // Плавный переход к белому
-        gradient.addColorStop(0.6, '#FFFFFF');     // Белый в середине
-        gradient.addColorStop(0.66, '#ED2939');   // Плавный переход к красному
-        gradient.addColorStop(1, '#ED2939');     // Красный (конец)
+        // Цвета французского флага по точному SVG градиенту
+        gradient.addColorStop(0, '#2A3587');       // Синий (начало)
+        gradient.addColorStop(0.495192, '#FFFFFF'); // Белый (49.5%)
+        gradient.addColorStop(1, '#CF2228');      // Красный (конец)
         
         this.ctx.strokeStyle = gradient;
         this.ctx.lineWidth = 8 * scale;
