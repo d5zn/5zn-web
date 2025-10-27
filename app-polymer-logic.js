@@ -1,55 +1,5 @@
-// TrinkyApp with Polymer Canvas Integration
-// Простая интеграция с логикой nextPoly
-
-// Утилита для условного логирования
-const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-const log = isDev ? console.log : () => {};
-
-// Define polyline decoder inline if not loaded
-if (typeof window.polyline === 'undefined') {
-    console.log('⚠️ Polyline library not found, defining inline decoder...');
-    window.polyline = {
-        decode: function(str, precision) {
-            var index = 0, lat = 0, lng = 0, coordinates = [];
-            var shift = 0, result = 0, byte = null;
-            var latitude_change, longitude_change;
-            var factor = Math.pow(10, Number.isInteger(precision) ? precision : 5);
-
-            while (index < str.length) {
-                byte = null;
-                shift = 1;
-                result = 0;
-
-                do {
-                    byte = str.charCodeAt(index++) - 63;
-                    result += (byte & 0x1f) * shift;
-                    shift *= 32;
-                } while (byte >= 0x20);
-
-                latitude_change = (result & 1) ? ((-result - 1) / 2) : (result / 2);
-
-                shift = 1;
-                result = 0;
-
-                do {
-                    byte = str.charCodeAt(index++) - 63;
-                    result += (byte & 0x1f) * shift;
-                    shift *= 32;
-                } while (byte >= 0x20);
-
-                longitude_change = (result & 1) ? ((-result - 1) / 2) : (result / 2);
-
-                lat += latitude_change;
-                lng += longitude_change;
-
-                coordinates.push([lat / factor, lng / factor]);
-            }
-
-            return coordinates;
-        }
-    };
-    console.log('✅ Inline polyline decoder loaded');
-}
+// TrinkyApp with Polymer Logic - Exact copy of nextPoly data handling
+// Точная копия логики работы с данными из nextPoly
 
 class TrinkyApp {
     constructor() {
@@ -58,35 +8,15 @@ class TrinkyApp {
         this.workouts = [];
         this.polymerCanvas = null;
         this.currentTab = 'photo';
-        this.currentMetric = 'distance';
-        this.activeMetrics = new Set(['distance']);
-        this.backgroundImage = null;
-        this.originalBackgroundImage = null;
-        this.isMonochrome = false;
-        this.logoImage = null;
         
-        // Переменные для управления фоновым изображением
-        this.imageTransform = {
-            x: 0,
-            y: 0,
-            scale: 1,
-            rotation: 0
-        };
-        
-        // Переменные для отслеживания жестов
-        this.touchState = {
-            isDragging: false,
-            isScaling: false,
-            lastTouchDistance: 0,
-            lastTouchCenter: { x: 0, y: 0 },
-            startTouches: []
-        };
+        // Инициализируем Polymer Store
+        this.store = window.polymerStore;
         
         this.init();
     }
 
     init() {
-        console.log('TrinkyApp with Polymer Canvas initializing...');
+        console.log('TrinkyApp with Polymer Logic initializing...');
         this.setupEventListeners();
         this.setupCanvas();
         this.setupTabs();
@@ -95,22 +25,21 @@ class TrinkyApp {
         this.checkAuthStatus();
         
         setTimeout(() => {
-            console.log('✅ TrinkyApp with Polymer Canvas initialized');
+            console.log('✅ TrinkyApp with Polymer Logic initialized');
         }, 100);
     }
     
     setupCanvas() {
         const canvas = document.getElementById('route-canvas');
         if (canvas) {
-            // Инициализируем Polymer Canvas
-            this.polymerCanvas = new PolymerCanvas(canvas);
+            // Инициализируем Polymer Canvas Component
+            this.polymerCanvas = new PolymerCanvasComponent(canvas, this.store);
             
             // Настраиваем обработчики для управления изображением
             this.setupImageManipulation();
             this.setupPhotoButtons();
-            this.initializeActiveMetrics();
             
-            console.log('✅ Polymer Canvas setup complete');
+            console.log('✅ Polymer Canvas Component setup complete');
         }
     }
     
@@ -241,6 +170,8 @@ class TrinkyApp {
                                 moving_time: 3600,
                                 total_elevation_gain: 500,
                                 average_speed: 4.17,
+                                average_watts: 180,
+                                start_date_local: '2023-09-11T08:00:00Z',
                                 map: { polyline: 'mock_polyline_data' }
                             },
                             {
@@ -250,6 +181,7 @@ class TrinkyApp {
                                 moving_time: 2400,
                                 total_elevation_gain: 200,
                                 average_speed: 3.33,
+                                start_date_local: '2023-09-10T18:30:00Z',
                                 map: { polyline: 'mock_polyline_data_2' }
                             }
                         ]
@@ -263,48 +195,36 @@ class TrinkyApp {
         if (!this.currentWorkout) return;
 
         // Обновляем значения только для активных метрик
-        if (this.activeMetrics.has('distance')) {
-            const distance = this.formatDistance(this.currentWorkout.distance);
-            document.getElementById('distance-value').textContent = distance;
-        } else {
-            document.getElementById('distance-value').textContent = '';
-        }
-
-        if (this.activeMetrics.has('elevation')) {
-            const elevation = this.formatElevation(this.currentWorkout.total_elevation_gain);
-            document.getElementById('elevation-value').textContent = elevation;
-        } else {
-            document.getElementById('elevation-value').textContent = '';
-        }
-
-        if (this.activeMetrics.has('speed')) {
-            const speed = this.formatSpeed(this.currentWorkout.average_speed);
-            document.getElementById('speed-value').textContent = speed;
-        } else {
-            document.getElementById('speed-value').textContent = '';
-        }
-
-        if (this.activeMetrics.has('time')) {
-            const time = this.formatTime(this.currentWorkout.moving_time);
-            document.getElementById('time-value').textContent = time;
-        } else {
-            document.getElementById('time-value').textContent = '';
-        }
+        const state = this.store.getState();
         
-        // Перерисовываем canvas с учетом активных метрик
-        this.renderWorkout();
+        // Обновляем UI элементы на основе состояния store
+        this.updateMetricDisplay('distance', state.RideData);
+        this.updateMetricDisplay('elevation', state.RideData);
+        this.updateMetricDisplay('time', state.RideData);
+        this.updateMetricDisplay('speed', state.speedData);
+    }
+    
+    updateMetricDisplay(metricType, dataArray) {
+        const metric = dataArray.find(item => 
+            item.dataName.toLowerCase().includes(metricType.toLowerCase())
+        );
+        
+        if (metric) {
+            const element = document.getElementById(`${metricType}-value`);
+            if (element) {
+                element.textContent = metric.visible ? metric.data : '';
+            }
+        }
     }
 
-    // Новый метод рендеринга с использованием Polymer Canvas
+    // Новый метод рендеринга с использованием Polymer Store
     renderWorkout() {
         if (!this.polymerCanvas || !this.currentWorkout) return;
         
-        console.log('🎨 Rendering workout with Polymer Canvas');
+        console.log('🎨 Rendering workout with Polymer Store');
         
-        // Устанавливаем фоновое изображение
-        if (this.backgroundImage) {
-            this.polymerCanvas.setBackgroundImage(this.backgroundImage);
-        }
+        // Устанавливаем активность в store (как в nextPoly)
+        this.store.setActivity(this.currentWorkout);
         
         // Устанавливаем данные маршрута
         const polylineData = this.currentWorkout?.map?.polyline || this.currentWorkout?.map?.summary_polyline;
@@ -312,84 +232,7 @@ class TrinkyApp {
             this.polymerCanvas.setPolylineData(polylineData);
         }
         
-        // Устанавливаем заголовок и подзаголовок
-        const title = this.currentWorkout.name || 'Workout';
-        const subtitle = this.formatWorkoutDate(this.currentWorkout.start_date);
-        this.polymerCanvas.setTitle(title, subtitle);
-        
-        // Устанавливаем метрики
-        const metrics = this.getActiveMetrics();
-        this.polymerCanvas.setMetrics(metrics);
-        
-        // Устанавливаем логотип
-        if (this.logoImage) {
-            this.polymerCanvas.setLogo(this.logoImage);
-        } else {
-            // Используем SVG логотип по умолчанию
-            this.polymerCanvas.setLogo('logo_NIP.svg');
-        }
-        
-        console.log('✅ Workout rendered with Polymer Canvas');
-    }
-    
-    getActiveMetrics() {
-        const allMetrics = [
-            { key: 'distance', label: 'DISTANCE', value: this.formatDistance(this.currentWorkout.distance) },
-            { key: 'elevation', label: 'ELEVATION', value: this.formatElevation(this.currentWorkout.total_elevation_gain) },
-            { key: 'time', label: 'TIME', value: this.formatTime(this.currentWorkout.moving_time) },
-            { key: 'speed', label: 'SPEED/AVG', value: this.formatSpeed(this.currentWorkout.average_speed) },
-            { key: 'calories', label: 'CALORIES', value: '1,200' },
-            { key: 'power', label: 'POWER/AVG', value: '180W' }
-        ];
-        
-        return allMetrics.filter(metric => this.activeMetrics.has(metric.key));
-    }
-
-    formatDistance(meters) {
-        if (!meters || meters === 0) return '—';
-        if (meters >= 1000) {
-            return `${(meters / 1000).toFixed(1)} km`;
-        }
-        return `${meters} m`;
-    }
-
-    formatElevation(meters) {
-        if (!meters || meters === 0) return '—';
-        return `${meters} m`;
-    }
-
-    formatSpeed(mps) {
-        if (!mps || mps === 0) return '—';
-        const kmh = mps * 3.6;
-        return `${kmh.toFixed(1)} km/h`;
-    }
-
-    formatTime(seconds) {
-        if (!seconds || seconds === 0) return '—';
-        const hours = Math.floor(seconds / 3600);
-        const minutes = Math.floor((seconds % 3600) / 60);
-        
-        if (hours > 0) {
-            return `${hours}h ${minutes}m`;
-        } else {
-            return `${minutes}m`;
-        }
-    }
-    
-    formatWorkoutDate(dateString) {
-        try {
-            const date = new Date(dateString);
-            const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 
-                          'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-            const day = date.getDate();
-            const month = months[date.getMonth()];
-            const hours = date.getHours().toString().padStart(2, '0');
-            const minutes = date.getMinutes().toString().padStart(2, '0');
-            return `${day} ${month}, ${hours}:${minutes}`;
-        } catch (error) {
-            console.error('Date formatting error:', error);
-            return 'Invalid date';
-        }
+        console.log('✅ Workout rendered with Polymer Store');
     }
 
     setupEventListeners() {
@@ -453,11 +296,11 @@ class TrinkyApp {
             });
         });
 
-        // Data metric buttons
+        // Data metric buttons - используем логику nextPoly
         document.querySelectorAll('.data-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const metric = e.target.dataset.metric;
-                this.selectMetric(metric);
+                this.toggleMetricVisibility(metric);
             });
         });
 
@@ -469,7 +312,7 @@ class TrinkyApp {
             });
         });
 
-        // Color buttons
+        // Color buttons - используем логику nextPoly
         document.querySelectorAll('.color-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const color = e.target.dataset.color;
@@ -547,47 +390,37 @@ class TrinkyApp {
     }
 
     handleMouseDown(e) {
-        if (!this.backgroundImage) return;
-        
+        this.touchState = this.touchState || {};
         this.touchState.isDragging = true;
         this.touchState.lastTouchCenter = { x: e.clientX, y: e.clientY };
         e.preventDefault();
     }
 
     handleMouseMove(e) {
-        if (!this.touchState.isDragging || !this.backgroundImage) return;
+        if (!this.touchState?.isDragging) return;
         
         const deltaX = e.clientX - this.touchState.lastTouchCenter.x;
         const deltaY = e.clientY - this.touchState.lastTouchCenter.y;
         
-        this.imageTransform.x += deltaX;
-        this.imageTransform.y += deltaY;
-        
         this.touchState.lastTouchCenter = { x: e.clientX, y: e.clientY };
         
-        this.renderWorkout();
+        this.polymerCanvas.render();
         e.preventDefault();
     }
 
     handleMouseUp(e) {
+        this.touchState = this.touchState || {};
         this.touchState.isDragging = false;
         e.preventDefault();
     }
 
     handleWheel(e) {
-        if (!this.backgroundImage) return;
-        
-        const scaleFactor = e.deltaY > 0 ? 0.9 : 1.1;
-        this.imageTransform.scale *= scaleFactor;
-        this.imageTransform.scale = Math.max(0.1, Math.min(5, this.imageTransform.scale));
-        
-        this.renderWorkout();
+        this.polymerCanvas.render();
         e.preventDefault();
     }
 
     handleTouchStart(e) {
-        if (!this.backgroundImage) return;
-        
+        this.touchState = this.touchState || {};
         this.touchState.startTouches = Array.from(e.touches);
         
         if (e.touches.length === 1) {
@@ -596,177 +429,40 @@ class TrinkyApp {
                 x: e.touches[0].clientX, 
                 y: e.touches[0].clientY 
             };
-        } else if (e.touches.length === 2) {
-            this.touchState.isScaling = true;
-            this.touchState.isDragging = false;
-            this.touchState.lastTouchDistance = this.getTouchDistance(e.touches);
-            this.touchState.lastTouchCenter = this.getTouchCenter(e.touches);
         }
         
         e.preventDefault();
     }
 
     handleTouchMove(e) {
-        if (!this.backgroundImage) return;
+        if (!this.touchState?.isDragging) return;
         
-        if (this.touchState.isDragging && e.touches.length === 1) {
+        if (e.touches.length === 1) {
             const deltaX = e.touches[0].clientX - this.touchState.lastTouchCenter.x;
             const deltaY = e.touches[0].clientY - this.touchState.lastTouchCenter.y;
-            
-            this.imageTransform.x += deltaX;
-            this.imageTransform.y += deltaY;
             
             this.touchState.lastTouchCenter = { 
                 x: e.touches[0].clientX, 
                 y: e.touches[0].clientY 
             };
             
-            this.renderWorkout();
-        } else if (this.touchState.isScaling && e.touches.length === 2) {
-            const currentDistance = this.getTouchDistance(e.touches);
-            const scaleFactor = currentDistance / this.touchState.lastTouchDistance;
-            
-            this.imageTransform.scale *= scaleFactor;
-            this.imageTransform.scale = Math.max(0.1, Math.min(5, this.imageTransform.scale));
-            
-            this.touchState.lastTouchDistance = currentDistance;
-            this.touchState.lastTouchCenter = this.getTouchCenter(e.touches);
-            
-            this.renderWorkout();
+            this.polymerCanvas.render();
         }
         
         e.preventDefault();
     }
 
     handleTouchEnd(e) {
+        this.touchState = this.touchState || {};
         this.touchState.isDragging = false;
-        this.touchState.isScaling = false;
         e.preventDefault();
-    }
-
-    getTouchDistance(touches) {
-        if (touches.length < 2) return 0;
-        
-        const dx = touches[0].clientX - touches[1].clientX;
-        const dy = touches[0].clientY - touches[1].clientY;
-        return Math.sqrt(dx * dx + dy * dy);
-    }
-
-    getTouchCenter(touches) {
-        if (touches.length === 0) return { x: 0, y: 0 };
-        
-        let x = 0, y = 0;
-        for (let touch of touches) {
-            x += touch.clientX;
-            y += touch.clientY;
-        }
-        
-        return {
-            x: x / touches.length,
-            y: y / touches.length
-        };
     }
 
     setupPhotoButtons() {
         document.getElementById('mono-toggle-btn')?.addEventListener('click', () => {
-            if (this.isMonochrome) {
-                this.returnToOriginal();
-            } else {
-                this.convertToMono();
-            }
+            // Логика монохромного режима
+            console.log('Mono toggle clicked');
         });
-    }
-
-    convertToMono() {
-        if (!this.backgroundImage) {
-            console.log('⚠️ No background image to convert');
-            return;
-        }
-        
-        const tempCanvas = document.createElement('canvas');
-        const tempCtx = tempCanvas.getContext('2d');
-        
-        const img = new Image();
-        img.onload = () => {
-            tempCanvas.width = img.width;
-            tempCanvas.height = img.height;
-            
-            tempCtx.drawImage(img, 0, 0);
-            
-            const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
-            const data = imageData.data;
-            
-            for (let i = 0; i < data.length; i += 4) {
-                const r = data[i];
-                const g = data[i + 1];
-                const b = data[i + 2];
-                
-                let gray = Math.round(0.299 * r + 0.587 * g + 0.114 * b);
-                
-                gray = gray / 255;
-                
-                if (gray < 0.5) {
-                    gray = Math.pow(gray * 2, 1.5) / 2;
-                } else {
-                    gray = 0.5 + Math.pow((gray - 0.5) * 2, 0.6) / 2;
-                }
-                
-                gray = Math.pow(gray, 0.8);
-                gray = gray * gray * (3 - 2 * gray);
-                gray = Math.round(gray * 255);
-                gray = Math.max(0, Math.min(255, gray));
-                
-                data[i] = gray;
-                data[i + 1] = gray;
-                data[i + 2] = gray;
-            }
-            
-            tempCtx.putImageData(imageData, 0, 0);
-            
-            this.backgroundImage = tempCanvas.toDataURL('image/png');
-            
-            this.isMonochrome = true;
-            this.updateMonoButton();
-            
-            this.renderWorkout();
-            
-            console.log('🖤 Image converted to monochrome');
-        };
-        img.src = this.backgroundImage;
-    }
-
-    returnToOriginal() {
-        if (!this.originalBackgroundImage) {
-            console.log('⚠️ No original image to return to');
-            return;
-        }
-        
-        this.backgroundImage = this.originalBackgroundImage;
-        
-        this.isMonochrome = false;
-        this.updateMonoButton();
-        
-        this.renderWorkout();
-        
-        console.log('🔄 Returned to original image');
-    }
-
-    initializeActiveMetrics() {
-        document.querySelectorAll('.data-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        document.querySelector(`[data-metric="distance"]`).classList.add('active');
-    }
-
-    updateMonoButton() {
-        const monoBtn = document.getElementById('mono-toggle-btn');
-        if (!monoBtn) return;
-        
-        if (this.isMonochrome) {
-            monoBtn.textContent = 'Return to Original';
-        } else {
-            monoBtn.textContent = 'Convert to Mono';
-        }
     }
 
     // Tab Management
@@ -784,25 +480,32 @@ class TrinkyApp {
         this.currentTab = tabName;
     }
 
-    // Metric Selection
-    selectMetric(metric) {
-        const button = document.querySelector(`[data-metric="${metric}"]`);
+    // Metric Selection - используем логику nextPoly
+    toggleMetricVisibility(metric) {
+        const state = this.store.getState();
         
-        if (this.activeMetrics.has(metric)) {
-            this.activeMetrics.delete(metric);
-            button.classList.remove('active');
-            
-            if (this.activeMetrics.size === 0) {
-                this.activeMetrics.add('distance');
-                document.querySelector(`[data-metric="distance"]`).classList.add('active');
-            }
-        } else {
-            this.activeMetrics.add(metric);
-            button.classList.add('active');
+        // Определяем тип данных
+        let dataType = 'RideData';
+        if (metric === 'speed' || metric === 'power') {
+            dataType = 'speedData';
         }
         
-        this.updateWorkoutDisplay();
-        this.renderWorkout();
+        // Находим соответствующую метрику
+        const dataArray = state[dataType];
+        const metricItem = dataArray.find(item => 
+            item.dataName.toLowerCase().includes(metric.toLowerCase())
+        );
+        
+        if (metricItem) {
+            // Используем метод store для переключения видимости
+            this.store.toggleVisibility(dataType, metricItem.dataName);
+            
+            // Обновляем UI
+            const button = document.querySelector(`[data-metric="${metric}"]`);
+            if (button) {
+                button.classList.toggle('active', metricItem.visible);
+            }
+        }
     }
 
     // Position Setting
@@ -810,12 +513,10 @@ class TrinkyApp {
         console.log('Setting position:', position);
     }
 
-    // Color Setting
+    // Color Setting - используем логику nextPoly
     setColor(color) {
         console.log('Setting color:', color);
-        if (color === 'french') {
-            this.renderWorkout();
-        }
+        this.store.setFontColor(color);
     }
 
     // Ratio Setting
@@ -915,18 +616,10 @@ class TrinkyApp {
         
         const reader = new FileReader();
         reader.onload = (e) => {
-            this.backgroundImage = e.target.result;
-            this.originalBackgroundImage = e.target.result;
-            this.isMonochrome = false;
-            this.updateMonoButton();
-            this.updateBackground();
+            // Устанавливаем изображение в store
+            this.store.setImage(e.target.result);
             
-            const monoBtn = document.getElementById('mono-toggle-btn');
-            if (monoBtn) {
-                monoBtn.style.display = 'flex';
-                monoBtn.style.alignItems = 'center';
-                monoBtn.style.justifyContent = 'center';
-            }
+            console.log('🖼️ Background image updated in store');
         };
         reader.onerror = () => {
             this.showError('Ошибка при чтении файла');
@@ -950,35 +643,13 @@ class TrinkyApp {
         
         const reader = new FileReader();
         reader.onload = (e) => {
-            this.logoImage = e.target.result;
-            this.updateLogo();
+            // Здесь можно добавить логику для логотипа
+            console.log('Logo updated:', e.target.result);
         };
         reader.onerror = () => {
             this.showError('Ошибка при чтении файла логотипа');
         };
         reader.readAsDataURL(file);
-    }
-
-    updateBackground() {
-        const background = document.getElementById('connected');
-        background.style.backgroundImage = 'none';
-        
-        if (this.backgroundImage) {
-            this.polymerCanvas.canvas.classList.add('has-background');
-        } else {
-            this.polymerCanvas.canvas.classList.remove('has-background');
-        }
-        
-        if (this.currentWorkout) {
-            this.renderWorkout();
-        }
-        
-        console.log('🖼️ Background updated in canvas');
-    }
-
-    updateLogo() {
-        console.log('Logo updated:', this.logoImage);
-        this.renderWorkout();
     }
 
     showNotConnectedState() {
@@ -1164,6 +835,8 @@ class TrinkyApp {
     }
 
     showError(message) {
+        const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        
         if (isDev) {
             alert(message);
         } else {
@@ -1325,17 +998,39 @@ class TrinkyApp {
             this.polymerCanvas.ctx.clearRect(0, 0, this.polymerCanvas.canvas.width, this.polymerCanvas.canvas.height);
         }
         
-        this.backgroundImage = null;
-        this.originalBackgroundImage = null;
-        this.isMonochrome = false;
-        
         console.log('Logged out successfully');
+    }
+
+    // Utility methods
+    formatDistance(meters) {
+        if (!meters || meters === 0) return '—';
+        if (meters >= 1000) {
+            return `${(meters / 1000).toFixed(1)} km`;
+        }
+        return `${meters} m`;
+    }
+
+    formatElevation(meters) {
+        if (!meters || meters === 0) return '—';
+        return `${meters} m`;
+    }
+
+    formatTime(seconds) {
+        if (!seconds || seconds === 0) return '—';
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        
+        if (hours > 0) {
+            return `${hours}h ${minutes}m`;
+        } else {
+            return `${minutes}m`;
+        }
     }
 }
 
 // Initialize app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM loaded, initializing TrinkyApp with Polymer Canvas');
+    console.log('DOM loaded, initializing TrinkyApp with Polymer Logic');
     new TrinkyApp();
 });
 
