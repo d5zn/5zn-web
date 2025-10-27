@@ -625,7 +625,7 @@ class SznCanvasComponent {
         const safeArea = this.config.safeArea;
         
         // Позиционируем логотип в правом верхнем углу с учетом безопасной зоны
-        const logoSize = 148 * scale;
+        const logoSize = 180 * scale;
         const logoX = width - logoSize - (safeArea.right * scale);
         const logoY = (safeArea.top * scale) - 40 * scale;
         
