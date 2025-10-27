@@ -394,7 +394,7 @@ class SznCanvasComponent {
         this.ctx.font = `${subtitleFontSize}px Inter, sans-serif`;
         
         const subtitleY = titleTop + titleFontSize + 10 * scale;
-        this.wrapText(state.date, leftMargin, subtitleY, maxWidth, subtitleFontSize);
+        this.wrapText(state.date.toUpperCase(), leftMargin, subtitleY, maxWidth, subtitleFontSize);
         
         this.ctx.restore();
     }
