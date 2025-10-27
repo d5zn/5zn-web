@@ -12,6 +12,7 @@ class PolymerCanvasComponent {
         this.imageLoading = true;
         this.backgroundImage = new Image();
         this.logoImage = new Image();
+        this.dpr = 1; // Инициализируем DPR по умолчанию
         
         // Конфигурация как в nextPoly
         this.config = {
@@ -102,18 +103,21 @@ class PolymerCanvasComponent {
                 },
                 active: () => {
                     this.fontsLoaded = true;
-                    this.render();
+                    // Добавляем небольшую задержку для инициализации canvas
+                    setTimeout(() => this.render(), 100);
                 },
                 inactive: () => {
                     console.error("Font loading failed!");
                     this.fontsLoaded = true; // Fallback
-                    this.render();
+                    // Добавляем небольшую задержку для инициализации canvas
+                    setTimeout(() => this.render(), 100);
                 }
             });
         } else {
             // Fallback если WebFont не загружен
             this.fontsLoaded = true;
-            this.render();
+            // Добавляем небольшую задержку для инициализации canvas
+            setTimeout(() => this.render(), 100);
         }
     }
     
@@ -165,6 +169,12 @@ class PolymerCanvasComponent {
         const width = this.canvas.width / this.dpr;
         const height = this.canvas.height / this.dpr;
         
+        // Проверяем, что canvas имеет валидные размеры
+        if (width <= 0 || height <= 0) {
+            console.warn('⚠️ Canvas has invalid dimensions, skipping render:', width, 'x', height);
+            return;
+        }
+        
         // Очищаем canvas
         this.ctx.clearRect(0, 0, width, height);
         
@@ -212,6 +222,11 @@ class PolymerCanvasComponent {
     }
     
     renderOverlay(state, width, height) {
+        // Проверяем, что canvas имеет валидные размеры
+        if (width <= 0 || height <= 0) {
+            console.warn('⚠️ Canvas has invalid dimensions:', width, 'x', height);
+            return;
+        }
         
         // Создаем полупрозрачный overlay как в nextPoly
         const overlayCanvas = document.createElement('canvas');
