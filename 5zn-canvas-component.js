@@ -497,17 +497,11 @@ class SznCanvasComponent {
         // Рисуем маршрут с градиентом французского флага
         this.ctx.save();
         
-        // Находим начальную и конечную точки маршрута для создания градиента по длине линии
-        const startPoint = this.decodedRoute[0];
-        const endPoint = this.decodedRoute[this.decodedRoute.length - 1];
-        
-        const startX = routeLeft + routeWidth / 2 + (startPoint[1] - centerLng) * routeScale;
-        const startY = routeTop + routeHeight / 2 - (startPoint[0] - centerLat) * routeScale;
-        const endX = routeLeft + routeWidth / 2 + (endPoint[1] - centerLng) * routeScale;
-        const endY = routeTop + routeHeight / 2 - (endPoint[0] - centerLat) * routeScale;
-        
-        // Создаем градиент по длине маршрута
-        const gradient = this.ctx.createLinearGradient(startX, startY, endX, endY);
+        // Создаем градиент по всей области маршрута (сверху вниз)
+        const gradient = this.ctx.createLinearGradient(
+            routeLeft + routeWidth / 2, routeTop,
+            routeLeft + routeWidth / 2, routeBottom
+        );
         
         // Цвета французского флага по точному SVG градиенту
         gradient.addColorStop(0, '#2A3587');       // Синий (начало)
