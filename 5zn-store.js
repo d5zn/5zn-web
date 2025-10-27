@@ -18,7 +18,7 @@ class SznStore {
                 src: "/assets/eye-slash.svg"
             },
             imagesArray: [],
-            image: "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885_1280.jpg",
+            image: "", // Пустая строка - будет использоваться дефолтный bg.jpeg
             RideData: [{
                 dataName: "Distance",
                 data: "132km",
