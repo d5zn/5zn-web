@@ -36,11 +36,25 @@ class PolymerCanvasComponent {
         const rawDPR = window.devicePixelRatio || 1;
         const dpr = Math.min(rawDPR, this.config.maxDPR);
         
-        // Устанавливаем размеры как в nextPoly
-        this.canvas.width = this.config.width * dpr;
-        this.canvas.height = this.config.height * dpr;
+        // Точная логика как в nextPoly
+        const clientWidth = this.canvas.clientWidth;
+        const clientHeight = this.canvas.clientHeight;
         
-        // CSS управляет отображением
+        // Рассчитываем размеры canvas
+        let canvasWidth = Math.floor(clientWidth * dpr);
+        let canvasHeight = Math.floor(clientHeight * dpr);
+        
+        // Минимальная ширина как в nextPoly
+        if (canvasWidth < 800) {
+            canvasHeight = 800 * canvasHeight / canvasWidth;
+            canvasWidth = 800;
+        }
+        
+        // Устанавливаем размеры canvas
+        this.canvas.width = canvasWidth;
+        this.canvas.height = canvasHeight;
+        
+        // CSS управляет отображением - фиксированные размеры
         this.canvas.style.width = this.config.width + 'px';
         this.canvas.style.height = this.config.height + 'px';
         this.canvas.style.aspectRatio = this.config.aspectRatio;
@@ -49,8 +63,11 @@ class PolymerCanvasComponent {
         this.canvas.style.margin = 'auto';
         this.canvas.style.transition = 'height 0.3s ease-out, transform 0.3s ease-out';
         
-        // Применяем DPR масштаб
+        // Применяем DPR масштаб только один раз
         this.ctx.scale(dpr, dpr);
+        
+        // Сохраняем DPR для использования в рендеринге
+        this.dpr = dpr;
         
         // Обработчик resize как в nextPoly
         window.addEventListener('resize', () => {
@@ -115,29 +132,31 @@ class PolymerCanvasComponent {
         if (!this.fontsLoaded) return;
         
         const state = this.store.getState();
-        const { width, height } = this.config;
+        
+        // Используем размеры с учетом DPR масштабирования
+        const width = this.canvas.width / this.dpr;
+        const height = this.canvas.height / this.dpr;
         
         // Очищаем canvas
         this.ctx.clearRect(0, 0, width, height);
         
         // Рендерим как в nextPoly
-        this.renderBackground(state);
-        this.renderOverlay(state);
-        this.renderContent(state);
-        this.renderLogo(state);
+        this.renderBackground(state, width, height);
+        this.renderOverlay(state, width, height);
+        this.renderContent(state, width, height);
+        this.renderLogo(state, width, height);
         
         console.log('🎨 Polymer Canvas rendered');
     }
     
-    renderBackground(state) {
+    renderBackground(state, width, height) {
         if (this.imageLoading || !this.backgroundImage.complete) return;
         
         // Адаптивное масштабирование как в nextPoly
-        this.drawBackgroundImage(this.backgroundImage, state);
+        this.drawBackgroundImage(this.backgroundImage, state, width, height);
     }
     
-    drawBackgroundImage(img, state) {
-        const { width, height } = this.config;
+    drawBackgroundImage(img, state, width, height) {
         
         // Точная логика масштабирования как в nextPoly
         const imgAspect = img.width / img.height;
@@ -164,8 +183,7 @@ class PolymerCanvasComponent {
         this.ctx.restore();
     }
     
-    renderOverlay(state) {
-        const { width, height } = this.config;
+    renderOverlay(state, width, height) {
         
         // Создаем полупрозрачный overlay как в nextPoly
         const overlayCanvas = document.createElement('canvas');
@@ -184,8 +202,7 @@ class PolymerCanvasComponent {
         this.ctx.drawImage(overlayCanvas, 0, 0, width, height);
     }
     
-    renderContent(state) {
-        const { width, height } = this.config;
+    renderContent(state, width, height) {
         
         // Рендерим заголовок
         if (state.titleVisible.visible) {
@@ -200,25 +217,27 @@ class PolymerCanvasComponent {
     }
     
     renderTitle(state, width, height) {
+        // Масштабируем размеры как в nextPoly
+        const scale = width / 1000;
         const titleTop = state.postStyle === 'portrait' 
             ? height * 0.05 
             : height * 0.15;
         
         // Заголовок
-        const titleFontSize = Math.floor(width / 1000 * 35);
+        const titleFontSize = Math.floor(35 * scale);
         this.ctx.save();
         this.ctx.fillStyle = state.fontColor;
         this.ctx.font = `bold ${titleFontSize}px Inter, sans-serif`;
         this.ctx.textAlign = 'left';
         
-        this.wrapText(state.title, 40, titleTop, width - 80, titleFontSize);
+        this.wrapText(state.title, 40 * scale, titleTop, width - 80 * scale, titleFontSize);
         
         // Подзаголовок (дата)
-        const subtitleFontSize = Math.floor(width / 1000 * 24);
+        const subtitleFontSize = Math.floor(24 * scale);
         this.ctx.font = `${subtitleFontSize}px Inter, sans-serif`;
         
         const subtitleY = titleTop + titleFontSize + 10;
-        this.wrapText(state.date, 40, subtitleY, width - 80, subtitleFontSize);
+        this.wrapText(state.date, 40 * scale, subtitleY, width - 80 * scale, subtitleFontSize);
         
         this.ctx.restore();
     }
@@ -230,20 +249,23 @@ class PolymerCanvasComponent {
         const visibleRideData = RideData.filter(item => item.visible);
         const visibleSpeedData = speedData.filter(item => item.visible);
         
+        // Масштабируем размеры как в nextPoly
+        const scale = width / 1000;
+        
         // Рендерим RideData
         let currentY = height - height * 0.05;
-        currentY = this.renderMetricGroup(visibleRideData, width, height, currentY);
+        currentY = this.renderMetricGroup(visibleRideData, width, height, currentY, scale);
         
         // Рендерим SpeedData
-        currentY = this.renderMetricGroup(visibleSpeedData, width, height, currentY - height * 0.01);
+        currentY = this.renderMetricGroup(visibleSpeedData, width, height, currentY - height * 0.01, scale);
     }
     
-    renderMetricGroup(metrics, width, height, bottomY) {
+    renderMetricGroup(metrics, width, height, bottomY, scale) {
         if (metrics.length === 0) return bottomY;
         
-        const fontSize = Math.floor(width / 1000 * 20);
+        const fontSize = Math.floor(20 * scale);
         const lineHeight = fontSize + 5;
-        const padding = 40;
+        const padding = 40 * scale;
         
         this.ctx.save();
         this.ctx.fillStyle = this.store.getState().fontColor;
@@ -273,15 +295,16 @@ class PolymerCanvasComponent {
         console.log('Route rendering placeholder');
     }
     
-    renderLogo(state) {
+    renderLogo(state, width, height) {
         if (!this.logoImage.complete) return;
         
-        const { width, height } = this.config;
+        // Масштабируем размеры как в nextPoly
+        const scale = width / 1000;
         
         // Позиционируем логотип в правом верхнем углу
-        const logoSize = 72;
-        const logoX = width - logoSize - 20;
-        const logoY = height * 0.05 + 50 - logoSize / 2;
+        const logoSize = 72 * scale;
+        const logoX = width - logoSize - 20 * scale;
+        const logoY = height * 0.05 + 50 * scale - logoSize / 2;
         
         this.ctx.save();
         this.ctx.drawImage(this.logoImage, logoX, logoY, logoSize, logoSize);
