@@ -242,6 +242,26 @@ class ProductionHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                 print(f"❌ Error injecting config: {e}")
                 # Fallback to default handling
         
+        # Handle static HTML files (support.html, landing.html, etc.)
+        if self.path.endswith('.html'):
+            try:
+                filename = self.path[1:]  # Remove leading slash
+                if os.path.exists(filename):
+                    with open(filename, 'r', encoding='utf-8') as f:
+                        html_content = f.read()
+                    
+                    # Send response
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'text/html; charset=utf-8')
+                    self.send_header('Content-Length', len(html_content.encode('utf-8')))
+                    self.end_headers()
+                    self.wfile.write(html_content.encode('utf-8'))
+                    return
+            except Exception as e:
+                print(f"❌ Error serving HTML file {self.path}: {e}")
+                self.send_error(404, 'File Not Found')
+                return
+        
         # Продолжаем как обычно
         super().do_GET()
     
