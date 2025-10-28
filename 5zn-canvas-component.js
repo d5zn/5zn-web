@@ -288,10 +288,26 @@ class SznCanvasComponent {
         
         // Применяем монохромный фильтр если включен
         if (state.isMono) {
-            this.ctx.filter = 'grayscale(100%) contrast(150%) brightness(110%)';
+            // Проверяем поддержку CSS фильтров
+            if (this.ctx.filter !== undefined) {
+                this.ctx.filter = 'grayscale(100%) contrast(150%) brightness(110%)';
+                console.log('🎨 Applied CSS filter for mono mode');
+            } else {
+                console.warn('⚠️ CSS filters not supported, using alternative method');
+                // Альтернативный метод для старых браузеров
+                this.ctx.globalCompositeOperation = 'multiply';
+                this.ctx.fillStyle = 'rgba(128, 128, 128, 0.5)';
+                this.ctx.fillRect(drawX, drawY, drawWidth, drawHeight);
+                this.ctx.globalCompositeOperation = 'source-over';
+            }
+        } else {
+            this.ctx.filter = 'none';
         }
         
         this.ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+        
+        // Сбрасываем фильтр после отрисовки
+        this.ctx.filter = 'none';
         this.ctx.restore();
     }
     

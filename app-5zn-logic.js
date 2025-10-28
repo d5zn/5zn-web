@@ -668,6 +668,12 @@ class SznApp {
             }
         }
         
+        // Принудительно обновляем канвас после изменения моно режима
+        if (this.polymerCanvas) {
+            this.polymerCanvas.render();
+            console.log(`🔄 Canvas refreshed after mono mode change`);
+        }
+        
         console.log(`🎨 Mono mode ${state.isMono ? 'enabled' : 'disabled'}`);
     }
 
