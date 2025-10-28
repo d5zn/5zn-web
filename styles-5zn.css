@@ -451,7 +451,8 @@ html, body {
 .ratio-controls {
     display: flex;
     gap: 8px;
-    justify-content: flex-start;
+    justify-content: stretch;
+    width: 100%;
 }
 
 /* Ratio Buttons */
@@ -469,6 +470,7 @@ html, body {
     transition: all 0.2s ease;
     border-radius: 4px;
     white-space: nowrap;
+    flex: 1; /* Растягиваем кнопки на ширину контейнера */
 }
 
 .ratio-btn.active {
@@ -529,6 +531,20 @@ html, body {
     justify-content: center;
     background: #000000;
     color: #ffffff;
+}
+
+/* Not Connected: заполняет видимую область, с отступами и скруглением */
+#not-connected {
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    width: calc(100% - 32px);
+    height: calc(100% - 32px);
+    margin: 16px;
+    border-radius: 8px;
+    overflow: hidden;
 }
 
 .state-card {
