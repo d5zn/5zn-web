@@ -1163,10 +1163,12 @@ class SznApp {
 }
 
 // Initialize app when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM loaded, initializing SznApp with 5zn Logic');
-    new SznApp();
-});
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM loaded, initializing SznApp with 5zn Logic');
+            const app = new SznApp();
+            // Дополнительная подстройка после отрисовки DOM: ещё раз проставим размер канваса
+            setTimeout(() => app.updateCanvas(), 0);
+        });
 
 // Force show not connected state if no token
 if (!localStorage.getItem('strava_token')) {

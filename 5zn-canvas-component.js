@@ -56,9 +56,22 @@ class SznCanvasComponent {
         // Обновляем размеры в зависимости от postStyle
         this.updateCanvasSize();
         
-        // Получаем размеры области просмотра (между navbar 48px и editing panel 180px)
-        const viewportHeight = window.innerHeight - 48 - 180;
-        const viewportWidth = window.innerWidth;
+        // Получаем реальные размеры видимой области (navbar + preview padding + editing panel)
+        const navbar = document.querySelector('.navbar');
+        const editingPanel = document.querySelector('.editing-panel');
+        const previewArea = document.querySelector('.preview-area');
+
+        const navbarHeight = navbar ? Math.round(navbar.getBoundingClientRect().height) : 64;
+        const panelHeight = editingPanel ? Math.round(editingPanel.getBoundingClientRect().height) : 180;
+
+        let previewPaddingV = 0;
+        if (previewArea) {
+            const cs = window.getComputedStyle(previewArea);
+            previewPaddingV = (parseFloat(cs.paddingTop || '0') || 0) + (parseFloat(cs.paddingBottom || '0') || 0);
+        }
+
+        const viewportHeight = window.innerHeight - navbarHeight - panelHeight - previewPaddingV;
+        const viewportWidth = previewArea?.clientWidth || window.innerWidth;
         
         // Используем viewport размеры если контейнер пустой
         let containerWidth = viewportWidth;
