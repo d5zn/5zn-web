@@ -80,15 +80,9 @@ class SznCanvasComponent {
         let displayWidth, displayHeight;
         const canvasAspect = this.config.canvasWidth / this.config.canvasHeight;
         
-        // Сначала подгоняем по ширине
+        // Сначала подгоняем по ширине и не сужаем по высоте — пусть вертикальный оверфлоу обрежется контейнером
         displayWidth = containerWidth;
         displayHeight = displayWidth / canvasAspect;
-        
-        // Если по высоте не помещается — ограничиваем по высоте
-        if (displayHeight > containerHeight) {
-            displayHeight = containerHeight;
-            displayWidth = displayHeight * canvasAspect;
-        }
         
         // Минимальные размеры для видимости
         if (displayWidth < 100) displayWidth = containerWidth * 0.9;

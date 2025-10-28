@@ -71,6 +71,7 @@ html, body {
 /* Точное соответствие канваса соотношению сторон */
 .ratio-9-16 #route-canvas {
     aspect-ratio: 0.5625;
+    max-height: none; /* Для 9:16 не ограничиваем по высоте, чтобы занять всю ширину */
 }
 
 .ratio-4-5 #route-canvas {
