@@ -381,20 +381,20 @@ html, body {
 }
 
 /* Первый ряд всегда занимает полную ширину */
-.data-btn[data-metric="distance"],
-.data-btn[data-metric="elevation"], 
-.data-btn[data-metric="time"] {
+.data-buttons .data-btn[data-metric="distance"],
+.data-buttons .data-btn[data-metric="elevation"], 
+.data-buttons .data-btn[data-metric="time"] {
     grid-row: 1;
 }
 
 /* Второй ряд только для Speed */
-.data-btn[data-metric="speed"] {
+.data-buttons .data-btn[data-metric="speed"] {
     grid-row: 2;
     grid-column: 2; /* Центр средней колонки */
 }
 
 /* Data Buttons */
-.data-btn {
+.data-buttons .data-btn {
     height: 36px;
     padding: 0 12px;
     background: transparent;
@@ -414,26 +414,26 @@ html, body {
     box-sizing: border-box;
 }
 
-.data-btn:not(.active) {
-    background: transparent !important;
-    color: #ffffff !important;
-    border: 1px solid #ffffff !important;
+.data-buttons .data-btn:not(.active) {
+    background: transparent;
+    color: #ffffff;
+    border: 1px solid #ffffff;
 }
 
-.data-btn.active {
-    background: #ffffff !important;
-    color: #000000 !important;
-    border: 1px solid #ffffff !important;
+.data-buttons .data-btn.active {
+    background: #ffffff;
+    color: #000000;
+    border: 1px solid #ffffff;
 }
 
-.data-btn:hover:not(.active) {
+.data-buttons .data-btn:hover:not(.active) {
     background: rgba(255, 255, 255, 0.1);
     color: #ffffff;
 }
 
-.data-btn:hover.active {
-    background: #ffffff !important;
-    color: #000000 !important;
+.data-buttons .data-btn:hover.active {
+    background: #ffffff;
+    color: #000000;
 }
 
 /* Ratio Controls */
