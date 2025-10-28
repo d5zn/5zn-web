@@ -267,7 +267,7 @@ class SznApp {
         
         // Logo click handler
         document.querySelector('.nav-logo')?.addEventListener('click', () => {
-            window.open('/landing.html', '_blank');
+            window.location.href = '/landing.html';
         });
         
         // Nav buttons
