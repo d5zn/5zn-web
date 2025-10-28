@@ -95,8 +95,8 @@ class SznCanvasComponent {
         if (displayHeight < 100) displayHeight = containerHeight * 0.9;
         
         // Устанавливаем CSS размеры для отображения
-        this.canvas.style.width = Math.floor(displayWidth) + 'px';
-        this.canvas.style.height = Math.floor(displayHeight) + 'px';
+        this.canvas.style.width = Math.round(displayWidth) + 'px';
+        this.canvas.style.height = Math.round(displayHeight) + 'px';
         this.canvas.style.display = 'block';
         this.canvas.style.margin = '0 auto';
         
