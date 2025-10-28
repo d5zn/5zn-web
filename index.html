@@ -121,7 +121,7 @@
             <div class="tab-nav">
                 <button class="tab-btn active" data-tab="photo">PHOTO</button>
                 <button class="tab-btn" data-tab="data">DATA</button>
-                <button class="tab-btn" data-tab="ratio" style="display: none;">RATIO</button>
+                <button class="tab-btn" data-tab="ratio">RATIO</button>
             </div>
 
             <!-- Tab Content -->
@@ -139,6 +139,14 @@
                         <button class="data-btn active" data-metric="elevation">Elevation</button>
                         <button class="data-btn active" data-metric="time">Time</button>
                         <button class="data-btn active" data-metric="speed">Speed/Avg</button>
+                    </div>
+                </div>
+
+                <!-- Ratio Tab -->
+                <div id="ratio-tab" class="tab-panel">
+                    <div class="ratio-controls">
+                        <button class="ratio-btn active" data-ratio="9:16">9:16</button>
+                        <button class="ratio-btn" data-ratio="4:5">4:5</button>
                     </div>
                 </div>
 
@@ -191,8 +199,8 @@
 <script src="config.js?v=4"></script>
 <script src="polyline.js?v=5"></script>
 <script src="5zn-store.js?v=15"></script>
-<script src="5zn-canvas-component.js?v=24"></script>
-<script src="app-5zn-logic.js?v=21"></script>
+<script src="5zn-canvas-component.js?v=25"></script>
+<script src="app-5zn-logic.js?v=22"></script>
     
     <!-- Debug script -->
     <script>

@@ -19,10 +19,10 @@ class SznCanvasComponent {
         this.polylineData = null; // Данные маршрута
         this.decodedRoute = null; // Декодированный маршрут
         
-        // Конфигурация - фиксированный размер canvas 1080x1920
+        // Конфигурация - динамический размер canvas в зависимости от соотношения
         this.config = {
             canvasWidth: 1080,  // Внутренний размер canvas для рендеринга
-            canvasHeight: 1920, // Внутренний размер canvas для рендеринга
+            canvasHeight: 1920, // Внутренний размер canvas для рендеринга (9:16)
             aspectRatio: '9/16',
             maxDPR: 1, // Используем фиксированный размер, не нужно DPR scaling
             // Безопасные зоны для контента
@@ -205,6 +205,25 @@ class SznCanvasComponent {
                 this.render();
             }
         });
+    }
+    
+    // Метод для обновления конфигурации канваса
+    updateCanvasConfig(ratio) {
+        if (ratio === '4:5') {
+            this.config.canvasWidth = 1080;
+            this.config.canvasHeight = 1350;
+            this.config.aspectRatio = '4/5';
+        } else if (ratio === '9:16') {
+            this.config.canvasWidth = 1080;
+            this.config.canvasHeight = 1920;
+            this.config.aspectRatio = '9/16';
+        }
+        
+        // Обновляем размеры канваса
+        this.canvas.width = this.config.canvasWidth;
+        this.canvas.height = this.config.canvasHeight;
+        
+        console.log(`🔄 Canvas config updated: ${this.config.canvasWidth}x${this.config.canvasHeight} (${ratio})`);
     }
     
     render() {

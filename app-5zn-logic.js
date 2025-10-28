@@ -603,6 +603,12 @@ class SznApp {
             }
         }
         
+        // Обновляем конфигурацию канваса
+        if (this.polymerCanvas) {
+            this.polymerCanvas.updateCanvasConfig(ratio);
+            this.polymerCanvas.render();
+        }
+        
         console.log('🔧 Ratio изменен на:', ratio);
         
         setTimeout(() => {
