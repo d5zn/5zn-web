@@ -47,18 +47,9 @@ class SznCanvasComponent {
     }
     
     updateCanvasSize() {
-        const state = this.store.getState();
-        
-        // Обновляем размеры в зависимости от postStyle
-        if (state.postStyle === 'square') {
-            this.config.canvasWidth = 1080;
-            this.config.canvasHeight = 1350; // 1080 * 5/4 = 1350 для соотношения 4:5
-            this.config.aspectRatio = '4/5';
-        } else {
-            this.config.canvasWidth = 1080;
-            this.config.canvasHeight = 1920; // Стандартное разрешение 9:16
-            this.config.aspectRatio = '9/16';
-        }
+        // Размеры канваса теперь управляются через updateCanvasConfig()
+        // Эта функция оставлена для совместимости
+        console.log(`📐 Canvas size: ${this.config.canvasWidth}x${this.config.canvasHeight}`);
     }
     
     setupCanvas() {
