@@ -518,8 +518,10 @@ class SznApp {
                 }
                 const isActive = btn.classList.contains('active');
                 
+                console.log(`🔄 Syncing ${metricItem.dataName}: visible=${metricItem.visible}, wasActive=${wasActive}, isActive=${isActive}`);
+                
                 if (wasActive !== isActive) {
-                    console.log(`🔄 Synced ${metricItem.dataName}: ${metricItem.visible ? 'active' : 'inactive'} (changed from ${wasActive ? 'active' : 'inactive'})`);
+                    console.log(`✅ Changed ${metricItem.dataName}: ${metricItem.visible ? 'active' : 'inactive'} (changed from ${wasActive ? 'active' : 'inactive'})`);
                 }
             } else {
                 // Если метрика не найдена в данных, оставляем кнопку неактивной
