@@ -145,7 +145,7 @@ class SznApp {
             if (!response.ok) {
                 if (response.status === 401) {
                     localStorage.removeItem('strava_token');
-                    this.showError('Сессия истекла. Пожалуйста, подключитесь снова');
+                    this.showError('Session expired. Please connect again');
                     setTimeout(() => {
                         window.location.href = '/';
                     }, 2000);
@@ -160,7 +160,7 @@ class SznApp {
             console.error('❌ Strava API error:', error);
             
             if (error.message !== 'Unauthorized') {
-                this.showError('Не удалось загрузить данные из Strava. Проверьте подключение к интернету');
+                this.showError('Failed to load data from Strava. Check your internet connection');
             }
             
             // Fallback to mock data for development
@@ -622,19 +622,19 @@ class SznApp {
         if (!file) return;
         
         if (!file.type.startsWith('image/')) {
-            this.showError('Пожалуйста, загрузите изображение');
+            this.showError('Please upload an image');
             return;
         }
         
         const maxSize = 10 * 1024 * 1024;
         if (file.size > maxSize) {
-            this.showError('Файл слишком большой. Максимальный размер: 10MB');
+            this.showError('File is too large. Max size: 10MB');
             return;
         }
         
         const validExtensions = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
         if (!validExtensions.includes(file.type)) {
-            this.showError('Неподдерживаемый формат изображения. Используйте JPG, PNG или WEBP');
+            this.showError('Unsupported image format. Use JPG, PNG, or WEBP');
             return;
         }
         
@@ -654,7 +654,7 @@ class SznApp {
             console.log('🖼️ Background image updated in store');
         };
         reader.onerror = () => {
-            this.showError('Ошибка при чтении файла');
+            this.showError('Error reading file');
         };
         reader.readAsDataURL(file);
     }
@@ -687,13 +687,13 @@ class SznApp {
         if (!file) return;
         
         if (!file.type.startsWith('image/')) {
-            this.showError('Пожалуйста, загрузите изображение');
+            this.showError('Please upload an image');
             return;
         }
         
         const maxSize = 2 * 1024 * 1024;
         if (file.size > maxSize) {
-            this.showError('Логотип слишком большой. Максимальный размер: 2MB');
+            this.showError('Logo is too large. Max size: 2MB');
             return;
         }
         
@@ -703,7 +703,7 @@ class SznApp {
             console.log('Logo updated:', e.target.result);
         };
         reader.onerror = () => {
-            this.showError('Ошибка при чтении файла логотипа');
+            this.showError('Error reading logo file');
         };
         reader.readAsDataURL(file);
     }

@@ -209,12 +209,12 @@
                 this.sznCanvas = null;
                 
                 if (!this.activityId) {
-                    this.showError('ID активности не указан в URL');
+                this.showError('Activity ID is not specified in URL');
                     return;
                 }
                 
                 if (!this.stravaToken || this.stravaToken === 'YOUR_STRAVA_CLIENT_ID') {
-                    this.showError('Необходимо подключиться к Strava');
+                    this.showError('You need to connect to Strava');
                     setTimeout(() => {
                         window.location.href = '/';
                     }, 2000);
@@ -253,7 +253,7 @@
                     this.displayActivity(activity);
                 } catch (error) {
                     console.error('Error loading activity:', error);
-                    this.showError('Не удалось загрузить активность');
+                    this.showError('Failed to load activity');
                 }
             }
             

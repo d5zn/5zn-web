@@ -71,7 +71,7 @@ html, body {
 /* Точное соответствие канваса соотношению сторон */
 .ratio-9-16 #route-canvas {
     aspect-ratio: 0.5625;
-    max-height: none; /* Для 9:16 не ограничиваем по высоте, чтобы занять всю ширину */
+    max-height: 100%; /* Возвращаем ограничение по высоте, чтобы вмещаться в контейнер */
 }
 
 .ratio-4-5 #route-canvas {
@@ -195,7 +195,7 @@ html, body {
 }
 
 .nav-logo {
-    height: 40px;
+    height: 32px;
     width: auto;
     filter: brightness(0) invert(1); /* Делает логотип белым */
     cursor: pointer;
