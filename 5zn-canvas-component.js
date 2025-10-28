@@ -288,26 +288,60 @@ class SznCanvasComponent {
         
         // Применяем монохромный фильтр если включен
         if (state.isMono) {
-            // Проверяем поддержку CSS фильтров
-            if (this.ctx.filter !== undefined) {
-                this.ctx.filter = 'grayscale(100%) contrast(150%) brightness(110%)';
-                console.log('🎨 Applied CSS filter for mono mode');
-            } else {
-                console.warn('⚠️ CSS filters not supported, using alternative method');
-                // Альтернативный метод для старых браузеров
-                this.ctx.globalCompositeOperation = 'multiply';
-                this.ctx.fillStyle = 'rgba(128, 128, 128, 0.5)';
-                this.ctx.fillRect(drawX, drawY, drawWidth, drawHeight);
-                this.ctx.globalCompositeOperation = 'source-over';
+            console.log('🎨 Applying mono filter...');
+            
+            // Метод 1: Попробуем CSS фильтр
+            this.ctx.filter = 'grayscale(100%) contrast(150%) brightness(110%)';
+            this.ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+            
+            // Метод 2: Если CSS фильтр не сработал, применяем альтернативный метод
+            // Создаем временный канвас для обработки изображения
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCanvas.width = drawWidth;
+            tempCanvas.height = drawHeight;
+            
+            // Рисуем изображение на временный канвас
+            tempCtx.drawImage(img, 0, 0, drawWidth, drawHeight);
+            
+            // Получаем данные пикселей
+            const imageData = tempCtx.getImageData(0, 0, drawWidth, drawHeight);
+            const data = imageData.data;
+            
+            // Применяем монохромный эффект к каждому пикселю
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i];
+                const g = data[i + 1];
+                const b = data[i + 2];
+                
+                // Конвертируем в оттенки серого
+                const gray = Math.round(0.299 * r + 0.587 * g + 0.114 * b);
+                
+                // Применяем контраст и яркость
+                const contrast = 1.5;
+                const brightness = 1.1;
+                const adjustedGray = Math.min(255, Math.max(0, (gray - 128) * contrast + 128 * brightness));
+                
+                data[i] = adjustedGray;     // Red
+                data[i + 1] = adjustedGray; // Green
+                data[i + 2] = adjustedGray; // Blue
+                // data[i + 3] остается без изменений (alpha)
             }
+            
+            // Возвращаем обработанные данные
+            tempCtx.putImageData(imageData, 0, 0);
+            
+            // Очищаем основной канвас и рисуем обработанное изображение
+            this.ctx.clearRect(drawX, drawY, drawWidth, drawHeight);
+            this.ctx.filter = 'none';
+            this.ctx.drawImage(tempCanvas, drawX, drawY);
+            
+            console.log('🎨 Applied pixel-based mono filter');
         } else {
             this.ctx.filter = 'none';
+            this.ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
         }
         
-        this.ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
-        
-        // Сбрасываем фильтр после отрисовки
-        this.ctx.filter = 'none';
         this.ctx.restore();
     }
     
