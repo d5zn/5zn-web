@@ -486,6 +486,12 @@ class SznApp {
     syncMetricButtons() {
         const state = this.store.getState();
         
+        console.log('🔄 Syncing metric buttons...');
+        console.log('Current state:', {
+            RideData: state.RideData.map(item => ({ name: item.dataName, visible: item.visible })),
+            speedData: state.speedData.map(item => ({ name: item.dataName, visible: item.visible }))
+        });
+        
         // Синхронизируем все кнопки метрик
         document.querySelectorAll('.data-btn').forEach(btn => {
             const metric = btn.dataset.metric;
@@ -504,18 +510,25 @@ class SznApp {
             );
             
             if (metricItem) {
+                const wasActive = btn.classList.contains('active');
                 if (metricItem.visible) {
                     btn.classList.add('active');
                 } else {
                     btn.classList.remove('active');
                 }
-                console.log(`🔄 Synced ${metricItem.dataName}: ${metricItem.visible ? 'active' : 'inactive'}`);
+                const isActive = btn.classList.contains('active');
+                
+                if (wasActive !== isActive) {
+                    console.log(`🔄 Synced ${metricItem.dataName}: ${metricItem.visible ? 'active' : 'inactive'} (changed from ${wasActive ? 'active' : 'inactive'})`);
+                }
             } else {
                 // Если метрика не найдена в данных, оставляем кнопку неактивной
                 btn.classList.remove('active');
-                console.log(`⚠️ Metric ${metric} not found in data, button set to inactive`);
+                console.log(`⚠️ Metric ${metric} not found in ${dataType}, button set to inactive`);
             }
         });
+        
+        console.log('✅ Metric buttons sync complete');
     }
 
     // Metric Selection - используем логику nextPoly
@@ -546,15 +559,9 @@ class SznApp {
                 item.dataName === metricItem.dataName
             );
             
-            const button = document.querySelector(`[data-metric="${metric}"]`);
-            if (button && updatedMetric) {
-                if (updatedMetric.visible) {
-                    button.classList.add('active');
-                } else {
-                    button.classList.remove('active');
-                }
-                console.log(`✅ Metric ${updatedMetric.dataName} is now ${updatedMetric.visible ? 'visible' : 'hidden'}`);
-            }
+            // Синхронизируем все кнопки после изменения
+            this.syncMetricButtons();
+            console.log(`✅ Metric ${updatedMetric.dataName} is now ${updatedMetric.visible ? 'visible' : 'hidden'}`);
         } else {
             console.warn(`⚠️ Metric not found: ${metric}`);
             // Если метрика не найдена, просто переключаем состояние кнопки
