@@ -714,11 +714,22 @@ class SznApp {
         const notConnected = document.getElementById('not-connected');
         const connected = document.getElementById('connected');
         const editingPanel = document.querySelector('.editing-panel');
+        const previewArea = document.querySelector('.preview-area');
+        const navbar = document.querySelector('.navbar');
         
         if (loading) loading.classList.add('hidden');
         if (notConnected) notConnected.classList.remove('hidden');
         if (connected) connected.classList.add('hidden');
         if (editingPanel) editingPanel.classList.add('hidden'); // Скрываем панель редактирования
+        // Превью на полный экран (минус navbar)
+        if (previewArea) {
+            const navbarHeight = navbar ? Math.round(navbar.getBoundingClientRect().height) : 64;
+            previewArea.style.bottom = '0';
+            previewArea.style.height = `calc(100vh - ${navbarHeight}px)`;
+            previewArea.style.paddingTop = '16px';
+            previewArea.style.paddingBottom = '16px';
+            previewArea.style.boxSizing = 'border-box';
+        }
         
         // Скрываем иконки в навбаре
         const navCenter = document.querySelector('.nav-center');
@@ -742,6 +753,7 @@ class SznApp {
         const loading = document.getElementById('loading');
         const notConnected = document.getElementById('not-connected');
         const connected = document.getElementById('connected');
+        const previewArea = document.querySelector('.preview-area');
         
         console.log('🔍 Elements found:', {
             loading: !!loading,
@@ -829,6 +841,12 @@ class SznApp {
             connected.style.setProperty('width', '100%', 'important');
             connected.style.setProperty('height', '100%', 'important');
             connected.style.setProperty('display', 'flex', 'important');
+
+            // Восстанавливаем исходную высоту превью под панель редактирования
+            if (previewArea) {
+                previewArea.style.bottom = '180px';
+                previewArea.style.height = 'calc(100vh - 64px - 180px)';
+            }
             
             console.log('🔧 Connected state показан');
             
