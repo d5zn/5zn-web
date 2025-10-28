@@ -76,18 +76,18 @@ class SznCanvasComponent {
         }
         
         // Рассчитываем CSS размеры для отображения (масштабируем под контейнер)
+        // Стратегия: стараться занять всю ширину, сохраняя аспект; если высота переполнится — ограничить по высоте
         let displayWidth, displayHeight;
         const canvasAspect = this.config.canvasWidth / this.config.canvasHeight;
-        const containerAspect = containerWidth / containerHeight;
         
-        if (containerAspect > canvasAspect) {
-            // Контейнер шире - ограничены по высоте
+        // Сначала подгоняем по ширине
+        displayWidth = containerWidth;
+        displayHeight = displayWidth / canvasAspect;
+        
+        // Если по высоте не помещается — ограничиваем по высоте
+        if (displayHeight > containerHeight) {
             displayHeight = containerHeight;
             displayWidth = displayHeight * canvasAspect;
-        } else {
-            // Контейнер уже - ограничены по ширине
-            displayWidth = containerWidth;
-            displayHeight = displayWidth / canvasAspect;
         }
         
         // Минимальные размеры для видимости
