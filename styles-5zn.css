@@ -408,16 +408,32 @@ html, body {
     transition: all 0.2s ease;
     border-radius: 4px;
     white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+.data-btn:not(.active) {
+    background: transparent !important;
+    color: #ffffff !important;
+    border: 1px solid #ffffff !important;
 }
 
 .data-btn.active {
-    background: #ffffff;
-    color: #000000;
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: 1px solid #ffffff !important;
 }
 
-.data-btn:hover {
-    background: #ffffff;
-    color: #000000;
+.data-btn:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+.data-btn:hover.active {
+    background: #ffffff !important;
+    color: #000000 !important;
 }
 
 /* Ratio Controls */
