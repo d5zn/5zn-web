@@ -158,8 +158,8 @@ class SznCanvasComponent {
         // Загружаем фоновое изображение (пользовательское или дефолтное)
         this.imageLoading = true;
         const imageSrc = state.image || '/bg.jpeg'; // Используем bg.jpeg как дефолт
-        this.backgroundImage.src = imageSrc;
         this.backgroundImage.crossOrigin = "anonymous";
+        this.backgroundImage.src = imageSrc;
         this.backgroundImage.onload = () => {
             this.imageLoading = false;
             this.render();
@@ -171,8 +171,8 @@ class SznCanvasComponent {
         };
         
         // Загружаем логотип
-        this.logoImage.src = "/logo_NIP.svg";
         this.logoImage.crossOrigin = "anonymous";
+        this.logoImage.src = "/logo_NIP.svg";
         this.logoImage.onload = () => {
             this.render();
         };

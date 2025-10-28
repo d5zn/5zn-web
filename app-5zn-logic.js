@@ -1021,18 +1021,52 @@ class SznApp {
             this.showError('Canvas not found');
             return;
         }
-        
-        // Create download link
-        const link = document.createElement('a');
-        link.download = `5zn-workout-${new Date().toISOString().split('T')[0]}.png`;
-        link.href = canvas.toDataURL('image/png');
-        
-        // Trigger download
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        console.log('📥 Canvas downloaded');
+
+        const filename = `5zn-workout-${new Date().toISOString().split('T')[0]}.png`;
+
+        // Safari/iOS fallback detection
+        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+        // Prefer toBlob to avoid data URL size limits and improve compatibility
+        if (canvas.toBlob && !(isSafari && isIOS)) {
+            canvas.toBlob((blob) => {
+                if (!blob) {
+                    // Fallback to data URL if blob creation failed
+                    const link = document.createElement('a');
+                    link.download = filename;
+                    link.href = canvas.toDataURL('image/png');
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    console.log('📥 Canvas downloaded via data URL fallback');
+                    return;
+                }
+
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+                console.log('📥 Canvas downloaded via blob URL');
+            }, 'image/png', 0.95);
+        } else {
+            // Safari/iOS often blocks programmatic downloads of blob URLs
+            // Use data URL which opens in a new tab allowing user to save
+            const dataUrl = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = dataUrl;
+            // Some Safari versions require target _blank
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            console.log('📥 Canvas downloaded via Safari/iOS data URL');
+        }
     }
     
     shareToInstagram() {
