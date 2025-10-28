@@ -214,6 +214,9 @@ class SznCanvasComponent {
         this.canvas.width = this.config.canvasWidth;
         this.canvas.height = this.config.canvasHeight;
         
+        // Пересчитываем размеры отображения
+        this.setupCanvas();
+        
         console.log(`🔄 Canvas config updated: ${this.config.canvasWidth}x${this.config.canvasHeight} (${ratio})`);
     }
     
