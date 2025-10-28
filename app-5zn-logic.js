@@ -821,7 +821,8 @@ class SznApp {
                 // Кнопки теперь в HTML, не требуют динамического управления
             }, 500);
             
-            connected.style.setProperty('aspect-ratio', '9 / 16', 'important');
+            // Убираем жестко заданные стили, позволяем CSS классам управлять соотношением сторон
+            connected.style.removeProperty('aspect-ratio');
             connected.style.setProperty('max-height', '100%', 'important');
             connected.style.setProperty('overflow', 'hidden', 'important');
             connected.style.setProperty('box-sizing', 'border-box', 'important');
