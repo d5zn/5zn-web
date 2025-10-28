@@ -53,6 +53,8 @@ html, body {
     background: #000000;
     overflow: hidden;
     z-index: 1;
+    box-sizing: border-box;
+    padding: 16px 0; /* Внутренние отступы вместо margin у дочернего контейнера */
     /* Шашечки для пустого превью */
     background-image: 
         linear-gradient(45deg, #2a2a2a 25%, transparent 25%),
@@ -115,7 +117,7 @@ html, body {
     width: calc(100% - 32px);
     height: 100%;
     max-height: 100%;
-    margin: 16px 16px;
+    margin: 0 16px; /* Вертикальные отступы перенесены в padding .preview-area */
     overflow: hidden;
 }
 
