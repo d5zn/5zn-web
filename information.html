@@ -165,6 +165,44 @@
             font-weight: 500;
         }
 
+        .contact-section {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 30px;
+            margin-top: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .contact-title {
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 15px;
+            color: #ffffff;
+        }
+
+        .contact-text {
+            font-size: 16px;
+            color: #cccccc;
+            margin-bottom: 20px;
+        }
+
+        .email-link {
+            display: inline-block;
+            background: #ffffff;
+            color: #000000;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .email-link:hover {
+            background: #f0f0f0;
+            transform: translateY(-1px);
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 20px 10px;
@@ -257,6 +295,17 @@
             </div>
 
             <div class="section">
+                <h2>Data Privacy & Security</h2>
+                <p>We take your privacy seriously:</p>
+                <ul>
+                    <li>We only access workout data necessary for visualization</li>
+                    <li>Your data is processed securely and not stored permanently</li>
+                    <li>We comply with Strava's API terms of service</li>
+                    <li>You can revoke access at any time through your Strava settings</li>
+                </ul>
+            </div>
+
+            <div class="section">
                 <h2>Troubleshooting</h2>
                 
                 <h3>Connection Issues</h3>
@@ -274,6 +323,12 @@
                     <li>Try selecting a different workout</li>
                     <li>Check that your activity is set to public or "Followers" visibility</li>
                 </ul>
+            </div>
+
+            <div class="contact-section">
+                <h3 class="contact-title">Need More Help?</h3>
+                <p class="contact-text">If you have questions or need assistance, please contact our support team:</p>
+                <a href="mailto:support@5zn.io" class="email-link">support@5zn.io</a>
             </div>
         </div>
 
