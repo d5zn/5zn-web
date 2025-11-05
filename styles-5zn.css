@@ -643,6 +643,10 @@ html, body {
     transition: all 0.2s ease;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .btn:hover {
@@ -755,6 +759,19 @@ html, body {
     font-size: 18px;
     font-weight: 300;
     color: #ffffff;
+}
+
+.strava-link {
+    color: #FC5200;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 400;
+    transition: opacity 0.2s;
+}
+
+.strava-link:hover {
+    opacity: 0.8;
+    text-decoration: underline;
 }
 
 .modal-close {

@@ -210,7 +210,7 @@
         <div class="content">
             <div class="section">
                 <h2>About 5zn.io</h2>
-                <p>5zn.io is a creative solutions laboratory that specializes in innovative sports and fitness applications. Our <span class="highlight">Strava workout formatting</span> tool helps athletes create beautiful visual representations of their training data.</p>
+                <p>5zn.io is a creative solutions laboratory that specializes in innovative business and community applications. Our <span class="highlight">club route application</span> helps clubs and communities create beautiful visual representations of their routes and activities.</p>
                 
                 <div class="strava-info">
                     <p>This application uses Strava API to access your workout data and create personalized visualizations.</p>

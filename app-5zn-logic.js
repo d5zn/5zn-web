@@ -905,7 +905,18 @@ class SznApp {
         const modal = document.getElementById('workout-selector-modal');
         if (modal) {
             modal.classList.remove('hidden');
+            this.updateStravaLink();
             this.populateWorkoutList();
+        }
+    }
+
+    updateStravaLink() {
+        const stravaLink = document.getElementById('strava-link');
+        if (stravaLink && this.currentWorkout && this.currentWorkout.id) {
+            stravaLink.href = `https://www.strava.com/activities/${this.currentWorkout.id}`;
+            stravaLink.style.display = 'block';
+        } else if (stravaLink) {
+            stravaLink.style.display = 'none';
         }
     }
 
@@ -920,6 +931,7 @@ class SznApp {
         const workoutList = document.getElementById('workout-list');
         if (!workoutList || !this.workouts.length) {
             workoutList.innerHTML = '<p style="text-align: center; opacity: 0.7;">No workouts available</p>';
+            this.updateStravaLink();
             return;
         }
 
@@ -972,6 +984,8 @@ class SznApp {
                 item.style.backgroundColor = '';
             });
         });
+        
+        this.updateStravaLink();
     }
 
     selectWorkout(workoutId) {

@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Information Center - 5zn.io</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #000000;
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            width: 80px;
+            height: auto;
+            margin-bottom: 20px;
+            filter: brightness(0) invert(1);
+        }
+
+        h1 {
+            font-size: 36px;
+            font-weight: 300;
+            margin-bottom: 10px;
+            color: #ffffff;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: #cccccc;
+            font-weight: 300;
+        }
+
+        .back-link {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #cccccc;
+            text-decoration: none;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: #ffffff;
+        }
+
+        .back-arrow {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 40px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tab-button {
+            background: none;
+            border: none;
+            color: #666666;
+            font-size: 18px;
+            font-weight: 400;
+            padding: 15px 30px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+        }
+
+        .tab-button:hover {
+            color: #ffffff;
+        }
+
+        .tab-button.active {
+            color: #ffffff;
+            border-bottom-color: #ffffff;
+        }
+
+        .tab-content {
+            display: none;
+            line-height: 1.6;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        h2 {
+            font-size: 24px;
+            font-weight: 500;
+            margin-bottom: 20px;
+            color: #ffffff;
+        }
+
+        h3 {
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 15px;
+            color: #ffffff;
+        }
+
+        p {
+            font-size: 16px;
+            color: #cccccc;
+            margin-bottom: 15px;
+        }
+
+        ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        li {
+            font-size: 16px;
+            color: #cccccc;
+            margin-bottom: 8px;
+        }
+
+        .highlight {
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .strava-info {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #fc4c02;
+        }
+
+        .strava-info p {
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 10px;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            .subtitle {
+                font-size: 16px;
+            }
+
+            h2 {
+                font-size: 20px;
+            }
+
+            h3 {
+                font-size: 18px;
+            }
+
+            .tab-button {
+                font-size: 16px;
+                padding: 12px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="back-link">
+        <svg class="back-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 12H5"/>
+            <path d="M12 19l-7-7 7-7"/>
+        </svg>
+        Back to App
+    </a>
+
+    <div class="container">
+        <div class="header">
+            <img src="/logo_Szn.svg" alt="5zn" class="logo">
+            <h1>Information Center</h1>
+            <p class="subtitle">Support and Privacy Information</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-button active" data-tab="support">Support</button>
+            <button class="tab-button" data-tab="privacy">Privacy Policy</button>
+        </div>
+
+        <!-- Support Tab -->
+        <div id="support-tab" class="tab-content active">
+            <div class="section">
+                <h2>About 5zn.io</h2>
+                <p>5zn.io is a creative solutions laboratory that specializes in innovative business and community applications. Our <span class="highlight">club route application</span> helps clubs and communities create beautiful visual representations of their routes and activities.</p>
+                
+                <div class="strava-info">
+                    <p>This application uses Strava API to access your workout data and create personalized visualizations.</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>How It Works</h2>
+                <h3>1. Connect to Strava</h3>
+                <p>Authorize 5zn.io to access your Strava data securely through OAuth.</p>
+                
+                <h3>2. Select Your Workout</h3>
+                <p>Choose from your recent cycling activities to create a visualization.</p>
+                
+                <h3>3. Customize Your Design</h3>
+                <p>Adjust metrics, colors, and layout to match your preferences.</p>
+                
+                <h3>4. Download or Share</h3>
+                <p>Save your workout visualization as an image or share it on social media.</p>
+            </div>
+
+            <div class="section">
+                <h2>Frequently Asked Questions</h2>
+                
+                <h3>What data does 5zn.io access?</h3>
+                <p>We access your basic activity data (distance, time, elevation, speed) and route information to create workout visualizations.</p>
+                
+                <h3>Is my data safe?</h3>
+                <p>Yes, we use secure OAuth authentication and only process data temporarily for visualization purposes.</p>
+                
+                <h3>Can I revoke access?</h3>
+                <p>Absolutely. You can revoke 5zn.io's access to your Strava data at any time in your Strava account settings.</p>
+                
+                <h3>Does this cost anything?</h3>
+                <p>5zn.io is free to use. We may offer premium features in the future.</p>
+            </div>
+
+            <div class="section">
+                <h2>Troubleshooting</h2>
+                
+                <h3>Connection Issues</h3>
+                <p>If you're having trouble connecting to Strava:</p>
+                <ul>
+                    <li>Make sure you're logged into Strava in your browser</li>
+                    <li>Check that you have cycling activities in your Strava account</li>
+                    <li>Try refreshing the page and reconnecting</li>
+                </ul>
+                
+                <h3>Visualization Problems</h3>
+                <p>If your workout isn't displaying correctly:</p>
+                <ul>
+                    <li>Ensure your activity has GPS data (route information)</li>
+                    <li>Try selecting a different workout</li>
+                    <li>Check that your activity is set to public or "Followers" visibility</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Privacy Policy Tab -->
+        <div id="privacy-tab" class="tab-content">
+            <div class="section">
+                <h2>Privacy Policy</h2>
+                <p>Last updated: <span id="privacy-date"></span></p>
+                <p>At 5zn.io, we are committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you use our service.</p>
+            </div>
+
+            <div class="section">
+                <h2>Information We Collect</h2>
+                
+                <h3>Strava Data</h3>
+                <p>When you connect your Strava account, we access the following information:</p>
+                <ul>
+                    <li>Basic activity data (distance, time, elevation, speed)</li>
+                    <li>Route information (GPS coordinates, polyline data)</li>
+                    <li>Activity metadata (name, date, type)</li>
+                </ul>
+                
+                <h3>Account Information</h3>
+                <p>We may store minimal account information necessary for authentication:</p>
+                <ul>
+                    <li>Strava athlete ID</li>
+                    <li>Access tokens (encrypted)</li>
+                    <li>Connection timestamp</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>How We Use Your Information</h2>
+                <p>We use your information solely for the purpose of:</p>
+                <ul>
+                    <li>Creating workout visualizations</li>
+                    <li>Providing the core functionality of our service</li>
+                    <li>Maintaining your account connection</li>
+                </ul>
+                <p>We do not sell, rent, or share your personal information with third parties.</p>
+            </div>
+
+            <div class="section">
+                <h2>Data Storage and Security</h2>
+                
+                <h3>Data Processing</h3>
+                <p>Your workout data is processed temporarily to generate visualizations. We do not permanently store your activity routes or detailed GPS data.</p>
+                
+                <h3>Security Measures</h3>
+                <p>We implement industry-standard security measures to protect your information:</p>
+                <ul>
+                    <li>Secure OAuth 2.0 authentication</li>
+                    <li>Encrypted access tokens</li>
+                    <li>HTTPS encryption for all data transmission</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>Your Rights</h2>
+                <p>You have the right to:</p>
+                <ul>
+                    <li>Access your stored data</li>
+                    <li>Revoke access to your Strava account at any time</li>
+                    <li>Request deletion of your account information</li>
+                    <li>Opt out of data collection by disconnecting your account</li>
+                </ul>
+                <p>To revoke access, go to your Strava account settings and remove 5zn.io from your connected applications.</p>
+            </div>
+
+            <div class="section">
+                <h2>Third-Party Services</h2>
+                <p>Our service integrates with Strava API. Please review Strava's Privacy Policy to understand how they handle your data: <a href="https://www.strava.com/legal/privacy" target="_blank" rel="noopener noreferrer" style="color: #fc4c02;">Strava Privacy Policy</a></p>
+            </div>
+
+            <div class="section">
+                <h2>Cookies and Tracking</h2>
+                <p>We use minimal cookies necessary for authentication and session management. We do not use tracking cookies or analytics tools that collect personal information.</p>
+            </div>
+
+            <div class="section">
+                <h2>Changes to This Policy</h2>
+                <p>We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last updated" date.</p>
+            </div>
+
+            <div class="section">
+                <h2>Contact Us</h2>
+                <p>If you have any questions about this Privacy Policy, please contact us at <a href="mailto:support@5zn.io" style="color: #fc4c02;">support@5zn.io</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching functionality
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const tabName = button.dataset.tab;
+                
+                // Remove active class from all buttons and tabs
+                document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+                
+                // Add active class to clicked button and corresponding tab
+                button.classList.add('active');
+                document.getElementById(`${tabName}-tab`).classList.add('active');
+            });
+        });
+
+        // Set privacy policy date
+        document.getElementById('privacy-date').textContent = new Date().toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        });
+    </script>
+</body>
+</html>
+
